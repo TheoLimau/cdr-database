@@ -1,1049 +1,1184 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carbon Credits DB</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CDR Transactions Database</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --green-primary: #16a34a;
-      --green-dark:    #14532d;
-      --green-light:   #dcfce7;
-      --bg:            #f0fdf4;
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+
+    /* Sidebar nav items */
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 14px; border-radius: 10px;
+      font-size: 13.5px; font-weight: 500; cursor: pointer;
+      transition: background .15s, color .15s; color: #bbf7d0;
     }
-    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); }
+    .nav-item:hover  { background: rgba(255,255,255,.1); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,.18); color: #fff; }
+    .nav-item .icon  { width: 18px; text-align: center; opacity: .85; }
 
-    /* Sidebar */
-    #sidebar { transition: width .25s; }
-    .nav-item { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors; }
-    .nav-item:hover  { background: rgba(255,255,255,.12); }
-    .nav-item.active { background: rgba(255,255,255,.22); }
+    /* KPI cards */
+    .kpi { display: flex; align-items: center; gap: 14px;
+           background: #fff; border-radius: 16px; padding: 18px 20px;
+           border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .kpi-icon { width: 44px; height: 44px; border-radius: 12px;
+                display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .kpi-val  { font-size: 1.55rem; font-weight: 700; color: #1e293b; line-height: 1; }
+    .kpi-lbl  { font-size: 11.5px; color: #94a3b8; margin-top: 3px; }
 
-    /* Cards */
-    .kpi-card { @apply bg-white rounded-2xl p-5 shadow-sm border border-green-100 flex items-center gap-4; }
+    /* Chart wrapper */
+    .chart-box { background:#fff; border-radius:16px; padding:20px;
+                 border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+    .chart-title { font-size:13px; font-weight:600; color:#475569; margin-bottom:14px; }
+    .chart-wrap  { position:relative; }
 
     /* Table */
-    #data-table th { @apply px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap; }
-    #data-table th:hover .sort-icon { opacity: 1; }
-    #data-table td { @apply px-4 py-3 text-sm text-gray-700 whitespace-nowrap; }
-    #data-table tbody tr { @apply border-b border-gray-50 hover:bg-green-50 transition-colors cursor-pointer; }
+    #tx-table th {
+      padding: 11px 14px; text-align: left; font-size: 11px;
+      font-weight: 600; color: #94a3b8; text-transform: uppercase;
+      letter-spacing: .05em; cursor: pointer; user-select: none;
+      white-space: nowrap; background: #f8fafc;
+    }
+    #tx-table th:hover { color: #16a34a; }
+    #tx-table td {
+      padding: 11px 14px; font-size: 13px; color: #334155;
+      border-bottom: 1px solid #f1f5f9; white-space: nowrap;
+    }
+    #tx-table tbody tr { transition: background .1s; cursor: pointer; }
+    #tx-table tbody tr:hover { background: #f0fdf4; }
 
-    /* Badge status */
-    .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
-    .badge-delivered  { @apply bg-green-100 text-green-800; }
-    .badge-contracted { @apply bg-blue-100 text-blue-800; }
-    .badge-retired    { @apply bg-purple-100 text-purple-800; }
-    .badge-pending    { @apply bg-yellow-100 text-yellow-800; }
-    .badge-default    { @apply bg-gray-100 text-gray-700; }
+    /* Status badges */
+    .badge { display: inline-flex; align-items: center;
+             padding: 2px 10px; border-radius: 999px;
+             font-size: 11.5px; font-weight: 600; }
+    .b-delivered  { background: #dcfce7; color: #15803d; }
+    .b-contracted { background: #dbeafe; color: #1d4ed8; }
+    .b-retired    { background: #ede9fe; color: #6d28d9; }
+    .b-partial    { background: #fef9c3; color: #854d0e; }
+    .b-default    { background: #f1f5f9; color: #64748b; }
+
+    /* Method pill */
+    .method-pill { display: inline-block; padding: 2px 8px; border-radius: 6px;
+                   font-size: 11px; font-weight: 500;
+                   background: #e0f2fe; color: #0369a1; max-width: 180px;
+                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* Search */
-    #search-input { transition: box-shadow .2s; }
-    #search-input:focus { box-shadow: 0 0 0 3px rgba(22,163,74,.25); }
+    #search-inp { transition: box-shadow .2s; }
+    #search-inp:focus { box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
 
-    /* Loader */
-    .spinner { border: 3px solid #e5e7eb; border-top-color: #16a34a; border-radius: 50%; width: 28px; height: 28px; animation: spin .7s linear infinite; }
+    /* Filter selects */
+    .fsel { font-size: 13px; border: 1px solid #e2e8f0; border-radius: 9px;
+            padding: 7px 12px; background: #fff; cursor: pointer;
+            transition: border-color .15s; }
+    .fsel:focus { outline: none; border-color: #16a34a; }
+
+    /* Spinner */
+    .spin { width: 26px; height: 26px; border: 3px solid #e2e8f0;
+            border-top-color: #16a34a; border-radius: 50%;
+            animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Modal */
-    #detail-modal { transition: opacity .2s; }
+    /* Pagination */
+    .pgbtn { padding: 5px 11px; border-radius: 8px; font-size: 13px;
+             font-weight: 500; border: 1px solid #e2e8f0;
+             transition: background .15s, border-color .15s; }
+    .pgbtn:hover:not(:disabled) { background: #f0fdf4; border-color: #86efac; }
+    .pgbtn.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+    .pgbtn:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* Upload zone */
-    #drop-zone { border: 2px dashed #86efac; transition: all .2s; }
+    /* Supplier card */
+    .sup-card { background: #fff; border-radius: 16px; padding: 18px;
+                border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+                transition: box-shadow .2s, transform .15s; }
+    .sup-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
+
+    /* Modal overlay */
+    #modal-overlay { transition: opacity .2s; }
+
+    /* Drop zone */
+    #drop-zone { border: 2px dashed #86efac; border-radius: 14px;
+                 transition: background .2s, border-color .2s; }
     #drop-zone.drag-over { border-color: #16a34a; background: #f0fdf4; }
 
-    /* Pagination */
-    .page-btn { @apply px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors; }
-    .page-btn:hover:not(:disabled) { @apply bg-green-50 border-green-300; }
-    .page-btn.active { @apply bg-green-600 text-white border-green-600; }
-    .page-btn:disabled { @apply opacity-40 cursor-not-allowed; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-    /* Tooltip */
-    [data-tooltip] { position: relative; }
-    [data-tooltip]:hover::after {
-      content: attr(data-tooltip);
-      position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
-      background: #1f2937; color: #fff; font-size: 11px; padding: 4px 8px;
-      border-radius: 6px; white-space: nowrap; pointer-events: none; z-index: 50;
-    }
-
-    /* Chart containers */
-    .chart-wrap { position: relative; height: 220px; }
-    canvas { max-height: 220px !important; }
+    /* Delivery rate bar */
+    .dr-bar { height: 7px; border-radius: 4px; background: #e2e8f0; overflow: hidden; }
+    .dr-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #16a34a, #22c55e); }
   </style>
 </head>
 
-<body class="min-h-screen flex">
+<body class="bg-slate-50 min-h-screen flex">
 
-<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
-<aside id="sidebar" class="w-64 min-h-screen bg-gradient-to-b from-green-800 to-green-900 text-white flex flex-col shrink-0">
+<!-- ═══════════════════ SIDEBAR ═══════════════════════════════════════════ -->
+<aside class="w-[220px] min-h-screen bg-gradient-to-b from-[#14532d] to-[#166534] flex flex-col flex-shrink-0">
+
   <!-- Logo -->
-  <div class="px-6 py-5 border-b border-green-700">
+  <div class="px-5 py-5 border-b border-green-800">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 bg-green-400 rounded-xl flex items-center justify-center">
+      <div class="w-9 h-9 rounded-xl bg-green-400 flex items-center justify-center flex-shrink-0">
         <i class="fas fa-leaf text-green-900 text-lg"></i>
       </div>
       <div>
-        <div class="font-bold text-base leading-tight">Carbon Credits</div>
-        <div class="text-green-300 text-xs">CDR Database</div>
+        <div class="text-white font-bold text-sm leading-tight">CDR Database</div>
+        <div class="text-green-300 text-[11px]">Carbon Removal Tracker</div>
       </div>
     </div>
   </div>
 
   <!-- Nav -->
-  <nav class="flex-1 px-3 py-4 space-y-1">
-    <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
-      <i class="fas fa-chart-pie w-5 text-center"></i><span>Dashboard</span>
+  <nav class="flex-1 px-3 py-4 space-y-0.5">
+    <div class="nav-item active" id="nav-dashboard" onclick="goto('dashboard')">
+      <i class="fas fa-chart-pie icon"></i><span>Dashboard</span>
     </div>
-    <div class="nav-item" onclick="showSection('transactions')" id="nav-transactions">
-      <i class="fas fa-exchange-alt w-5 text-center"></i><span>Transazioni</span>
+    <div class="nav-item" id="nav-transactions" onclick="goto('transactions')">
+      <i class="fas fa-table icon"></i><span>Transazioni</span>
     </div>
-    <div class="nav-item" onclick="showSection('suppliers')" id="nav-suppliers">
-      <i class="fas fa-industry w-5 text-center"></i><span>Suppliers</span>
+    <div class="nav-item" id="nav-suppliers" onclick="goto('suppliers')">
+      <i class="fas fa-industry icon"></i><span>Suppliers</span>
     </div>
-    <div class="nav-item" onclick="showSection('upload')" id="nav-upload">
-      <i class="fas fa-cloud-upload-alt w-5 text-center"></i><span>Importa Dati</span>
+    <div class="nav-item" id="nav-upload" onclick="goto('upload')">
+      <i class="fas fa-cloud-upload-alt icon"></i><span>Importa Dati</span>
     </div>
-    <div class="nav-item" onclick="window.open('/api/docs','_blank')" id="nav-api">
-      <i class="fas fa-code w-5 text-center"></i><span>API Docs</span>
+    <div class="nav-item" onclick="window.open('/api/docs','_blank')">
+      <i class="fas fa-code icon"></i><span>API Docs</span>
     </div>
   </nav>
 
-  <!-- DB Status -->
-  <div class="px-4 py-4 border-t border-green-700">
-    <div id="db-status" class="text-xs text-green-300 space-y-1">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
-        Database attivo
-      </div>
-      <div id="db-counts" class="text-green-400">Caricamento...</div>
+  <!-- Footer status -->
+  <div class="px-4 pb-5 border-t border-green-800 pt-4 space-y-2">
+    <div class="flex items-center gap-2 text-[11px] text-green-300">
+      <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+      Database attivo
     </div>
+    <div id="sidebar-counts" class="text-[11px] text-green-400">Caricamento...</div>
   </div>
 </aside>
 
-<!-- ═══════════════════════════════ MAIN CONTENT ══════════════════════════════ -->
-<main class="flex-1 flex flex-col min-w-0">
+<!-- ═══════════════════ MAIN ══════════════════════════════════════════════ -->
+<main class="flex-1 flex flex-col overflow-hidden">
 
   <!-- Top bar -->
-  <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+  <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-20 shadow-sm">
     <div class="flex items-center gap-3">
-      <h1 id="page-title" class="text-lg font-semibold text-gray-800">Dashboard</h1>
-      <span id="page-subtitle" class="text-sm text-gray-400"></span>
+      <h1 id="page-title" class="text-base font-semibold text-slate-800">Dashboard</h1>
+      <span id="page-badge" class="hidden text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium"></span>
     </div>
-    <div class="flex items-center gap-3">
-      <button onclick="refreshAll()" class="text-gray-500 hover:text-green-600 transition-colors" data-tooltip="Aggiorna dati">
+    <div class="flex items-center gap-4">
+      <button onclick="refreshCurrent()" title="Aggiorna"
+        class="text-slate-400 hover:text-green-600 transition-colors text-sm">
         <i class="fas fa-sync-alt"></i>
       </button>
-      <span class="text-xs text-gray-400" id="last-update">—</span>
+      <span id="last-refresh" class="text-[11px] text-slate-400"></span>
     </div>
   </header>
 
-  <!-- ─────── DASHBOARD SECTION ─────── -->
-  <section id="section-dashboard" class="flex-1 p-6 space-y-6 overflow-auto">
+  <!-- ════ DASHBOARD ════ -->
+  <section id="sec-dashboard" class="flex-1 overflow-auto p-6 space-y-5">
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="kpi-grid">
-      <!-- Generati da JS -->
+    <!-- KPI row -->
+    <div id="kpi-row" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4"></div>
+
+    <!-- Delivery rate bar -->
+    <div class="bg-white rounded-2xl px-5 py-4 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Delivery Rate globale</span>
+        <span id="dr-pct" class="text-sm font-bold text-green-600">—</span>
+      </div>
+      <div class="dr-bar"><div id="dr-fill" class="dr-fill" style="width:0%"></div></div>
+      <div class="flex justify-between mt-1.5 text-[10px] text-slate-400">
+        <span id="dr-delivered">Delivered: —</span>
+        <span id="dr-committed">Committed: —</span>
+      </div>
     </div>
 
     <!-- Charts row 1 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-calendar-alt mr-1 text-green-500"></i> tCO₂e per Anno</h3>
-        <div class="chart-wrap"><canvas id="chart-year"></canvas></div>
+      <div class="chart-box lg:col-span-2">
+        <div class="chart-title"><i class="fas fa-chart-bar text-green-500 mr-1.5"></i>tCO₂e Committed vs Delivered per Anno</div>
+        <div class="chart-wrap" style="height:210px"><canvas id="c-year"></canvas></div>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-cogs mr-1 text-blue-500"></i> Distribuzione Metodi CDR</h3>
-        <div class="chart-wrap"><canvas id="chart-method"></canvas></div>
-      </div>
-
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-check-circle mr-1 text-purple-500"></i> Status Transazioni</h3>
-        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+      <div class="chart-box">
+        <div class="chart-title"><i class="fas fa-circle-dot text-blue-400 mr-1.5"></i>Status Transazioni</div>
+        <div class="chart-wrap" style="height:210px"><canvas id="c-status"></canvas></div>
       </div>
     </div>
 
     <!-- Charts row 2 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-trophy mr-1 text-yellow-500"></i> Top 10 Acquirenti (tCO₂e)</h3>
-        <div class="chart-wrap" style="height:260px"><canvas id="chart-purchasers" style="max-height:260px !important"></canvas></div>
+      <div class="chart-box lg:col-span-2">
+        <div class="chart-title"><i class="fas fa-cogs text-purple-400 mr-1.5"></i>Distribuzione per Metodo CDR (tCO₂e Committed)</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="c-method" style="max-height:260px!important"></canvas></div>
       </div>
 
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-globe mr-1 text-teal-500"></i> tCO₂e per Regione</h3>
-        <div class="chart-wrap"><canvas id="chart-region"></canvas></div>
+      <div class="chart-box">
+        <div class="chart-title"><i class="fas fa-globe text-teal-500 mr-1.5"></i>tCO₂e per Continente</div>
+        <div class="chart-wrap" style="height:260px"><canvas id="c-continent" style="max-height:260px!important"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Charts row 3 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <div class="chart-box">
+        <div class="chart-title"><i class="fas fa-store text-orange-400 mr-1.5"></i>Top Marketplace per n° Transazioni</div>
+        <div class="chart-wrap" style="height:230px"><canvas id="c-marketplace" style="max-height:230px!important"></canvas></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title"><i class="fas fa-trophy text-yellow-500 mr-1.5"></i>Top 10 Acquirenti (tCO₂e Committed)</div>
+        <div class="chart-wrap" style="height:230px"><canvas id="c-purchasers" style="max-height:230px!important"></canvas></div>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div id="dashboard-empty" class="hidden bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
-      <i class="fas fa-database text-5xl text-gray-200 mb-4"></i>
-      <p class="text-gray-500 text-lg font-medium">Nessun dato nel database</p>
-      <p class="text-gray-400 text-sm mt-1">Importa il tuo file Excel nella sezione <strong>Importa Dati</strong> per iniziare.</p>
-      <button onclick="showSection('upload')" class="mt-4 px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-        <i class="fas fa-cloud-upload-alt mr-2"></i>Importa dati
+    <div id="dash-empty" class="hidden bg-white rounded-2xl p-16 text-center border-2 border-dashed border-slate-200">
+      <i class="fas fa-database text-6xl text-slate-200 mb-4"></i>
+      <p class="text-slate-500 text-lg font-medium">Database vuoto</p>
+      <p class="text-slate-400 text-sm mt-1">Importa il file Excel nella sezione <strong>Importa Dati</strong></p>
+      <button onclick="goto('upload')"
+        class="mt-5 px-5 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition-colors">
+        <i class="fas fa-cloud-upload-alt mr-2"></i>Importa ora
       </button>
     </div>
 
   </section>
 
-  <!-- ─────── TRANSACTIONS SECTION ─────── -->
-  <section id="section-transactions" class="hidden flex-1 flex flex-col overflow-hidden">
+  <!-- ════ TRANSACTIONS ════ -->
+  <section id="sec-transactions" class="hidden flex-1 flex flex-col overflow-hidden">
 
-    <!-- Search & Filters bar -->
-    <div class="bg-white border-b border-gray-200 px-6 py-4 space-y-3">
+    <!-- Toolbar -->
+    <div class="bg-white border-b border-slate-200 px-5 py-3 space-y-3">
 
-      <!-- Search -->
-      <div class="relative max-w-2xl">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-        <input
-          id="search-input"
-          type="text"
-          placeholder="Cerca per acquirente, supplier, metodo, registro..."
-          class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400 bg-gray-50"
-          oninput="debounceSearch(this.value)"
-        />
-        <button id="clear-search" onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 hidden">
-          <i class="fas fa-times"></i>
-        </button>
+      <!-- Search bar -->
+      <div class="flex items-center gap-3">
+        <div class="relative flex-1 max-w-lg">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+          <input id="search-inp" type="text"
+            placeholder="Cerca purchaser, supplier, metodo, marketplace…"
+            class="w-full pl-10 pr-9 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-green-400 bg-slate-50"
+            oninput="onSearch(this.value)"/>
+          <button id="clr-search" onclick="clearSearch()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600 hidden">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        </div>
+        <span id="res-count" class="text-xs text-slate-400 whitespace-nowrap"></span>
       </div>
 
-      <!-- Filters -->
+      <!-- Filter row -->
       <div class="flex flex-wrap gap-2 items-center">
-        <select id="filter-method"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
-          <option value="">Tutti i metodi</option>
-        </select>
-        <select id="filter-status"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
-          <option value="">Tutti gli status</option>
-        </select>
-        <select id="filter-registry" onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
-          <option value="">Tutti i registri</option>
-        </select>
-        <select id="filter-region"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
-          <option value="">Tutte le regioni</option>
-        </select>
-        <select id="filter-year"     onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
-          <option value="">Tutti gli anni</option>
-        </select>
-
-        <button onclick="resetFilters()" class="ml-auto text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 hover:border-red-200 transition-colors">
-          <i class="fas fa-times"></i> Reset filtri
+        <select id="f-method"      class="fsel" onchange="applyFilters()"><option value="">Tutti i Metodi</option></select>
+        <select id="f-status"      class="fsel" onchange="applyFilters()"><option value="">Tutti gli Status</option></select>
+        <select id="f-marketplace" class="fsel" onchange="applyFilters()"><option value="">Tutti i Marketplace</option></select>
+        <select id="f-registry"    class="fsel" onchange="applyFilters()"><option value="">Tutti i Registri</option></select>
+        <select id="f-continent"   class="fsel" onchange="applyFilters()"><option value="">Tutti i Continenti</option></select>
+        <select id="f-year"        class="fsel" onchange="applyFilters()"><option value="">Tutti gli Anni</option></select>
+        <button onclick="resetFilters()"
+          class="ml-auto text-xs text-slate-500 hover:text-red-500 flex items-center gap-1.5
+                 px-3 py-2 rounded-lg border border-slate-200 hover:border-red-200 transition-colors">
+          <i class="fas fa-times"></i> Reset
         </button>
-
-        <span id="result-count" class="text-xs text-gray-400 ml-2"></span>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="flex-1 overflow-auto px-6 py-4">
-      <div id="table-loader" class="flex justify-center py-16 hidden">
-        <div class="spinner"></div>
-      </div>
+    <!-- Table container -->
+    <div class="flex-1 overflow-auto px-5 py-4">
 
-      <div id="table-empty" class="hidden text-center py-16 text-gray-400">
-        <i class="fas fa-search text-4xl mb-3 opacity-30"></i>
+      <div id="tx-loading" class="hidden flex justify-center py-20">
+        <div class="spin"></div>
+      </div>
+      <div id="tx-empty" class="hidden text-center py-20 text-slate-400">
+        <i class="fas fa-search text-4xl mb-3 opacity-20"></i>
         <p class="text-sm">Nessun risultato trovato</p>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table id="data-table" class="w-full min-w-max">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th onclick="sortBy('date')"          data-col="date">Data <span class="sort-icon opacity-0">↕</span></th>
-              <th onclick="sortBy('purchaser')"     data-col="purchaser">Acquirente <span class="sort-icon opacity-0">↕</span></th>
-              <th onclick="sortBy('supplier_name')" data-col="supplier_name">Supplier</th>
-              <th>Metodo</th>
-              <th onclick="sortBy('tonnes')"        data-col="tonnes">Tonnellate <span class="sort-icon opacity-0">↕</span></th>
-              <th onclick="sortBy('total_value')"   data-col="total_value">Valore USD <span class="sort-icon opacity-0">↕</span></th>
-              <th onclick="sortBy('status')"        data-col="status">Status <span class="sort-icon opacity-0">↕</span></th>
-              <th>Registro</th>
-              <th>Regione</th>
-              <th class="text-center">Azioni</th>
-            </tr>
-          </thead>
-          <tbody id="table-body">
-            <!-- Generato da JS -->
-          </tbody>
-        </table>
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table id="tx-table" class="w-full min-w-[900px]">
+            <thead>
+              <tr>
+                <th onclick="sortCol('announcement')" data-c="announcement">Data <span class="sort-ic opacity-40">↕</span></th>
+                <th onclick="sortCol('purchaser')"    data-c="purchaser">Acquirente <span class="sort-ic opacity-40">↕</span></th>
+                <th>Supplier</th>
+                <th>Metodo CDR</th>
+                <th onclick="sortCol('tonnes')"           data-c="tonnes" class="text-right">Committed <span class="sort-ic opacity-40">↕</span></th>
+                <th onclick="sortCol('tonnes_delivered')" data-c="tonnes_delivered" class="text-right">Delivered <span class="sort-ic opacity-40">↕</span></th>
+                <th onclick="sortCol('status')" data-c="status">Status <span class="sort-ic opacity-40">↕</span></th>
+                <th>Marketplace</th>
+                <th>Registry</th>
+                <th>Continente</th>
+              </tr>
+            </thead>
+            <tbody id="tx-body"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Pagination -->
-      <div id="pagination" class="flex items-center justify-between mt-4">
-        <span id="pagination-info" class="text-xs text-gray-400"></span>
-        <div id="pagination-buttons" class="flex gap-1.5"></div>
+      <div class="flex items-center justify-between mt-4">
+        <span id="pg-info" class="text-xs text-slate-400"></span>
+        <div id="pg-btns" class="flex gap-1.5"></div>
       </div>
     </div>
+
   </section>
 
-  <!-- ─────── SUPPLIERS SECTION ─────── -->
-  <section id="section-suppliers" class="hidden flex-1 overflow-auto p-6">
-    <div id="suppliers-loader" class="flex justify-center py-16"><div class="spinner"></div></div>
-    <div id="suppliers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  <!-- ════ SUPPLIERS ════ -->
+  <section id="sec-suppliers" class="hidden flex-1 overflow-auto p-6">
+
+    <!-- Supplier search + filters -->
+    <div class="flex gap-3 mb-5">
+      <div class="relative flex-1 max-w-sm">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
+        <input id="sup-search" type="text" placeholder="Cerca supplier…"
+          class="w-full pl-10 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-green-400 bg-white"
+          oninput="loadSuppliers(this.value)"/>
+      </div>
+      <select id="sup-tech" class="fsel" onchange="loadSuppliers()">
+        <option value="">Tutte le tecnologie</option>
+      </select>
+      <select id="sup-cont" class="fsel" onchange="loadSuppliers()">
+        <option value="">Tutti i continenti</option>
+      </select>
+      <span id="sup-count" class="self-center text-xs text-slate-400"></span>
+    </div>
+
+    <div id="sup-loading" class="flex justify-center py-20"><div class="spin"></div></div>
+    <div id="sup-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
   </section>
 
-  <!-- ─────── UPLOAD SECTION ─────── -->
-  <section id="section-upload" class="hidden flex-1 overflow-auto p-6">
-    <div class="max-w-2xl mx-auto space-y-6">
+  <!-- ════ UPLOAD ════ -->
+  <section id="sec-upload" class="hidden flex-1 overflow-auto p-6">
+    <div class="max-w-xl mx-auto space-y-5">
 
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 class="text-base font-semibold text-gray-800 mb-1">
-          <i class="fas fa-file-excel text-green-600 mr-2"></i>Importa File Excel o CSV
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <h2 class="font-semibold text-slate-800 mb-1">
+          <i class="fas fa-file-excel text-green-600 mr-2"></i>Importa File Excel
         </h2>
-        <p class="text-sm text-gray-500 mb-4">
-          Carica il tuo file <code class="bg-gray-100 px-1 rounded">.xlsx</code> o <code class="bg-gray-100 px-1 rounded">.csv</code>.
-          Le colonne vengono mappate automaticamente tramite alias flessibili.
+        <p class="text-sm text-slate-500 mb-4">
+          Carica il tuo file <code class="bg-slate-100 px-1 rounded text-xs">.xlsx</code> con i fogli
+          <strong>"CDR Transactions Data"</strong> e <strong>"Summary by Supplier (2)"</strong>.
         </p>
 
-        <!-- Drop zone -->
-        <div
-          id="drop-zone"
-          class="rounded-xl p-8 text-center cursor-pointer bg-gray-50"
-          onclick="document.getElementById('file-input').click()"
-          ondragover="handleDragOver(event)"
-          ondragleave="handleDragLeave(event)"
-          ondrop="handleDrop(event)"
-        >
+        <div id="drop-zone" class="p-8 text-center cursor-pointer bg-slate-50"
+          onclick="document.getElementById('file-inp').click()"
+          ondragover="dzDragOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
           <i class="fas fa-cloud-upload-alt text-4xl text-green-300 mb-3"></i>
-          <p class="text-sm font-medium text-gray-600">Trascina il file qui oppure clicca per selezionarlo</p>
-          <p class="text-xs text-gray-400 mt-1">Excel (.xlsx, .xls) e CSV — Max 50MB</p>
-          <input id="file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)" />
+          <p class="text-sm font-medium text-slate-600">Trascina il file qui o clicca per selezionarlo</p>
+          <p class="text-xs text-slate-400 mt-1">.xlsx · .xls · .csv — max 50MB</p>
+          <input id="file-inp" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="fileSelected(event)"/>
         </div>
 
-        <!-- File selected -->
-        <div id="file-selected" class="hidden mt-3 flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-200">
-          <i class="fas fa-file-excel text-green-600 text-lg"></i>
+        <div id="file-info" class="hidden mt-3 flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-200">
+          <i class="fas fa-file-excel text-green-600 text-xl"></i>
           <div class="flex-1 min-w-0">
-            <div id="file-name" class="text-sm font-medium text-gray-700 truncate"></div>
-            <div id="file-size" class="text-xs text-gray-400"></div>
+            <div id="file-name" class="text-sm font-medium text-slate-700 truncate"></div>
+            <div id="file-sz"   class="text-xs text-slate-400"></div>
           </div>
-          <button onclick="clearFile()" class="text-gray-400 hover:text-red-500 transition-colors">
+          <button onclick="clearFile()" class="text-slate-300 hover:text-red-400 transition-colors">
             <i class="fas fa-times"></i>
           </button>
         </div>
 
-        <!-- Upload button -->
-        <button
-          id="upload-btn"
-          onclick="uploadFile()"
-          class="mt-4 w-full py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-          disabled
-        >
+        <button id="upload-btn" onclick="doUpload()" disabled
+          class="mt-4 w-full py-3 bg-green-600 text-white rounded-xl font-semibold text-sm
+                 hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed
+                 transition-colors flex items-center justify-center gap-2">
           <i class="fas fa-upload"></i> Importa nel Database
         </button>
       </div>
 
-      <!-- Upload progress -->
-      <div id="upload-progress" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div id="upload-prog" class="hidden bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
         <div class="flex items-center gap-3 mb-3">
-          <div class="spinner"></div>
-          <span class="text-sm font-medium text-gray-700">Importazione in corso...</span>
+          <div class="spin"></div>
+          <span class="text-sm font-medium text-slate-700">Importazione in corso…</span>
         </div>
-        <div class="w-full bg-gray-100 rounded-full h-2">
-          <div class="bg-green-500 h-2 rounded-full animate-pulse" style="width:60%"></div>
-        </div>
-      </div>
-
-      <!-- Upload result -->
-      <div id="upload-result" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-gray-100"></div>
-
-      <!-- Column mapping guide -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">
-          <i class="fas fa-info-circle text-blue-400 mr-1"></i> Colonne Riconosciute
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600">
-          <div><strong class="text-green-700">Supplier:</strong> supplier, supplier name, project name</div>
-          <div><strong class="text-green-700">Metodo:</strong> method, cdr method, technology, type</div>
-          <div><strong class="text-green-700">Acquirente:</strong> purchaser, buyer, company</div>
-          <div><strong class="text-green-700">Tonnellate:</strong> tonnes, volume, tco2e, amount</div>
-          <div><strong class="text-green-700">Data:</strong> date, transaction date, purchase date</div>
-          <div><strong class="text-green-700">Status:</strong> status, delivery status, state</div>
-          <div><strong class="text-green-700">Registro:</strong> registry, carbon registry, register</div>
-          <div><strong class="text-green-700">Prezzo:</strong> price, price per tonne, usd/tonne</div>
-          <div><strong class="text-green-700">Regione:</strong> region, continent, geography</div>
-          <div><strong class="text-green-700">Certificazione:</strong> certification, standard</div>
+        <div class="w-full bg-slate-100 rounded-full h-1.5">
+          <div class="bg-green-500 h-1.5 rounded-full w-3/5 animate-pulse"></div>
         </div>
       </div>
 
-      <!-- Scheduler info -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">
-          <i class="fas fa-clock text-orange-400 mr-1"></i> Aggiornamento Automatico 24/7
+      <div id="upload-res" class="hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"></div>
+
+      <!-- Format guide -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">
+          <i class="fas fa-info-circle text-blue-400 mr-1.5"></i>Formato File Atteso
         </h3>
-        <div class="space-y-2 text-xs text-gray-600">
-          <p>Per automatizzare l'importazione senza intervento manuale:</p>
-          <ol class="list-decimal ml-4 space-y-1">
-            <li>Avvia lo scheduler: <code class="bg-gray-100 px-1 py-0.5 rounded">python utils/scheduler.py</code></li>
-            <li>Copia i nuovi file nella cartella: <code class="bg-gray-100 px-1 py-0.5 rounded">backend/data/inbox/</code></li>
-            <li>Lo scheduler controlla ogni <strong>15 minuti</strong> e importa automaticamente</li>
-            <li>I file elaborati vengono spostati in <code class="bg-gray-100 px-1 py-0.5 rounded">data/processed/</code></li>
-          </ol>
+        <div class="space-y-2 text-xs text-slate-500">
+          <div class="flex items-start gap-2">
+            <span class="text-green-500 font-bold mt-0.5">✓</span>
+            <span><strong>Foglio "CDR Transactions Data"</strong>: colonne Announcement, Tonnes (t), Method, Supplier, Purchaser, Status, Marketplace, Registry Name, Tonnes Delivered</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-500 font-bold mt-0.5">✓</span>
+            <span><strong>Foglio "Summary by Supplier (2)"</strong>: Supplier, Total Tonnes Committed, Total Tonnes Delivered, Geolocation, Continent, Country, Technology, Certification, Price (USD/tonne), ecc.</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Auto-update guide -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">
+          <i class="fas fa-clock text-orange-400 mr-1.5"></i>Aggiornamento Automatico 24/7
+        </h3>
+        <ol class="text-xs text-slate-500 list-decimal ml-4 space-y-1.5">
+          <li>Avvia lo scheduler: <code class="bg-slate-100 px-1.5 py-0.5 rounded">cd backend && python utils/scheduler.py</code></li>
+          <li>Deposita i nuovi file Excel in: <code class="bg-slate-100 px-1.5 py-0.5 rounded">backend/data/inbox/</code></li>
+          <li>Lo scheduler controlla ogni <strong>15 minuti</strong> e importa automaticamente</li>
+          <li>I file elaborati vengono spostati in <code class="bg-slate-100 px-1.5 py-0.5 rounded">data/processed/</code></li>
+        </ol>
       </div>
 
     </div>
   </section>
 
 </main>
+</body>
+
+<!-- ═══════════════════ MODAL DETTAGLIO ══════════════════════════════════ -->
+<div id="modal-overlay" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4"
+  onclick="closeModal(event)">
+  <div id="modal-box" class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto p-6"></div>
 </div>
 
-<!-- ═══════════════════════════════ DETAIL MODAL ══════════════════════════════ -->
-<div id="detail-modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" id="modal-content">
-  </div>
-</div>
-
-<!-- ═══════════════════════════════ TOAST ════════════════════════════════════ -->
+<!-- ═══════════════════ TOAST ════════════════════════════════════════════ -->
 <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
-  <div id="toast-inner" class="px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2 max-w-xs">
-    <i id="toast-icon" class="fas"></i>
+  <div id="toast-inner" class="px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2.5 max-w-xs">
+    <i id="toast-ic" class="fas text-base"></i>
     <span id="toast-msg"></span>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════════════
-// CARBON CREDITS DB — Frontend Application
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// CDR DATABASE — Frontend App
+// ═══════════════════════════════════════════════════════════════════════════
 
-const API = '';   // Same-origin — FastAPI serve sia frontend che API
+const API = '';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-const state = {
-  currentSection: 'dashboard',
-  search: '',
-  filters: { method:'', status:'', registry:'', region:'', year:'' },
+const S = {
+  section: 'dashboard',
+  search: '', filters: { method:'', status:'', marketplace:'', registry:'', continent:'', year:'' },
   sort: { by:'id', dir:'desc' },
-  pagination: { skip:0, limit:50, total:0 },
+  page: { skip:0, limit:50, total:0 },
   charts: {},
-  selectedFile: null,
+  file: null,
 };
 
-// ─── Utils ────────────────────────────────────────────────────────────────────
+// ─── Formattatori ─────────────────────────────────────────────────────────
 
-function fmt(n, decimals=0) {
-  if (n === null || n === undefined) return '—';
-  return Number(n).toLocaleString('it-IT', {maximumFractionDigits: decimals});
-}
+const fmt  = (n, d=0) => n==null ? '—' : Number(n).toLocaleString('it-IT',{maximumFractionDigits:d});
+const fmtK = (n) => {
+  if (n == null) return '—';
+  if (n >= 1_000_000) return fmt(n/1_000_000,2) + ' M';
+  if (n >= 1_000)     return fmt(n/1_000,1) + ' K';
+  return fmt(n, 1);
+};
+const fmtDate = (d) => { try { return d ? new Date(d).toLocaleDateString('it-IT') : '—'; } catch { return d||'—'; }};
 
-function fmtDate(d) {
-  if (!d) return '—';
-  try { return new Date(d).toLocaleDateString('it-IT'); } catch { return d; }
-}
-
-function statusBadge(status) {
-  if (!status) return '<span class="text-gray-300">—</span>';
+function badge(status) {
+  if (!status) return '<span class="text-slate-300">—</span>';
   const s = status.toLowerCase();
-  let cls = 'badge-default';
-  if (s.includes('deliver')) cls = 'badge-delivered';
-  else if (s.includes('contract')) cls = 'badge-contracted';
-  else if (s.includes('retir')) cls = 'badge-retired';
-  else if (s.includes('pend')) cls = 'badge-pending';
-  return `<span class="badge ${cls}">${status}</span>`;
+  let c = 'b-default';
+  if (s.includes('deliver')) c = 'b-delivered';
+  else if (s.includes('contract')) c = 'b-contracted';
+  else if (s.includes('retir')) c = 'b-retired';
+  else if (s.includes('partial')) c = 'b-partial';
+  return `<span class="badge ${c}">${status}</span>`;
 }
 
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  const inner = document.getElementById('toast-inner');
-  const icon = document.getElementById('toast-icon');
+// ─── Toast ────────────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const colors = { success:'bg-green-600', error:'bg-red-500', info:'bg-blue-500' };
+  const icons  = { success:'fa-check-circle', error:'fa-exclamation-triangle', info:'fa-info-circle' };
+  document.getElementById('toast-inner').className =
+    `px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2.5 max-w-xs ${colors[type]}`;
+  document.getElementById('toast-ic').className  = `fas ${icons[type]} text-base`;
   document.getElementById('toast-msg').textContent = msg;
-  inner.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2 max-w-xs ${
-    type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-  }`;
-  icon.className = `fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}`;
+  const t = document.getElementById('toast');
   t.classList.remove('hidden');
-  setTimeout(() => t.classList.add('hidden'), 3500);
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.add('hidden'), 3500);
 }
 
-let searchTimer;
-function debounceSearch(val) {
-  state.search = val;
-  document.getElementById('clear-search').classList.toggle('hidden', !val);
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { state.pagination.skip = 0; loadTransactions(); }, 350);
+// ─── API ──────────────────────────────────────────────────────────────────
+async function api(path) {
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${path}`);
+  return r.json();
 }
 
-function clearSearch() {
-  document.getElementById('search-input').value = '';
-  state.search = '';
-  document.getElementById('clear-search').classList.add('hidden');
-  state.pagination.skip = 0;
-  loadTransactions();
-}
-
-function applyFilters() {
-  state.filters.method   = document.getElementById('filter-method').value;
-  state.filters.status   = document.getElementById('filter-status').value;
-  state.filters.registry = document.getElementById('filter-registry').value;
-  state.filters.region   = document.getElementById('filter-region').value;
-  state.filters.year     = document.getElementById('filter-year').value;
-  state.pagination.skip  = 0;
-  loadTransactions();
-}
-
-function resetFilters() {
-  ['filter-method','filter-status','filter-registry','filter-region','filter-year']
-    .forEach(id => document.getElementById(id).value = '');
-  Object.keys(state.filters).forEach(k => state.filters[k] = '');
-  state.search = '';
-  document.getElementById('search-input').value = '';
-  document.getElementById('clear-search').classList.add('hidden');
-  state.pagination.skip = 0;
-  loadTransactions();
-}
-
-function sortBy(col) {
-  if (state.sort.by === col) {
-    state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
-  } else {
-    state.sort.by = col;
-    state.sort.dir = 'desc';
-  }
-  // Aggiorna icone header
-  document.querySelectorAll('#data-table th .sort-icon').forEach(el => el.textContent = '↕');
-  document.querySelectorAll('#data-table th').forEach(th => {
-    th.style.color = '';
-    const icon = th.querySelector('.sort-icon');
-    if (icon) icon.style.opacity = '0';
-    if (th.dataset.col === col) {
-      th.style.color = '#16a34a';
-      if (icon) { icon.textContent = state.sort.dir === 'asc' ? '↑' : '↓'; icon.style.opacity = '1'; }
-    }
-  });
-  loadTransactions();
-}
-
-// ─── Section switching ────────────────────────────────────────────────────────
-
-function showSection(name) {
-  state.currentSection = name;
+// ─── Navigazione ──────────────────────────────────────────────────────────
+function goto(name) {
+  S.section = name;
   ['dashboard','transactions','suppliers','upload'].forEach(s => {
-    document.getElementById(`section-${s}`).classList.add('hidden');
+    document.getElementById(`sec-${s}`).classList.add('hidden');
     document.getElementById(`nav-${s}`)?.classList.remove('active');
   });
-  document.getElementById(`section-${name}`).classList.remove('hidden');
+  document.getElementById(`sec-${name}`).classList.remove('hidden');
   document.getElementById(`nav-${name}`)?.classList.add('active');
 
-  const titles = {
-    dashboard:'Dashboard', transactions:'Transazioni CDR',
-    suppliers:'Suppliers CDR', upload:'Importa Dati'
-  };
+  const titles = { dashboard:'Dashboard', transactions:'Transazioni CDR',
+                   suppliers:'Supplier CDR', upload:'Importa Dati' };
   document.getElementById('page-title').textContent = titles[name] || name;
+  document.getElementById('page-badge').classList.add('hidden');
 
-  if (name === 'transactions') loadTransactions();
-  if (name === 'suppliers') loadSuppliers();
-  if (name === 'dashboard') loadDashboard();
+  if (name === 'dashboard')    loadDashboard();
+  if (name === 'transactions') { loadFilters(); loadTx(); }
+  if (name === 'suppliers')    loadSuppliers();
 }
 
-// ─── API calls ────────────────────────────────────────────────────────────────
-
-async function apiFetch(path) {
-  const res = await fetch(API + path);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-// ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── DASHBOARD ────────────────────────────────────────────────────────────
 
 async function loadDashboard() {
   try {
-    const [summary, byYear, byMethod, byStatus, byRegion, topBuyers] = await Promise.all([
-      apiFetch('/api/transactions/stats/summary'),
-      apiFetch('/api/transactions/stats/by-year'),
-      apiFetch('/api/transactions/stats/by-method'),
-      apiFetch('/api/transactions/stats/by-status'),
-      apiFetch('/api/transactions/stats/by-region'),
-      apiFetch('/api/transactions/stats/top-purchasers?limit=10'),
+    const [summary, byYear, byMethod, byStatus, byCont, byMkt, topBuyers] = await Promise.all([
+      api('/api/transactions/stats/summary'),
+      api('/api/transactions/stats/by-year'),
+      api('/api/transactions/stats/by-method'),
+      api('/api/transactions/stats/by-status'),
+      api('/api/transactions/stats/by-continent'),
+      api('/api/transactions/stats/by-marketplace'),
+      api('/api/transactions/stats/top-purchasers?limit=10'),
     ]);
 
     const empty = summary.total_transactions === 0;
-    document.getElementById('dashboard-empty').classList.toggle('hidden', !empty);
+    document.getElementById('dash-empty').classList.toggle('hidden', !empty);
 
     renderKPI(summary);
+    renderDeliveryRate(summary);
     if (!empty) {
       renderChartYear(byYear);
-      renderChartMethod(byMethod);
       renderChartStatus(byStatus);
-      renderChartRegion(byRegion);
+      renderChartMethod(byMethod);
+      renderChartContinent(byCont);
+      renderChartMarketplace(byMkt);
       renderChartPurchasers(topBuyers);
     }
-
-    document.getElementById('last-update').textContent = new Date().toLocaleTimeString('it-IT');
-    updateDbCounts(summary);
+    updateSidebarCounts(summary);
+    document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('it-IT');
   } catch(e) {
-    console.error('Dashboard load error:', e);
+    console.error(e);
+    toast('Errore caricamento dashboard', 'error');
   }
 }
 
 function renderKPI(s) {
   const kpis = [
-    { icon:'fa-exchange-alt', color:'green',  label:'Transazioni',     value: fmt(s.total_transactions) },
-    { icon:'fa-leaf',          color:'emerald',label:'tCO₂e Totali',   value: fmt(s.total_tonnes) },
-    { icon:'fa-dollar-sign',   color:'blue',   label:'Valore USD',      value: '$' + fmt(s.total_value_usd) },
-    { icon:'fa-building',      color:'purple', label:'Acquirenti Unici',value: fmt(s.unique_purchasers) },
-    { icon:'fa-industry',      color:'orange', label:'Suppliers',       value: fmt(s.unique_suppliers) },
+    { icon:'fa-exchange-alt', bg:'bg-green-100', ic:'text-green-600',
+      val: fmt(s.total_transactions), lbl:'Transazioni' },
+    { icon:'fa-leaf', bg:'bg-emerald-100', ic:'text-emerald-600',
+      val: fmtK(s.total_tonnes_committed)+' t', lbl:'tCO₂e Committed' },
+    { icon:'fa-check-double', bg:'bg-teal-100', ic:'text-teal-600',
+      val: fmtK(s.total_tonnes_delivered)+' t', lbl:'tCO₂e Delivered' },
+    { icon:'fa-percentage', bg:'bg-blue-100', ic:'text-blue-600',
+      val: fmt(s.delivery_rate_pct,1)+'%', lbl:'Delivery Rate' },
+    { icon:'fa-building', bg:'bg-purple-100', ic:'text-purple-600',
+      val: fmt(s.unique_purchasers), lbl:'Acquirenti Unici' },
+    { icon:'fa-industry', bg:'bg-orange-100', ic:'text-orange-600',
+      val: fmt(s.unique_suppliers), lbl:'Suppliers' },
   ];
-  const colorMap = {
-    green:'bg-green-100 text-green-600', emerald:'bg-emerald-100 text-emerald-600',
-    blue:'bg-blue-100 text-blue-600', purple:'bg-purple-100 text-purple-600',
-    orange:'bg-orange-100 text-orange-600',
-  };
-  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
-    <div class="kpi-card">
-      <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${colorMap[k.color]}">
-        <i class="fas ${k.icon} text-lg"></i>
-      </div>
-      <div>
-        <div class="text-2xl font-bold text-gray-800">${k.value}</div>
-        <div class="text-xs text-gray-500 mt-0.5">${k.label}</div>
-      </div>
-    </div>
-  `).join('');
+  document.getElementById('kpi-row').innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-icon ${k.bg}"><i class="fas ${k.icon} ${k.ic}"></i></div>
+      <div><div class="kpi-val">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>
+    </div>`).join('');
 }
+
+function renderDeliveryRate(s) {
+  const pct = s.delivery_rate_pct || 0;
+  document.getElementById('dr-pct').textContent = fmt(pct,1) + '%';
+  document.getElementById('dr-fill').style.width = Math.min(pct,100) + '%';
+  document.getElementById('dr-delivered').textContent = 'Delivered: ' + fmtK(s.total_tonnes_delivered) + ' t';
+  document.getElementById('dr-committed').textContent = 'Committed: ' + fmtK(s.total_tonnes_committed) + ' t';
+}
+
+function updateSidebarCounts(s) {
+  document.getElementById('sidebar-counts').textContent =
+    `${fmt(s.total_transactions)} tx · ${fmt(s.unique_suppliers)} supplier`;
+}
+
+// ── Chart helpers ──────────────────────────────────────────────────────────
+
+const PAL = ['#16a34a','#0ea5e9','#a855f7','#f59e0b','#ef4444',
+             '#14b8a6','#f97316','#6366f1','#ec4899','#84cc16',
+             '#06b6d4','#8b5cf6','#0891b2','#d97706','#dc2626'];
 
 function destroyChart(id) {
-  if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
+  if (S.charts[id]) { S.charts[id].destroy(); delete S.charts[id]; }
 }
-
-const PALETTE = [
-  '#16a34a','#0ea5e9','#a855f7','#f59e0b','#ef4444',
-  '#14b8a6','#f97316','#6366f1','#ec4899','#84cc16',
-  '#06b6d4','#8b5cf6','#10b981','#f43f5e','#3b82f6',
-];
 
 function renderChartYear(data) {
   destroyChart('year');
   if (!data.length) return;
-  const ctx = document.getElementById('chart-year').getContext('2d');
-  state.charts['year'] = new Chart(ctx, {
+  const ctx = document.getElementById('c-year').getContext('2d');
+  S.charts['year'] = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: data.map(d => d.year),
-      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: '#16a34a', borderRadius: 6 }]
+      datasets: [
+        { label:'Committed', data: data.map(d => d.committed), backgroundColor:'#16a34a', borderRadius:5 },
+        { label:'Delivered', data: data.map(d => d.delivered), backgroundColor:'#86efac', borderRadius:5 },
+      ]
     },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}} }
-  });
-}
-
-function renderChartMethod(data) {
-  destroyChart('method');
-  if (!data.length) return;
-  const ctx = document.getElementById('chart-method').getContext('2d');
-  state.charts['method'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: data.map(d => d.method),
-      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderWidth: 2, borderColor:'#fff' }]
-    },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ position:'right', labels:{font:{size:10},boxWidth:12} } } }
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'top', labels:{ font:{size:11}, boxWidth:12 } } },
+      scales:{
+        y:{ ticks:{callback:v=>fmtK(v), font:{size:10}}, grid:{color:'#f1f5f9'} },
+        x:{ grid:{display:false}, ticks:{font:{size:10}} }
+      }
+    }
   });
 }
 
 function renderChartStatus(data) {
   destroyChart('status');
   if (!data.length) return;
-  const ctx = document.getElementById('chart-status').getContext('2d');
-  state.charts['status'] = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: data.map(d => d.status),
-      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderWidth: 2, borderColor:'#fff' }]
+  const ctx = document.getElementById('c-status').getContext('2d');
+  const colors = { Delivered:'#16a34a', Contracted:'#3b82f6', Retired:'#a855f7', Partial:'#f59e0b' };
+  S.charts['status'] = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels: data.map(d=>d.status),
+      datasets:[{ data:data.map(d=>d.count),
+        backgroundColor: data.map(d=>colors[d.status]||'#94a3b8'),
+        borderWidth:2, borderColor:'#fff' }]
     },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ position:'right', labels:{font:{size:10},boxWidth:12} } } }
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:11}, boxWidth:12, padding:10 } },
+        tooltip:{ callbacks:{ label:(c)=>`${c.label}: ${fmt(c.raw)} tx` } }
+      }
+    }
   });
 }
 
-function renderChartRegion(data) {
-  destroyChart('region');
+function renderChartMethod(data) {
+  destroyChart('method');
   if (!data.length) return;
-  const ctx = document.getElementById('chart-region').getContext('2d');
-  state.charts['region'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.region),
-      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderRadius: 6 }]
+  const ctx = document.getElementById('c-method').getContext('2d');
+  // Abbrevia nomi lunghi
+  const abbrev = s => s.length > 35 ? s.substring(0,33)+'…' : s;
+  S.charts['method'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.map(d=>abbrev(d.method)),
+      datasets:[
+        { label:'Committed', data:data.map(d=>d.committed), backgroundColor:PAL, borderRadius:5 },
+      ]
     },
-    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>`${fmtK(c.raw)} t`}}},
+      scales:{
+        x:{ ticks:{callback:v=>fmtK(v),font:{size:10}}, grid:{color:'#f1f5f9'} },
+        y:{ grid:{display:false}, ticks:{font:{size:10}} }
+      }
+    }
+  });
+}
+
+function renderChartContinent(data) {
+  destroyChart('continent');
+  if (!data.length) return;
+  const ctx = document.getElementById('c-continent').getContext('2d');
+  S.charts['continent'] = new Chart(ctx, {
+    type:'doughnut',
+    data:{
+      labels: data.map(d=>d.continent),
+      datasets:[{ data:data.map(d=>d.committed),
+        backgroundColor:PAL, borderWidth:2, borderColor:'#fff' }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{font:{size:10},boxWidth:12,padding:8} },
+        tooltip:{ callbacks:{ label:(c)=>`${c.label}: ${fmtK(c.raw)} t` } }
+      }
+    }
+  });
+}
+
+function renderChartMarketplace(data) {
+  destroyChart('marketplace');
+  if (!data.length) return;
+  const ctx = document.getElementById('c-marketplace').getContext('2d');
+  S.charts['marketplace'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.map(d=>d.marketplace),
+      datasets:[{ data:data.map(d=>d.count), backgroundColor:'#f97316', borderRadius:5 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{legend:{display:false}},
-      scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},y:{grid:{display:false}}} }
+      scales:{
+        x:{ ticks:{font:{size:10}}, grid:{color:'#f1f5f9'} },
+        y:{ grid:{display:false}, ticks:{font:{size:10}} }
+      }
+    }
   });
 }
 
 function renderChartPurchasers(data) {
   destroyChart('purchasers');
   if (!data.length) return;
-  const ctx = document.getElementById('chart-purchasers').getContext('2d');
-  state.charts['purchasers'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.purchaser?.length > 20 ? d.purchaser.substring(0,20)+'…' : d.purchaser),
-      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: '#0ea5e9', borderRadius: 6 }]
+  const ctx = document.getElementById('c-purchasers').getContext('2d');
+  const trunc = s => s && s.length > 18 ? s.substring(0,17)+'…' : (s||'—');
+  S.charts['purchasers'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: data.map(d=>trunc(d.purchaser)),
+      datasets:[{ data:data.map(d=>d.committed), backgroundColor:'#0ea5e9', borderRadius:5 }]
     },
-    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},y:{grid:{display:false},ticks:{font:{size:11}}}} }
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>`${fmtK(c.raw)} t`}}},
+      scales:{
+        x:{ ticks:{callback:v=>fmtK(v),font:{size:10}}, grid:{color:'#f1f5f9'} },
+        y:{ grid:{display:false}, ticks:{font:{size:10}} }
+      }
+    }
   });
 }
 
-function updateDbCounts(s) {
-  document.getElementById('db-counts').textContent =
-    `${fmt(s.total_transactions)} tx · ${fmt(s.total_tonnes)} tCO₂e`;
+// ─── TRANSACTIONS TABLE ───────────────────────────────────────────────────
+
+let searchTimer;
+function onSearch(v) {
+  S.search = v;
+  document.getElementById('clr-search').classList.toggle('hidden', !v);
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { S.page.skip=0; loadTx(); }, 350);
+}
+function clearSearch() {
+  document.getElementById('search-inp').value = '';
+  S.search = '';
+  document.getElementById('clr-search').classList.add('hidden');
+  S.page.skip = 0; loadTx();
+}
+function applyFilters() {
+  S.filters.method      = document.getElementById('f-method').value;
+  S.filters.status      = document.getElementById('f-status').value;
+  S.filters.marketplace = document.getElementById('f-marketplace').value;
+  S.filters.registry    = document.getElementById('f-registry').value;
+  S.filters.continent   = document.getElementById('f-continent').value;
+  S.filters.year        = document.getElementById('f-year').value;
+  S.page.skip = 0; loadTx();
+}
+function resetFilters() {
+  ['f-method','f-status','f-marketplace','f-registry','f-continent','f-year']
+    .forEach(id => document.getElementById(id).value = '');
+  Object.keys(S.filters).forEach(k => S.filters[k] = '');
+  S.search=''; document.getElementById('search-inp').value='';
+  document.getElementById('clr-search').classList.add('hidden');
+  S.page.skip=0; loadTx();
 }
 
-// ─── Transactions table ───────────────────────────────────────────────────────
-
-async function loadTransactions() {
-  document.getElementById('table-loader').classList.remove('hidden');
-  document.getElementById('table-body').innerHTML = '';
-  document.getElementById('table-empty').classList.add('hidden');
-
-  const params = new URLSearchParams({
-    skip:     state.pagination.skip,
-    limit:    state.pagination.limit,
-    sort_by:  state.sort.by,
-    sort_dir: state.sort.dir,
+function sortCol(c) {
+  S.sort.dir = S.sort.by === c ? (S.sort.dir==='asc'?'desc':'asc') : 'desc';
+  S.sort.by  = c;
+  document.querySelectorAll('#tx-table th').forEach(th => {
+    th.style.color=''; const ic=th.querySelector('.sort-ic'); if(ic) ic.style.opacity='0.4';
+    if (th.dataset.c === c) {
+      th.style.color='#16a34a';
+      if(ic){ ic.textContent=S.sort.dir==='asc'?'↑':'↓'; ic.style.opacity='1'; }
+    }
   });
-  if (state.search)          params.set('search',   state.search);
-  if (state.filters.method)  params.set('method',   state.filters.method);
-  if (state.filters.status)  params.set('status',   state.filters.status);
-  if (state.filters.registry)params.set('registry', state.filters.registry);
-  if (state.filters.region)  params.set('region',   state.filters.region);
-  if (state.filters.year)    params.set('year',      state.filters.year);
+  loadTx();
+}
 
+async function loadFilters() {
   try {
-    const res = await apiFetch(`/api/transactions/?${params}`);
-    state.pagination.total = res.total;
-    renderTable(res.data);
-    renderPagination();
-    document.getElementById('result-count').textContent =
-      `${fmt(res.total)} risultat${res.total === 1 ? 'o' : 'i'}`;
-  } catch(e) {
-    showToast('Errore caricamento transazioni', 'error');
-  } finally {
-    document.getElementById('table-loader').classList.add('hidden');
-  }
-}
-
-function renderTable(rows) {
-  const tbody = document.getElementById('table-body');
-  if (!rows.length) {
-    document.getElementById('table-empty').classList.remove('hidden');
-    return;
-  }
-  tbody.innerHTML = rows.map(r => `
-    <tr onclick="showDetail(${r.id})">
-      <td>${fmtDate(r.date)}</td>
-      <td class="font-medium text-gray-800 max-w-[160px] truncate">${r.purchaser || '—'}</td>
-      <td class="max-w-[160px] truncate" title="${r.supplier_name||''}">${r.supplier_name || '—'}</td>
-      <td><span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">${r.supplier_method || '—'}</span></td>
-      <td class="text-right font-mono">${r.tonnes ? fmt(r.tonnes,1) : '—'}</td>
-      <td class="text-right font-mono">${r.total_value ? '$'+fmt(r.total_value) : '—'}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td class="text-xs text-gray-500">${r.registry || '—'}</td>
-      <td class="text-xs text-gray-500">${r.supplier_region || '—'}</td>
-      <td class="text-center">
-        <button onclick="event.stopPropagation(); showDetail(${r.id})" class="text-gray-400 hover:text-green-600 px-2 transition-colors" data-tooltip="Dettaglio">
-          <i class="fas fa-eye text-xs"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function renderPagination() {
-  const { skip, limit, total } = state.pagination;
-  const currentPage = Math.floor(skip / limit) + 1;
-  const totalPages  = Math.ceil(total / limit);
-  const from = skip + 1, to = Math.min(skip + limit, total);
-
-  document.getElementById('pagination-info').textContent =
-    total > 0 ? `${fmt(from)}–${fmt(to)} di ${fmt(total)}` : '';
-
-  const btns = document.getElementById('pagination-buttons');
-  if (totalPages <= 1) { btns.innerHTML = ''; return; }
-
-  let pages = [];
-  pages.push(1);
-  if (currentPage > 3) pages.push('...');
-  for (let p = Math.max(2, currentPage-1); p <= Math.min(totalPages-1, currentPage+1); p++) pages.push(p);
-  if (currentPage < totalPages-2) pages.push('...');
-  if (totalPages > 1) pages.push(totalPages);
-
-  btns.innerHTML = `
-    <button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>
-      <i class="fas fa-chevron-left text-xs"></i>
-    </button>
-    ${pages.map(p => p === '...'
-      ? `<span class="px-2 text-gray-400 text-sm">…</span>`
-      : `<button class="page-btn ${p===currentPage?'active':''}" onclick="goToPage(${p})">${p}</button>`
-    ).join('')}
-    <button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>
-      <i class="fas fa-chevron-right text-xs"></i>
-    </button>
-  `;
-}
-
-function goToPage(page) {
-  const { limit, total } = state.pagination;
-  const totalPages = Math.ceil(total / limit);
-  if (page < 1 || page > totalPages) return;
-  state.pagination.skip = (page - 1) * limit;
-  loadTransactions();
-  document.querySelector('#section-transactions').scrollTop = 0;
-}
-
-// ─── Filter options (populate dropdowns) ─────────────────────────────────────
-
-async function loadFilterOptions() {
-  try {
-    const opts = await apiFetch('/api/transactions/filters');
-    const setOptions = (id, values) => {
+    const opts = await api('/api/transactions/filters');
+    const fill = (id, vals, placeholder) => {
       const sel = document.getElementById(id);
       const cur = sel.value;
-      sel.innerHTML = `<option value="">${sel.options[0].text}</option>` +
-        values.map(v => `<option value="${v}" ${v===cur?'selected':''}>${v}</option>`).join('');
+      sel.innerHTML = `<option value="">${placeholder}</option>` +
+        vals.map(v=>`<option value="${v}"${v==cur?' selected':''}>${v}</option>`).join('');
     };
-    setOptions('filter-method',   opts.methods);
-    setOptions('filter-status',   opts.statuses);
-    setOptions('filter-registry', opts.registries);
-    setOptions('filter-region',   opts.regions);
-    setOptions('filter-year',     opts.years.map(String));
+    fill('f-method',      opts.methods,      'Tutti i Metodi');
+    fill('f-status',      opts.statuses,     'Tutti gli Status');
+    fill('f-marketplace', opts.marketplaces, 'Tutti i Marketplace');
+    fill('f-registry',    opts.registries,   'Tutti i Registri');
+    fill('f-continent',   opts.continents,   'Tutti i Continenti');
+    fill('f-year',        opts.years.map(String), 'Tutti gli Anni');
+
+    // Popola anche i filtri suppliers
+    const techSel = document.getElementById('sup-tech');
+    if (techSel && !techSel.options.length > 1) {
+      techSel.innerHTML = '<option value="">Tutte le tecnologie</option>' +
+        opts.methods.map(m=>`<option value="${m}">${m}</option>`).join('');
+    }
+    const contSel = document.getElementById('sup-cont');
+    if (contSel) {
+      contSel.innerHTML = '<option value="">Tutti i continenti</option>' +
+        opts.continents.map(c=>`<option value="${c}">${c}</option>`).join('');
+    }
   } catch(e) { /* silenzioso */ }
 }
 
-// ─── Transaction detail modal ─────────────────────────────────────────────────
+async function loadTx() {
+  document.getElementById('tx-loading').classList.remove('hidden');
+  document.getElementById('tx-body').innerHTML = '';
+  document.getElementById('tx-empty').classList.add('hidden');
 
-async function showDetail(id) {
+  const p = new URLSearchParams({
+    skip: S.page.skip, limit: S.page.limit,
+    sort_by: S.sort.by, sort_dir: S.sort.dir,
+  });
+  if (S.search)              p.set('search',      S.search);
+  if (S.filters.method)      p.set('method',      S.filters.method);
+  if (S.filters.status)      p.set('status',      S.filters.status);
+  if (S.filters.marketplace) p.set('marketplace', S.filters.marketplace);
+  if (S.filters.registry)    p.set('registry',    S.filters.registry);
+  if (S.filters.continent)   p.set('continent',   S.filters.continent);
+  if (S.filters.year)        p.set('year',        S.filters.year);
+
   try {
-    const tx = await apiFetch(`/api/transactions/${id}`);
-    const modal = document.getElementById('modal-content');
-    modal.innerHTML = `
+    const res = await api(`/api/transactions/?${p}`);
+    S.page.total = res.total;
+    renderTx(res.data);
+    renderPagination();
+    document.getElementById('res-count').textContent =
+      `${fmt(res.total)} risultat${res.total===1?'o':'i'}`;
+
+    const badge = document.getElementById('page-badge');
+    badge.textContent = fmt(res.total);
+    badge.classList.remove('hidden');
+  } catch(e) {
+    toast('Errore caricamento transazioni', 'error');
+  } finally {
+    document.getElementById('tx-loading').classList.add('hidden');
+  }
+}
+
+function renderTx(rows) {
+  const tbody = document.getElementById('tx-body');
+  if (!rows.length) {
+    document.getElementById('tx-empty').classList.remove('hidden'); return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr onclick="showTxDetail(${r.id})">
+      <td class="text-slate-400 text-xs">${fmtDate(r.announcement)}</td>
+      <td class="font-medium text-slate-800 max-w-[150px]">
+        <div class="truncate" title="${r.purchaser||''}">${r.purchaser||'—'}</div>
+      </td>
+      <td class="max-w-[140px]">
+        <div class="truncate text-slate-500 text-xs" title="${r.supplier_name||''}">${r.supplier_name||'—'}</div>
+      </td>
+      <td><span class="method-pill" title="${r.method||''}">${r.method||'—'}</span></td>
+      <td class="text-right font-mono text-xs">${r.tonnes?fmt(r.tonnes,1):'—'}</td>
+      <td class="text-right font-mono text-xs ${r.tonnes_delivered>0?'text-green-600':''}">${r.tonnes_delivered?fmt(r.tonnes_delivered,1):'0'}</td>
+      <td>${badge(r.status)}</td>
+      <td class="text-xs text-slate-400">${r.marketplace||'—'}</td>
+      <td class="text-xs text-slate-400">${r.registry_name||'—'}</td>
+      <td class="text-xs text-slate-500">${r.supplier_continent||'—'}</td>
+    </tr>`).join('');
+}
+
+function renderPagination() {
+  const { skip, limit, total } = S.page;
+  const cur = Math.floor(skip/limit)+1;
+  const tot = Math.ceil(total/limit);
+  const from = skip+1, to = Math.min(skip+limit, total);
+  document.getElementById('pg-info').textContent =
+    total > 0 ? `${fmt(from)}–${fmt(to)} di ${fmt(total)}` : '';
+
+  const btns = document.getElementById('pg-btns');
+  if (tot <= 1) { btns.innerHTML=''; return; }
+
+  let pages=[1];
+  if (cur>3) pages.push('…');
+  for(let p=Math.max(2,cur-1); p<=Math.min(tot-1,cur+1); p++) pages.push(p);
+  if (cur<tot-2) pages.push('…');
+  if (tot>1) pages.push(tot);
+
+  btns.innerHTML = `
+    <button class="pgbtn" onclick="goPage(${cur-1})" ${cur===1?'disabled':''}><i class="fas fa-chevron-left text-xs"></i></button>
+    ${pages.map(p=>p==='…'
+      ? `<span class="px-1.5 text-slate-400 text-sm self-center">…</span>`
+      : `<button class="pgbtn ${p===cur?'active':''}" onclick="goPage(${p})">${p}</button>`
+    ).join('')}
+    <button class="pgbtn" onclick="goPage(${cur+1})" ${cur===tot?'disabled':''}><i class="fas fa-chevron-right text-xs"></i></button>`;
+}
+
+function goPage(p) {
+  const tot = Math.ceil(S.page.total/S.page.limit);
+  if (p<1||p>tot) return;
+  S.page.skip = (p-1)*S.page.limit;
+  loadTx();
+  document.getElementById('sec-transactions').scrollTop=0;
+}
+
+// ─── TX DETAIL MODAL ──────────────────────────────────────────────────────
+
+async function showTxDetail(id) {
+  try {
+    const tx = await api(`/api/transactions/${id}`);
+    const box = document.getElementById('modal-box');
+    const row = (l,v,cls='') => v?`
+      <div class="bg-slate-50 rounded-xl p-3">
+        <div class="text-[10px] text-slate-400 uppercase tracking-wide mb-0.5">${l}</div>
+        <div class="text-sm font-medium text-slate-700 ${cls}">${v}</div>
+      </div>`:''
+
+    box.innerHTML = `
       <div class="flex items-start justify-between mb-5">
         <div>
-          <h3 class="font-bold text-gray-800 text-lg">${tx.purchaser || 'Acquirente sconosciuto'}</h3>
-          <p class="text-sm text-gray-500">${statusBadge(tx.status)}</p>
+          <h3 class="font-bold text-slate-800 text-base">${tx.purchaser||'Acquirente N/D'}</h3>
+          <p class="mt-1">${badge(tx.status)}</p>
         </div>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 ml-4">
+        <button onclick="closeModal()" class="text-slate-300 hover:text-slate-600 ml-4 mt-0.5">
           <i class="fas fa-times text-lg"></i>
         </button>
       </div>
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        ${[
-          ['Data', fmtDate(tx.date)],
-          ['Anno', tx.year || '—'],
-          ['Tonnellate', tx.tonnes ? fmt(tx.tonnes,2)+' tCO₂e' : '—'],
-          ['Prezzo/t', tx.price_per_tonne ? '$'+fmt(tx.price_per_tonne,2) : '—'],
-          ['Valore Totale', tx.total_value ? '$'+fmt(tx.total_value) : '—'],
-          ['Anno Consegna', tx.delivery_year || '—'],
-          ['Registro', tx.registry || '—'],
-          ['Paese Acquirente', tx.purchaser_country || '—'],
-          ['Settore', tx.purchaser_sector || '—'],
-        ].map(([l,v]) => `
-          <div class="bg-gray-50 rounded-lg p-3">
-            <div class="text-xs text-gray-400 mb-0.5">${l}</div>
-            <div class="font-medium text-gray-800">${v}</div>
-          </div>
-        `).join('')}
+
+      <div class="grid grid-cols-2 gap-2.5 mb-4">
+        ${row('Data Annuncio', fmtDate(tx.announcement))}
+        ${row('Anno', tx.year)}
+        ${row('tCO₂e Committed', tx.tonnes ? fmt(tx.tonnes,2)+' t' : null)}
+        ${row('tCO₂e Delivered', tx.tonnes_delivered!=null ? fmt(tx.tonnes_delivered,2)+' t' : null, tx.tonnes_delivered>0?'text-green-600':'')}
+        ${row('Metodo CDR', tx.method)}
+        ${row('Status', tx.status)}
+        ${row('Marketplace', tx.marketplace)}
+        ${row('Registry', tx.registry_name)}
       </div>
+
       ${tx.supplier_name ? `
-      <div class="mt-4 border-t border-gray-100 pt-4">
-        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Supplier</p>
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          ${[
-            ['Nome', tx.supplier_name],
-            ['Metodo', tx.supplier_method || '—'],
-            ['Regione', tx.supplier_region || '—'],
-          ].map(([l,v]) => `
-            <div class="bg-blue-50 rounded-lg p-3">
-              <div class="text-xs text-blue-400 mb-0.5">${l}</div>
-              <div class="font-medium text-blue-900">${v}</div>
-            </div>
-          `).join('')}
+      <div class="border-t border-slate-100 pt-4 mt-2">
+        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Supplier</p>
+        <div class="grid grid-cols-2 gap-2.5">
+          ${row('Nome', tx.supplier_name)}
+          ${row('Tecnologia', tx.supplier_technology)}
+          ${row('Continente', tx.supplier_continent)}
+          ${row('Paese', tx.supplier_country)}
+          ${tx.supplier_price ? row('Prezzo/t', '$'+fmt(tx.supplier_price,0)) : ''}
         </div>
       </div>` : ''}
-      ${tx.notes ? `<div class="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-gray-600"><i class="fas fa-sticky-note text-yellow-400 mr-1"></i>${tx.notes}</div>` : ''}
+      ${tx.notes ? `<div class="mt-3 p-3 bg-amber-50 rounded-xl text-xs text-slate-600">
+        <i class="fas fa-sticky-note text-amber-400 mr-1.5"></i>${tx.notes}</div>` : ''}
     `;
-    document.getElementById('detail-modal').classList.remove('hidden');
-  } catch(e) {
-    showToast('Errore caricamento dettaglio', 'error');
-  }
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  } catch(e) { toast('Errore caricamento dettaglio','error'); }
 }
 
 function closeModal(e) {
-  if (!e || e.target === document.getElementById('detail-modal')) {
-    document.getElementById('detail-modal').classList.add('hidden');
-  }
+  if (!e || e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.add('hidden');
 }
 
-// ─── Suppliers ────────────────────────────────────────────────────────────────
+// ─── SUPPLIERS ────────────────────────────────────────────────────────────
 
-async function loadSuppliers() {
-  document.getElementById('suppliers-loader').classList.remove('hidden');
-  document.getElementById('suppliers-grid').innerHTML = '';
+let supTimer;
+function loadSuppliers(searchVal) {
+  clearTimeout(supTimer);
+  const search = typeof searchVal==='string' ? searchVal
+               : (document.getElementById('sup-search')?.value||'');
+  const tech   = document.getElementById('sup-tech')?.value||'';
+  const cont   = document.getElementById('sup-cont')?.value||'';
+  supTimer = setTimeout(() => _doLoadSuppliers(search, tech, cont), 300);
+}
+
+async function _doLoadSuppliers(search, tech, cont) {
+  document.getElementById('sup-loading').classList.remove('hidden');
+  document.getElementById('sup-grid').innerHTML = '';
   try {
-    const data = await apiFetch('/api/suppliers/with-stats');
-    document.getElementById('suppliers-loader').classList.add('hidden');
-    const grid = document.getElementById('suppliers-grid');
-    if (!data.length) {
-      grid.innerHTML = `<div class="col-span-3 text-center py-16 text-gray-400">
-        <i class="fas fa-industry text-4xl mb-3 opacity-30"></i><br>Nessun supplier trovato
-      </div>`;
+    const p = new URLSearchParams({ limit:200 });
+    if (search) p.set('search', search);
+    if (tech)   p.set('technology', tech);
+    if (cont)   p.set('continent', cont);
+    const res = await api(`/api/suppliers/?${p}`);
+    document.getElementById('sup-loading').classList.add('hidden');
+    document.getElementById('sup-count').textContent = `${fmt(res.total)} supplier`;
+    const grid = document.getElementById('sup-grid');
+    if (!res.data.length) {
+      grid.innerHTML = `<div class="col-span-3 text-center py-16 text-slate-400">
+        <i class="fas fa-industry text-5xl opacity-20 mb-4"></i><br>Nessun supplier trovato</div>`;
       return;
     }
-    grid.innerHTML = data.map(s => `
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-800 text-sm leading-tight truncate">${s.name}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">${s.location_country || ''} ${s.location_region ? '· '+s.location_region : ''}</p>
+
+    // Colore per tecnologia
+    const techColors = {
+      'Biochar Carbon Removal BCR':              ['bg-amber-100','text-amber-800'],
+      'Direct Air Carbon Capture And Sequestration DACCS': ['bg-sky-100','text-sky-800'],
+      'Enhanced Weathering':                      ['bg-lime-100','text-lime-800'],
+      'Bioenergy With Carbon Capture And Sequestration BECCS': ['bg-orange-100','text-orange-800'],
+      'Mineralization':                           ['bg-purple-100','text-purple-800'],
+      'Biomass Geological Sequestration':         ['bg-teal-100','text-teal-800'],
+      'Alkalinity Enhancement':                   ['bg-cyan-100','text-cyan-800'],
+      'Marine Biomass Carbon Capture And Sequestration MBCCS': ['bg-blue-100','text-blue-800'],
+      'Biomass Direct Storage':                   ['bg-green-100','text-green-800'],
+      'Direct Ocean Removal':                     ['bg-indigo-100','text-indigo-800'],
+    };
+    const abbrevTech = t => {
+      const map = {
+        'Biochar Carbon Removal BCR': 'Biochar BCR',
+        'Direct Air Carbon Capture And Sequestration DACCS': 'DACCS',
+        'Enhanced Weathering': 'Enhanced Weathering',
+        'Bioenergy With Carbon Capture And Sequestration BECCS': 'BECCS',
+        'Mineralization': 'Mineralization',
+        'Biomass Geological Sequestration': 'BGS',
+        'Alkalinity Enhancement': 'Alkalinity',
+        'Marine Biomass Carbon Capture And Sequestration MBCCS': 'MBCCS',
+        'Biomass Direct Storage': 'Biomass Direct',
+        'Direct Ocean Removal': 'Ocean Removal',
+      };
+      return map[t] || (t ? t.substring(0,25) : 'N/D');
+    };
+    const continentFlag = { 'North America':'🌎','South America':'🌎','Europe':'🌍',
+                             'Asia':'🌏','Africa':'🌍','Oceania':'🌏','Various':'🌐' };
+
+    grid.innerHTML = res.data.map(s => {
+      const [bg, tc] = techColors[s.technology] || ['bg-slate-100','text-slate-600'];
+      const delivRate = s.total_tonnes_committed > 0
+        ? Math.min(100, (s.total_tonnes_delivered/s.total_tonnes_committed*100)).toFixed(1)
+        : null;
+      const flag = continentFlag[s.continent] || '🌐';
+      return `
+        <div class="sup-card">
+          <div class="flex items-start justify-between mb-3 gap-2">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-slate-800 text-sm leading-tight truncate" title="${s.name}">${s.name}</h3>
+              <p class="text-xs text-slate-400 mt-0.5">${flag} ${s.country||''} ${s.continent?'· '+s.continent:''}</p>
+            </div>
+            <span class="badge ${bg} ${tc} text-[10px] shrink-0">${abbrevTech(s.technology)}</span>
           </div>
-          <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full shrink-0">${s.method || 'N/D'}</span>
-        </div>
-        <div class="grid grid-cols-3 gap-2 text-center text-xs mt-3">
-          <div class="bg-green-50 rounded-lg py-2">
-            <div class="font-bold text-green-700 text-base">${fmt(s.total_tonnes,0)}</div>
-            <div class="text-gray-400 mt-0.5">tCO₂e</div>
+
+          <div class="grid grid-cols-3 gap-2 text-center text-[11px] mb-3">
+            <div class="bg-green-50 rounded-lg py-2">
+              <div class="font-bold text-green-700 text-sm">${fmtK(s.total_tonnes_committed)}</div>
+              <div class="text-slate-400">Committed</div>
+            </div>
+            <div class="bg-blue-50 rounded-lg py-2">
+              <div class="font-bold text-blue-700 text-sm">${fmtK(s.total_tonnes_delivered)}</div>
+              <div class="text-slate-400">Delivered</div>
+            </div>
+            <div class="bg-purple-50 rounded-lg py-2">
+              <div class="font-bold text-purple-700 text-sm">${s.transaction_count||'—'}</div>
+              <div class="text-slate-400">Contratti</div>
+            </div>
           </div>
-          <div class="bg-blue-50 rounded-lg py-2">
-            <div class="font-bold text-blue-700 text-base">${s.tx_count}</div>
-            <div class="text-gray-400 mt-0.5">Contratti</div>
+
+          ${delivRate !== null ? `
+          <div class="mb-2">
+            <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+              <span>Delivery Rate</span><span class="font-medium text-slate-600">${delivRate}%</span>
+            </div>
+            <div class="dr-bar"><div class="dr-fill" style="width:${delivRate}%"></div></div>
+          </div>` : ''}
+
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            ${s.price_per_tonne ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">$${fmt(s.price_per_tonne,0)}/t</span>` : ''}
+            ${s.certification ? `<span class="text-[10px] bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-full truncate max-w-[140px]" title="${s.certification}"><i class="fas fa-certificate mr-0.5"></i>${s.certification.split(',')[0].trim()}</span>` : ''}
           </div>
-          <div class="bg-purple-50 rounded-lg py-2">
-            <div class="font-bold text-purple-700 text-base">${s.price_per_tonne ? '$'+fmt(s.price_per_tonne,0) : '—'}</div>
-            <div class="text-gray-400 mt-0.5">$/t</div>
-          </div>
-        </div>
-        ${s.certification ? `<div class="mt-3 text-xs text-gray-500"><i class="fas fa-certificate text-yellow-400 mr-1"></i>${s.certification}</div>` : ''}
-      </div>
-    `).join('');
+        </div>`;
+    }).join('');
   } catch(e) {
-    document.getElementById('suppliers-loader').classList.add('hidden');
-    showToast('Errore caricamento suppliers', 'error');
+    document.getElementById('sup-loading').classList.add('hidden');
+    toast('Errore caricamento suppliers', 'error');
   }
 }
 
-// ─── File upload ──────────────────────────────────────────────────────────────
+// ─── UPLOAD ───────────────────────────────────────────────────────────────
 
-function handleDragOver(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.add('drag-over');
-}
-function handleDragLeave(e) {
-  document.getElementById('drop-zone').classList.remove('drag-over');
-}
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) setFile(file);
-}
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (file) setFile(file);
-}
-function setFile(file) {
-  state.selectedFile = file;
-  document.getElementById('file-name').textContent = file.name;
-  document.getElementById('file-size').textContent = (file.size/1024/1024).toFixed(2)+' MB';
-  document.getElementById('file-selected').classList.remove('hidden');
+function dzDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function dzLeave(e)    { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function dzDrop(e)     { e.preventDefault(); dzLeave(); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }
+function fileSelected(e) { if(e.target.files[0]) setFile(e.target.files[0]); }
+
+function setFile(f) {
+  S.file = f;
+  document.getElementById('file-name').textContent = f.name;
+  document.getElementById('file-sz').textContent   = (f.size/1024/1024).toFixed(2)+' MB';
+  document.getElementById('file-info').classList.remove('hidden');
   document.getElementById('upload-btn').disabled = false;
-  document.getElementById('upload-result').classList.add('hidden');
+  document.getElementById('upload-res').classList.add('hidden');
 }
 function clearFile() {
-  state.selectedFile = null;
-  document.getElementById('file-selected').classList.add('hidden');
+  S.file = null;
+  document.getElementById('file-info').classList.add('hidden');
   document.getElementById('upload-btn').disabled = true;
-  document.getElementById('file-input').value = '';
+  document.getElementById('file-inp').value = '';
 }
 
-async function uploadFile() {
-  if (!state.selectedFile) return;
-  document.getElementById('upload-progress').classList.remove('hidden');
+async function doUpload() {
+  if (!S.file) return;
+  document.getElementById('upload-prog').classList.remove('hidden');
   document.getElementById('upload-btn').disabled = true;
-  document.getElementById('upload-result').classList.add('hidden');
+  document.getElementById('upload-res').classList.add('hidden');
 
-  const formData = new FormData();
-  formData.append('file', state.selectedFile);
+  const fd = new FormData();
+  fd.append('file', S.file);
 
   try {
-    const res = await fetch(API + '/api/ingest/upload', { method:'POST', body: formData });
-    const data = await res.json();
-    document.getElementById('upload-progress').classList.add('hidden');
+    const r   = await fetch('/api/ingest/upload', { method:'POST', body:fd });
+    const res = await r.json();
+    document.getElementById('upload-prog').classList.add('hidden');
 
-    const ok = res.ok;
-    const resultEl = document.getElementById('upload-result');
-    resultEl.classList.remove('hidden');
-    resultEl.innerHTML = `
-      <div class="flex items-center gap-2 mb-3">
-        <i class="fas fa-${ok ? 'check-circle text-green-500' : 'exclamation-triangle text-red-500'} text-xl"></i>
-        <span class="font-semibold text-gray-800">${ok ? 'Importazione completata!' : 'Importazione con errori'}</span>
+    const el = document.getElementById('upload-res');
+    el.classList.remove('hidden');
+    el.innerHTML = `
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fas fa-${r.ok?'check-circle text-green-500':'exclamation-triangle text-red-500'} text-xl"></i>
+        <span class="font-semibold text-slate-800">${r.ok?'Importazione completata!':'Importazione con errori'}</span>
       </div>
       <div class="grid grid-cols-2 gap-3 text-sm mb-3">
-        ${[
-          ['Inserite', data.inserted, 'green'],
-          ['Aggiornate', data.updated, 'blue'],
-          ['Saltate', data.skipped, 'gray'],
-          ['Errori', data.total_errors, data.total_errors>0?'red':'gray'],
-        ].map(([l,v,c]) => `
-          <div class="bg-${c}-50 rounded-lg p-3 text-center">
-            <div class="text-2xl font-bold text-${c}-700">${fmt(v)}</div>
-            <div class="text-xs text-gray-500 mt-0.5">${l}</div>
-          </div>
-        `).join('')}
+        ${[['Inseriti',res.inserted,'green'],['Aggiornati',res.updated,'blue'],
+           ['Saltati',res.skipped,'slate'],['Errori',res.total_errors,res.total_errors>0?'red':'slate']]
+          .map(([l,v,c])=>`
+            <div class="bg-${c}-50 rounded-xl p-3 text-center">
+              <div class="text-2xl font-bold text-${c}-700">${fmt(v)}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${l}</div>
+            </div>`).join('')}
       </div>
-      ${data.errors?.length ? `
-        <div class="mt-2 p-3 bg-red-50 rounded-lg text-xs text-red-700 max-h-32 overflow-y-auto">
-          <strong>Dettaglio errori:</strong><br>${data.errors.join('<br>')}
-        </div>` : ''}
+      ${res.errors?.length?`<div class="p-3 bg-red-50 rounded-xl text-xs text-red-600 max-h-28 overflow-y-auto">${res.errors.join('<br>')}</div>`:''}
     `;
-
-    if (ok) {
-      showToast(`${fmt(data.inserted)} righe importate con successo!`, 'success');
+    if (r.ok) {
+      toast(`${fmt(res.inserted)} record importati!`, 'success');
       clearFile();
-      loadFilterOptions();
+      loadFilters();
     } else {
-      showToast(data.detail || 'Errore durante l\'importazione', 'error');
+      toast(res.detail||'Errore importazione','error');
     }
   } catch(e) {
-    document.getElementById('upload-progress').classList.add('hidden');
-    showToast('Errore di connessione al server', 'error');
+    document.getElementById('upload-prog').classList.add('hidden');
+    toast('Errore di connessione','error');
   }
   document.getElementById('upload-btn').disabled = false;
 }
 
-// ─── Refresh ──────────────────────────────────────────────────────────────────
-
-function refreshAll() {
-  const s = state.currentSection;
-  if (s === 'dashboard') loadDashboard();
-  if (s === 'transactions') { loadTransactions(); loadFilterOptions(); }
-  if (s === 'suppliers') loadSuppliers();
-  showToast('Dati aggiornati', 'success');
+// ─── Refresh ─────────────────────────────────────────────────────────────
+function refreshCurrent() {
+  const s = S.section;
+  if (s==='dashboard')    loadDashboard();
+  if (s==='transactions') loadTx();
+  if (s==='suppliers')    loadSuppliers();
+  toast('Aggiornato', 'success');
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-
+// ─── Init ─────────────────────────────────────────────────────────────────
 async function init() {
-  await loadFilterOptions();
+  await loadFilters();
   loadDashboard();
-  // Seed dati demo se db vuoto
-  const status = await apiFetch('/api/ingest/status').catch(()=>({transactions:0}));
-  if (status.transactions === 0) {
-    document.getElementById('db-counts').textContent = 'Database vuoto';
-  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 </script>
-</body>
 </html>

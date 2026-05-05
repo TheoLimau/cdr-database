@@ -1,17 +1,16 @@
 # services/transaction_service.py
-# Business logic per le transazioni CDR
+# Business logic per le transazioni CDR — adattato ai dati reali del file Excel
 
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, and_, func, distinct
+from sqlalchemy import or_, func, distinct
 from typing import Optional, List, Dict, Any
 from models.transaction import Transaction
 from models.supplier import Supplier
 
 
 class TransactionService:
-    """Service layer per operazioni CRUD e query avanzate sulle transazioni."""
 
-    # ─── READ ────────────────────────────────────────────────────────────────
+    # ─── READ con filtri ─────────────────────────────────────────────────────
 
     @staticmethod
     def get_all(
@@ -21,70 +20,66 @@ class TransactionService:
         search: Optional[str] = None,
         method: Optional[str] = None,
         status: Optional[str] = None,
+        marketplace: Optional[str] = None,
         registry: Optional[str] = None,
-        region: Optional[str] = None,
+        continent: Optional[str] = None,
         year: Optional[int] = None,
-        purchaser: Optional[str] = None,
         sort_by: str = "id",
         sort_dir: str = "desc",
     ) -> Dict[str, Any]:
-        """
-        Recupera transazioni con filtri dinamici, ricerca full-text e paginazione.
-        Ritorna sia i dati che il totale per la paginazione lato client.
-        """
-        query = db.query(Transaction).options(joinedload(Transaction.supplier))
 
-        # ── Full-text search ──────────────────────────────────────────────────
+        query = db.query(Transaction).options(joinedload(Transaction.supplier))
+        query = query.join(Transaction.supplier, isouter=True)
+
+        # Full-text search su campi chiave
         if search and search.strip():
             term = f"%{search.strip()}%"
-            query = query.join(Transaction.supplier, isouter=True).filter(
+            query = query.filter(
                 or_(
                     Transaction.purchaser.ilike(term),
-                    Transaction.registry.ilike(term),
+                    Transaction.method.ilike(term),
                     Transaction.status.ilike(term),
-                    Transaction.notes.ilike(term),
+                    Transaction.marketplace.ilike(term),
+                    Transaction.registry_name.ilike(term),
                     Supplier.name.ilike(term),
-                    Supplier.method.ilike(term),
+                    Supplier.technology.ilike(term),
+                    Supplier.country.ilike(term),
                     Supplier.certification.ilike(term),
                 )
             )
-        else:
-            query = query.join(Transaction.supplier, isouter=True)
 
-        # ── Filtri dinamici combinabili ───────────────────────────────────────
+        # Filtri dinamici combinabili
         if method:
-            query = query.filter(Supplier.method.ilike(f"%{method}%"))
+            query = query.filter(Transaction.method.ilike(f"%{method}%"))
         if status:
             query = query.filter(Transaction.status.ilike(f"%{status}%"))
+        if marketplace:
+            query = query.filter(Transaction.marketplace.ilike(f"%{marketplace}%"))
         if registry:
-            query = query.filter(Transaction.registry.ilike(f"%{registry}%"))
-        if region:
-            query = query.filter(Supplier.location_region.ilike(f"%{region}%"))
+            query = query.filter(Transaction.registry_name.ilike(f"%{registry}%"))
+        if continent:
+            query = query.filter(Supplier.continent.ilike(f"%{continent}%"))
         if year:
             query = query.filter(Transaction.year == year)
-        if purchaser:
-            query = query.filter(Transaction.purchaser.ilike(f"%{purchaser}%"))
 
-        # ── Conteggio totale (prima del paging) ───────────────────────────────
         total = query.count()
 
-        # ── Ordinamento dinamico ──────────────────────────────────────────────
+        # Ordinamento dinamico
         sort_map = {
-            "id": Transaction.id,
-            "date": Transaction.date,
-            "year": Transaction.year,
-            "tonnes": Transaction.tonnes,
-            "total_value": Transaction.total_value,
-            "status": Transaction.status,
-            "purchaser": Transaction.purchaser,
-            "registry": Transaction.registry,
+            "id":               Transaction.id,
+            "announcement":     Transaction.announcement,
+            "year":             Transaction.year,
+            "tonnes":           Transaction.tonnes,
+            "tonnes_delivered": Transaction.tonnes_delivered,
+            "status":           Transaction.status,
+            "purchaser":        Transaction.purchaser,
+            "method":           Transaction.method,
+            "marketplace":      Transaction.marketplace,
         }
         col = sort_map.get(sort_by, Transaction.id)
         query = query.order_by(col.desc() if sort_dir == "desc" else col.asc())
 
-        # ── Paginazione ───────────────────────────────────────────────────────
         transactions = query.offset(skip).limit(limit).all()
-
         return {
             "total": total,
             "skip": skip,
@@ -101,168 +96,224 @@ class TransactionService:
             .first()
         )
 
-    # ─── AGGREGAZIONI / STATS ────────────────────────────────────────────────
+    # ─── KPI AGGREGATI ───────────────────────────────────────────────────────
 
     @staticmethod
     def get_summary_stats(db: Session) -> Dict[str, Any]:
-        """KPI principali per la dashboard."""
-        total_transactions = db.query(func.count(Transaction.id)).scalar() or 0
-        total_tonnes = db.query(func.sum(Transaction.tonnes)).scalar() or 0
-        total_value = db.query(func.sum(Transaction.total_value)).scalar() or 0
+        total_tx        = db.query(func.count(Transaction.id)).scalar() or 0
+        total_committed = db.query(func.sum(Transaction.tonnes)).scalar() or 0
+        total_delivered = db.query(func.sum(Transaction.tonnes_delivered)).scalar() or 0
         unique_purchasers = db.query(func.count(distinct(Transaction.purchaser))).scalar() or 0
-        unique_suppliers = db.query(func.count(distinct(Transaction.supplier_id))).scalar() or 0
+        unique_suppliers  = db.query(func.count(distinct(Transaction.supplier_id))).scalar() or 0
+        delivery_rate = (total_delivered / total_committed * 100) if total_committed > 0 else 0
 
         return {
-            "total_transactions": total_transactions,
-            "total_tonnes": round(total_tonnes, 2),
-            "total_value_usd": round(total_value, 2),
-            "unique_purchasers": unique_purchasers,
-            "unique_suppliers": unique_suppliers,
+            "total_transactions":   total_tx,
+            "total_tonnes_committed": round(total_committed, 2),
+            "total_tonnes_delivered": round(total_delivered, 2),
+            "delivery_rate_pct":      round(delivery_rate, 2),
+            "unique_purchasers":      unique_purchasers,
+            "unique_suppliers":       unique_suppliers,
         }
 
     @staticmethod
-    def get_tonnes_by_year(db: Session) -> List[Dict]:
-        """Distribuzione tCO2e per anno."""
+    def get_by_year(db: Session) -> List[Dict]:
         rows = (
-            db.query(Transaction.year, func.sum(Transaction.tonnes).label("tonnes"))
+            db.query(
+                Transaction.year,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+                func.sum(Transaction.tonnes_delivered).label("delivered"),
+            )
             .filter(Transaction.year.isnot(None))
             .group_by(Transaction.year)
             .order_by(Transaction.year)
             .all()
         )
-        return [{"year": r.year, "tonnes": round(r.tonnes or 0, 2)} for r in rows]
+        return [
+            {
+                "year":      r.year,
+                "count":     r.count,
+                "committed": round(r.committed or 0, 2),
+                "delivered": round(r.delivered or 0, 2),
+            }
+            for r in rows
+        ]
 
     @staticmethod
-    def get_tonnes_by_method(db: Session) -> List[Dict]:
-        """Distribuzione tCO2e per metodo CDR."""
+    def get_by_method(db: Session) -> List[Dict]:
         rows = (
-            db.query(Supplier.method, func.sum(Transaction.tonnes).label("tonnes"))
-            .join(Transaction.supplier)
-            .filter(Supplier.method.isnot(None))
-            .group_by(Supplier.method)
+            db.query(
+                Transaction.method,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+                func.sum(Transaction.tonnes_delivered).label("delivered"),
+            )
+            .filter(Transaction.method.isnot(None))
+            .group_by(Transaction.method)
             .order_by(func.sum(Transaction.tonnes).desc())
             .all()
         )
-        return [{"method": r.method, "tonnes": round(r.tonnes or 0, 2)} for r in rows]
+        return [
+            {
+                "method":    r.method,
+                "count":     r.count,
+                "committed": round(r.committed or 0, 2),
+                "delivered": round(r.delivered or 0, 2),
+            }
+            for r in rows
+        ]
 
     @staticmethod
-    def get_tonnes_by_status(db: Session) -> List[Dict]:
-        """Distribuzione tCO2e per status."""
+    def get_by_status(db: Session) -> List[Dict]:
         rows = (
-            db.query(Transaction.status, func.sum(Transaction.tonnes).label("tonnes"))
+            db.query(
+                Transaction.status,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+            )
             .filter(Transaction.status.isnot(None))
             .group_by(Transaction.status)
             .order_by(func.sum(Transaction.tonnes).desc())
             .all()
         )
-        return [{"status": r.status, "tonnes": round(r.tonnes or 0, 2)} for r in rows]
+        return [
+            {"status": r.status, "count": r.count, "committed": round(r.committed or 0, 2)}
+            for r in rows
+        ]
 
     @staticmethod
-    def get_tonnes_by_region(db: Session) -> List[Dict]:
-        """Distribuzione tCO2e per regione geografica del supplier."""
+    def get_by_continent(db: Session) -> List[Dict]:
         rows = (
-            db.query(Supplier.location_region, func.sum(Transaction.tonnes).label("tonnes"))
+            db.query(
+                Supplier.continent,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+                func.sum(Transaction.tonnes_delivered).label("delivered"),
+            )
             .join(Transaction.supplier)
-            .filter(Supplier.location_region.isnot(None))
-            .group_by(Supplier.location_region)
+            .filter(Supplier.continent.isnot(None))
+            .group_by(Supplier.continent)
             .order_by(func.sum(Transaction.tonnes).desc())
             .all()
         )
-        return [{"region": r.location_region, "tonnes": round(r.tonnes or 0, 2)} for r in rows]
+        return [
+            {
+                "continent": r.continent,
+                "count":     r.count,
+                "committed": round(r.committed or 0, 2),
+                "delivered": round(r.delivered or 0, 2),
+            }
+            for r in rows
+        ]
+
+    @staticmethod
+    def get_by_marketplace(db: Session) -> List[Dict]:
+        rows = (
+            db.query(
+                Transaction.marketplace,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+            )
+            .filter(Transaction.marketplace.isnot(None))
+            .group_by(Transaction.marketplace)
+            .order_by(func.count(Transaction.id).desc())
+            .limit(15)
+            .all()
+        )
+        return [
+            {"marketplace": r.marketplace, "count": r.count, "committed": round(r.committed or 0, 2)}
+            for r in rows
+        ]
 
     @staticmethod
     def get_top_purchasers(db: Session, limit: int = 10) -> List[Dict]:
-        """Top acquirenti per volume tCO2e."""
         rows = (
             db.query(
                 Transaction.purchaser,
-                func.sum(Transaction.tonnes).label("tonnes"),
-                func.count(Transaction.id).label("transactions"),
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+                func.sum(Transaction.tonnes_delivered).label("delivered"),
             )
             .filter(Transaction.purchaser.isnot(None))
+            .filter(Transaction.purchaser != "Not Disclosed")
             .group_by(Transaction.purchaser)
             .order_by(func.sum(Transaction.tonnes).desc())
             .limit(limit)
             .all()
         )
         return [
-            {"purchaser": r.purchaser, "tonnes": round(r.tonnes or 0, 2), "transactions": r.transactions}
+            {
+                "purchaser": r.purchaser,
+                "count":     r.count,
+                "committed": round(r.committed or 0, 2),
+                "delivered": round(r.delivered or 0, 2),
+            }
             for r in rows
         ]
 
     @staticmethod
-    def get_top_suppliers(db: Session, limit: int = 10) -> List[Dict]:
-        """Top supplier per volume tCO2e vendute."""
+    def get_timeline(db: Session) -> List[Dict]:
+        """Crescita cumulativa tCO₂e per anno."""
         rows = (
             db.query(
-                Supplier.name,
-                Supplier.method,
-                Supplier.location_region,
-                func.sum(Transaction.tonnes).label("tonnes"),
-                func.count(Transaction.id).label("transactions"),
+                Transaction.year,
+                func.sum(Transaction.tonnes).label("committed"),
             )
-            .join(Supplier.transactions)
-            .group_by(Supplier.id)
-            .order_by(func.sum(Transaction.tonnes).desc())
-            .limit(limit)
+            .filter(Transaction.year.isnot(None))
+            .group_by(Transaction.year)
+            .order_by(Transaction.year)
             .all()
         )
-        return [
-            {
-                "supplier": r.name,
-                "method": r.method,
-                "region": r.location_region,
-                "tonnes": round(r.tonnes or 0, 2),
-                "transactions": r.transactions,
-            }
-            for r in rows
-        ]
+        cumulative = 0
+        result = []
+        for r in rows:
+            cumulative += r.committed or 0
+            result.append({
+                "year": r.year,
+                "annual": round(r.committed or 0, 2),
+                "cumulative": round(cumulative, 2),
+            })
+        return result
 
     # ─── FILTER OPTIONS ──────────────────────────────────────────────────────
 
     @staticmethod
     def get_filter_options(db: Session) -> Dict[str, List]:
-        """
-        Ritorna tutti i valori distinti usati nei filtri dinamici.
-        Aggiornati automaticamente ad ogni nuova importazione.
-        """
         methods = [
-            r[0] for r in db.query(distinct(Supplier.method))
-            .filter(Supplier.method.isnot(None)).order_by(Supplier.method).all()
+            r[0] for r in db.query(distinct(Transaction.method))
+            .filter(Transaction.method.isnot(None)).order_by(Transaction.method).all()
         ]
         statuses = [
             r[0] for r in db.query(distinct(Transaction.status))
             .filter(Transaction.status.isnot(None)).order_by(Transaction.status).all()
         ]
-        registries = [
-            r[0] for r in db.query(distinct(Transaction.registry))
-            .filter(Transaction.registry.isnot(None)).order_by(Transaction.registry).all()
+        marketplaces = [
+            r[0] for r in db.query(distinct(Transaction.marketplace))
+            .filter(Transaction.marketplace.isnot(None)).order_by(Transaction.marketplace).all()
         ]
-        regions = [
-            r[0] for r in db.query(distinct(Supplier.location_region))
-            .filter(Supplier.location_region.isnot(None)).order_by(Supplier.location_region).all()
+        registries = [
+            r[0] for r in db.query(distinct(Transaction.registry_name))
+            .filter(Transaction.registry_name.isnot(None)).order_by(Transaction.registry_name).all()
+        ]
+        continents = [
+            r[0] for r in db.query(distinct(Supplier.continent))
+            .filter(Supplier.continent.isnot(None)).order_by(Supplier.continent).all()
         ]
         years = [
             r[0] for r in db.query(distinct(Transaction.year))
             .filter(Transaction.year.isnot(None)).order_by(Transaction.year).all()
         ]
         return {
-            "methods": methods,
-            "statuses": statuses,
-            "registries": registries,
-            "regions": regions,
-            "years": years,
+            "methods":      methods,
+            "statuses":     statuses,
+            "marketplaces": marketplaces,
+            "registries":   registries,
+            "continents":   continents,
+            "years":        years,
         }
 
-    # ─── CREATE / UPDATE / DELETE ────────────────────────────────────────────
-
-    @staticmethod
-    def create(db: Session, data: dict) -> Transaction:
-        tx = Transaction(**data)
-        db.add(tx)
-        db.commit()
-        db.refresh(tx)
-        return tx
+    # ─── CRUD base ───────────────────────────────────────────────────────────
 
     @staticmethod
     def delete(db: Session, transaction_id: int) -> bool:
