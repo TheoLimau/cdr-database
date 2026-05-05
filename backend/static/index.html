@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carbon Credits DB</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --green-primary: #16a34a;
+      --green-dark:    #14532d;
+      --green-light:   #dcfce7;
+      --bg:            #f0fdf4;
+    }
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); }
+
+    /* Sidebar */
+    #sidebar { transition: width .25s; }
+    .nav-item { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors; }
+    .nav-item:hover  { background: rgba(255,255,255,.12); }
+    .nav-item.active { background: rgba(255,255,255,.22); }
+
+    /* Cards */
+    .kpi-card { @apply bg-white rounded-2xl p-5 shadow-sm border border-green-100 flex items-center gap-4; }
+
+    /* Table */
+    #data-table th { @apply px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap; }
+    #data-table th:hover .sort-icon { opacity: 1; }
+    #data-table td { @apply px-4 py-3 text-sm text-gray-700 whitespace-nowrap; }
+    #data-table tbody tr { @apply border-b border-gray-50 hover:bg-green-50 transition-colors cursor-pointer; }
+
+    /* Badge status */
+    .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+    .badge-delivered  { @apply bg-green-100 text-green-800; }
+    .badge-contracted { @apply bg-blue-100 text-blue-800; }
+    .badge-retired    { @apply bg-purple-100 text-purple-800; }
+    .badge-pending    { @apply bg-yellow-100 text-yellow-800; }
+    .badge-default    { @apply bg-gray-100 text-gray-700; }
+
+    /* Search */
+    #search-input { transition: box-shadow .2s; }
+    #search-input:focus { box-shadow: 0 0 0 3px rgba(22,163,74,.25); }
+
+    /* Loader */
+    .spinner { border: 3px solid #e5e7eb; border-top-color: #16a34a; border-radius: 50%; width: 28px; height: 28px; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal */
+    #detail-modal { transition: opacity .2s; }
+
+    /* Upload zone */
+    #drop-zone { border: 2px dashed #86efac; transition: all .2s; }
+    #drop-zone.drag-over { border-color: #16a34a; background: #f0fdf4; }
+
+    /* Pagination */
+    .page-btn { @apply px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors; }
+    .page-btn:hover:not(:disabled) { @apply bg-green-50 border-green-300; }
+    .page-btn.active { @apply bg-green-600 text-white border-green-600; }
+    .page-btn:disabled { @apply opacity-40 cursor-not-allowed; }
+
+    /* Tooltip */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: #fff; font-size: 11px; padding: 4px 8px;
+      border-radius: 6px; white-space: nowrap; pointer-events: none; z-index: 50;
+    }
+
+    /* Chart containers */
+    .chart-wrap { position: relative; height: 220px; }
+    canvas { max-height: 220px !important; }
+  </style>
+</head>
+
+<body class="min-h-screen flex">
+
+<!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
+<aside id="sidebar" class="w-64 min-h-screen bg-gradient-to-b from-green-800 to-green-900 text-white flex flex-col shrink-0">
+  <!-- Logo -->
+  <div class="px-6 py-5 border-b border-green-700">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-green-400 rounded-xl flex items-center justify-center">
+        <i class="fas fa-leaf text-green-900 text-lg"></i>
+      </div>
+      <div>
+        <div class="font-bold text-base leading-tight">Carbon Credits</div>
+        <div class="text-green-300 text-xs">CDR Database</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="flex-1 px-3 py-4 space-y-1">
+    <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+      <i class="fas fa-chart-pie w-5 text-center"></i><span>Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showSection('transactions')" id="nav-transactions">
+      <i class="fas fa-exchange-alt w-5 text-center"></i><span>Transazioni</span>
+    </div>
+    <div class="nav-item" onclick="showSection('suppliers')" id="nav-suppliers">
+      <i class="fas fa-industry w-5 text-center"></i><span>Suppliers</span>
+    </div>
+    <div class="nav-item" onclick="showSection('upload')" id="nav-upload">
+      <i class="fas fa-cloud-upload-alt w-5 text-center"></i><span>Importa Dati</span>
+    </div>
+    <div class="nav-item" onclick="window.open('/api/docs','_blank')" id="nav-api">
+      <i class="fas fa-code w-5 text-center"></i><span>API Docs</span>
+    </div>
+  </nav>
+
+  <!-- DB Status -->
+  <div class="px-4 py-4 border-t border-green-700">
+    <div id="db-status" class="text-xs text-green-300 space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse"></span>
+        Database attivo
+      </div>
+      <div id="db-counts" class="text-green-400">Caricamento...</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════ MAIN CONTENT ══════════════════════════════ -->
+<main class="flex-1 flex flex-col min-w-0">
+
+  <!-- Top bar -->
+  <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+    <div class="flex items-center gap-3">
+      <h1 id="page-title" class="text-lg font-semibold text-gray-800">Dashboard</h1>
+      <span id="page-subtitle" class="text-sm text-gray-400"></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="refreshAll()" class="text-gray-500 hover:text-green-600 transition-colors" data-tooltip="Aggiorna dati">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+      <span class="text-xs text-gray-400" id="last-update">—</span>
+    </div>
+  </header>
+
+  <!-- ─────── DASHBOARD SECTION ─────── -->
+  <section id="section-dashboard" class="flex-1 p-6 space-y-6 overflow-auto">
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="kpi-grid">
+      <!-- Generati da JS -->
+    </div>
+
+    <!-- Charts row 1 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-calendar-alt mr-1 text-green-500"></i> tCO₂e per Anno</h3>
+        <div class="chart-wrap"><canvas id="chart-year"></canvas></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-cogs mr-1 text-blue-500"></i> Distribuzione Metodi CDR</h3>
+        <div class="chart-wrap"><canvas id="chart-method"></canvas></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-check-circle mr-1 text-purple-500"></i> Status Transazioni</h3>
+        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Charts row 2 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-trophy mr-1 text-yellow-500"></i> Top 10 Acquirenti (tCO₂e)</h3>
+        <div class="chart-wrap" style="height:260px"><canvas id="chart-purchasers" style="max-height:260px !important"></canvas></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3"><i class="fas fa-globe mr-1 text-teal-500"></i> tCO₂e per Regione</h3>
+        <div class="chart-wrap"><canvas id="chart-region"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="dashboard-empty" class="hidden bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
+      <i class="fas fa-database text-5xl text-gray-200 mb-4"></i>
+      <p class="text-gray-500 text-lg font-medium">Nessun dato nel database</p>
+      <p class="text-gray-400 text-sm mt-1">Importa il tuo file Excel nella sezione <strong>Importa Dati</strong> per iniziare.</p>
+      <button onclick="showSection('upload')" class="mt-4 px-5 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+        <i class="fas fa-cloud-upload-alt mr-2"></i>Importa dati
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ─────── TRANSACTIONS SECTION ─────── -->
+  <section id="section-transactions" class="hidden flex-1 flex flex-col overflow-hidden">
+
+    <!-- Search & Filters bar -->
+    <div class="bg-white border-b border-gray-200 px-6 py-4 space-y-3">
+
+      <!-- Search -->
+      <div class="relative max-w-2xl">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Cerca per acquirente, supplier, metodo, registro..."
+          class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-400 bg-gray-50"
+          oninput="debounceSearch(this.value)"
+        />
+        <button id="clear-search" onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-600 hidden">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 items-center">
+        <select id="filter-method"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
+          <option value="">Tutti i metodi</option>
+        </select>
+        <select id="filter-status"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
+          <option value="">Tutti gli status</option>
+        </select>
+        <select id="filter-registry" onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
+          <option value="">Tutti i registri</option>
+        </select>
+        <select id="filter-region"   onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
+          <option value="">Tutte le regioni</option>
+        </select>
+        <select id="filter-year"     onchange="applyFilters()" class="filter-select text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-green-400">
+          <option value="">Tutti gli anni</option>
+        </select>
+
+        <button onclick="resetFilters()" class="ml-auto text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 hover:border-red-200 transition-colors">
+          <i class="fas fa-times"></i> Reset filtri
+        </button>
+
+        <span id="result-count" class="text-xs text-gray-400 ml-2"></span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="flex-1 overflow-auto px-6 py-4">
+      <div id="table-loader" class="flex justify-center py-16 hidden">
+        <div class="spinner"></div>
+      </div>
+
+      <div id="table-empty" class="hidden text-center py-16 text-gray-400">
+        <i class="fas fa-search text-4xl mb-3 opacity-30"></i>
+        <p class="text-sm">Nessun risultato trovato</p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table id="data-table" class="w-full min-w-max">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th onclick="sortBy('date')"          data-col="date">Data <span class="sort-icon opacity-0">↕</span></th>
+              <th onclick="sortBy('purchaser')"     data-col="purchaser">Acquirente <span class="sort-icon opacity-0">↕</span></th>
+              <th onclick="sortBy('supplier_name')" data-col="supplier_name">Supplier</th>
+              <th>Metodo</th>
+              <th onclick="sortBy('tonnes')"        data-col="tonnes">Tonnellate <span class="sort-icon opacity-0">↕</span></th>
+              <th onclick="sortBy('total_value')"   data-col="total_value">Valore USD <span class="sort-icon opacity-0">↕</span></th>
+              <th onclick="sortBy('status')"        data-col="status">Status <span class="sort-icon opacity-0">↕</span></th>
+              <th>Registro</th>
+              <th>Regione</th>
+              <th class="text-center">Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Generato da JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination" class="flex items-center justify-between mt-4">
+        <span id="pagination-info" class="text-xs text-gray-400"></span>
+        <div id="pagination-buttons" class="flex gap-1.5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────── SUPPLIERS SECTION ─────── -->
+  <section id="section-suppliers" class="hidden flex-1 overflow-auto p-6">
+    <div id="suppliers-loader" class="flex justify-center py-16"><div class="spinner"></div></div>
+    <div id="suppliers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </section>
+
+  <!-- ─────── UPLOAD SECTION ─────── -->
+  <section id="section-upload" class="hidden flex-1 overflow-auto p-6">
+    <div class="max-w-2xl mx-auto space-y-6">
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 class="text-base font-semibold text-gray-800 mb-1">
+          <i class="fas fa-file-excel text-green-600 mr-2"></i>Importa File Excel o CSV
+        </h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Carica il tuo file <code class="bg-gray-100 px-1 rounded">.xlsx</code> o <code class="bg-gray-100 px-1 rounded">.csv</code>.
+          Le colonne vengono mappate automaticamente tramite alias flessibili.
+        </p>
+
+        <!-- Drop zone -->
+        <div
+          id="drop-zone"
+          class="rounded-xl p-8 text-center cursor-pointer bg-gray-50"
+          onclick="document.getElementById('file-input').click()"
+          ondragover="handleDragOver(event)"
+          ondragleave="handleDragLeave(event)"
+          ondrop="handleDrop(event)"
+        >
+          <i class="fas fa-cloud-upload-alt text-4xl text-green-300 mb-3"></i>
+          <p class="text-sm font-medium text-gray-600">Trascina il file qui oppure clicca per selezionarlo</p>
+          <p class="text-xs text-gray-400 mt-1">Excel (.xlsx, .xls) e CSV — Max 50MB</p>
+          <input id="file-input" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFileSelect(event)" />
+        </div>
+
+        <!-- File selected -->
+        <div id="file-selected" class="hidden mt-3 flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-200">
+          <i class="fas fa-file-excel text-green-600 text-lg"></i>
+          <div class="flex-1 min-w-0">
+            <div id="file-name" class="text-sm font-medium text-gray-700 truncate"></div>
+            <div id="file-size" class="text-xs text-gray-400"></div>
+          </div>
+          <button onclick="clearFile()" class="text-gray-400 hover:text-red-500 transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Upload button -->
+        <button
+          id="upload-btn"
+          onclick="uploadFile()"
+          class="mt-4 w-full py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          disabled
+        >
+          <i class="fas fa-upload"></i> Importa nel Database
+        </button>
+      </div>
+
+      <!-- Upload progress -->
+      <div id="upload-progress" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="spinner"></div>
+          <span class="text-sm font-medium text-gray-700">Importazione in corso...</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-green-500 h-2 rounded-full animate-pulse" style="width:60%"></div>
+        </div>
+      </div>
+
+      <!-- Upload result -->
+      <div id="upload-result" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-gray-100"></div>
+
+      <!-- Column mapping guide -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">
+          <i class="fas fa-info-circle text-blue-400 mr-1"></i> Colonne Riconosciute
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600">
+          <div><strong class="text-green-700">Supplier:</strong> supplier, supplier name, project name</div>
+          <div><strong class="text-green-700">Metodo:</strong> method, cdr method, technology, type</div>
+          <div><strong class="text-green-700">Acquirente:</strong> purchaser, buyer, company</div>
+          <div><strong class="text-green-700">Tonnellate:</strong> tonnes, volume, tco2e, amount</div>
+          <div><strong class="text-green-700">Data:</strong> date, transaction date, purchase date</div>
+          <div><strong class="text-green-700">Status:</strong> status, delivery status, state</div>
+          <div><strong class="text-green-700">Registro:</strong> registry, carbon registry, register</div>
+          <div><strong class="text-green-700">Prezzo:</strong> price, price per tonne, usd/tonne</div>
+          <div><strong class="text-green-700">Regione:</strong> region, continent, geography</div>
+          <div><strong class="text-green-700">Certificazione:</strong> certification, standard</div>
+        </div>
+      </div>
+
+      <!-- Scheduler info -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">
+          <i class="fas fa-clock text-orange-400 mr-1"></i> Aggiornamento Automatico 24/7
+        </h3>
+        <div class="space-y-2 text-xs text-gray-600">
+          <p>Per automatizzare l'importazione senza intervento manuale:</p>
+          <ol class="list-decimal ml-4 space-y-1">
+            <li>Avvia lo scheduler: <code class="bg-gray-100 px-1 py-0.5 rounded">python utils/scheduler.py</code></li>
+            <li>Copia i nuovi file nella cartella: <code class="bg-gray-100 px-1 py-0.5 rounded">backend/data/inbox/</code></li>
+            <li>Lo scheduler controlla ogni <strong>15 minuti</strong> e importa automaticamente</li>
+            <li>I file elaborati vengono spostati in <code class="bg-gray-100 px-1 py-0.5 rounded">data/processed/</code></li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- ═══════════════════════════════ DETAIL MODAL ══════════════════════════════ -->
+<div id="detail-modal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-6" id="modal-content">
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOAST ════════════════════════════════════ -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+  <div id="toast-inner" class="px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2 max-w-xs">
+    <i id="toast-icon" class="fas"></i>
+    <span id="toast-msg"></span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// CARBON CREDITS DB — Frontend Application
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const API = '';   // Same-origin — FastAPI serve sia frontend che API
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+  currentSection: 'dashboard',
+  search: '',
+  filters: { method:'', status:'', registry:'', region:'', year:'' },
+  sort: { by:'id', dir:'desc' },
+  pagination: { skip:0, limit:50, total:0 },
+  charts: {},
+  selectedFile: null,
+};
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+
+function fmt(n, decimals=0) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('it-IT', {maximumFractionDigits: decimals});
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('it-IT'); } catch { return d; }
+}
+
+function statusBadge(status) {
+  if (!status) return '<span class="text-gray-300">—</span>';
+  const s = status.toLowerCase();
+  let cls = 'badge-default';
+  if (s.includes('deliver')) cls = 'badge-delivered';
+  else if (s.includes('contract')) cls = 'badge-contracted';
+  else if (s.includes('retir')) cls = 'badge-retired';
+  else if (s.includes('pend')) cls = 'badge-pending';
+  return `<span class="badge ${cls}">${status}</span>`;
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  const inner = document.getElementById('toast-inner');
+  const icon = document.getElementById('toast-icon');
+  document.getElementById('toast-msg').textContent = msg;
+  inner.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white flex items-center gap-2 max-w-xs ${
+    type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+  }`;
+  icon.className = `fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle'}`;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+let searchTimer;
+function debounceSearch(val) {
+  state.search = val;
+  document.getElementById('clear-search').classList.toggle('hidden', !val);
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { state.pagination.skip = 0; loadTransactions(); }, 350);
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  state.search = '';
+  document.getElementById('clear-search').classList.add('hidden');
+  state.pagination.skip = 0;
+  loadTransactions();
+}
+
+function applyFilters() {
+  state.filters.method   = document.getElementById('filter-method').value;
+  state.filters.status   = document.getElementById('filter-status').value;
+  state.filters.registry = document.getElementById('filter-registry').value;
+  state.filters.region   = document.getElementById('filter-region').value;
+  state.filters.year     = document.getElementById('filter-year').value;
+  state.pagination.skip  = 0;
+  loadTransactions();
+}
+
+function resetFilters() {
+  ['filter-method','filter-status','filter-registry','filter-region','filter-year']
+    .forEach(id => document.getElementById(id).value = '');
+  Object.keys(state.filters).forEach(k => state.filters[k] = '');
+  state.search = '';
+  document.getElementById('search-input').value = '';
+  document.getElementById('clear-search').classList.add('hidden');
+  state.pagination.skip = 0;
+  loadTransactions();
+}
+
+function sortBy(col) {
+  if (state.sort.by === col) {
+    state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sort.by = col;
+    state.sort.dir = 'desc';
+  }
+  // Aggiorna icone header
+  document.querySelectorAll('#data-table th .sort-icon').forEach(el => el.textContent = '↕');
+  document.querySelectorAll('#data-table th').forEach(th => {
+    th.style.color = '';
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.style.opacity = '0';
+    if (th.dataset.col === col) {
+      th.style.color = '#16a34a';
+      if (icon) { icon.textContent = state.sort.dir === 'asc' ? '↑' : '↓'; icon.style.opacity = '1'; }
+    }
+  });
+  loadTransactions();
+}
+
+// ─── Section switching ────────────────────────────────────────────────────────
+
+function showSection(name) {
+  state.currentSection = name;
+  ['dashboard','transactions','suppliers','upload'].forEach(s => {
+    document.getElementById(`section-${s}`).classList.add('hidden');
+    document.getElementById(`nav-${s}`)?.classList.remove('active');
+  });
+  document.getElementById(`section-${name}`).classList.remove('hidden');
+  document.getElementById(`nav-${name}`)?.classList.add('active');
+
+  const titles = {
+    dashboard:'Dashboard', transactions:'Transazioni CDR',
+    suppliers:'Suppliers CDR', upload:'Importa Dati'
+  };
+  document.getElementById('page-title').textContent = titles[name] || name;
+
+  if (name === 'transactions') loadTransactions();
+  if (name === 'suppliers') loadSuppliers();
+  if (name === 'dashboard') loadDashboard();
+}
+
+// ─── API calls ────────────────────────────────────────────────────────────────
+
+async function apiFetch(path) {
+  const res = await fetch(API + path);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
+async function loadDashboard() {
+  try {
+    const [summary, byYear, byMethod, byStatus, byRegion, topBuyers] = await Promise.all([
+      apiFetch('/api/transactions/stats/summary'),
+      apiFetch('/api/transactions/stats/by-year'),
+      apiFetch('/api/transactions/stats/by-method'),
+      apiFetch('/api/transactions/stats/by-status'),
+      apiFetch('/api/transactions/stats/by-region'),
+      apiFetch('/api/transactions/stats/top-purchasers?limit=10'),
+    ]);
+
+    const empty = summary.total_transactions === 0;
+    document.getElementById('dashboard-empty').classList.toggle('hidden', !empty);
+
+    renderKPI(summary);
+    if (!empty) {
+      renderChartYear(byYear);
+      renderChartMethod(byMethod);
+      renderChartStatus(byStatus);
+      renderChartRegion(byRegion);
+      renderChartPurchasers(topBuyers);
+    }
+
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString('it-IT');
+    updateDbCounts(summary);
+  } catch(e) {
+    console.error('Dashboard load error:', e);
+  }
+}
+
+function renderKPI(s) {
+  const kpis = [
+    { icon:'fa-exchange-alt', color:'green',  label:'Transazioni',     value: fmt(s.total_transactions) },
+    { icon:'fa-leaf',          color:'emerald',label:'tCO₂e Totali',   value: fmt(s.total_tonnes) },
+    { icon:'fa-dollar-sign',   color:'blue',   label:'Valore USD',      value: '$' + fmt(s.total_value_usd) },
+    { icon:'fa-building',      color:'purple', label:'Acquirenti Unici',value: fmt(s.unique_purchasers) },
+    { icon:'fa-industry',      color:'orange', label:'Suppliers',       value: fmt(s.unique_suppliers) },
+  ];
+  const colorMap = {
+    green:'bg-green-100 text-green-600', emerald:'bg-emerald-100 text-emerald-600',
+    blue:'bg-blue-100 text-blue-600', purple:'bg-purple-100 text-purple-600',
+    orange:'bg-orange-100 text-orange-600',
+  };
+  document.getElementById('kpi-grid').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${colorMap[k.color]}">
+        <i class="fas ${k.icon} text-lg"></i>
+      </div>
+      <div>
+        <div class="text-2xl font-bold text-gray-800">${k.value}</div>
+        <div class="text-xs text-gray-500 mt-0.5">${k.label}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function destroyChart(id) {
+  if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
+}
+
+const PALETTE = [
+  '#16a34a','#0ea5e9','#a855f7','#f59e0b','#ef4444',
+  '#14b8a6','#f97316','#6366f1','#ec4899','#84cc16',
+  '#06b6d4','#8b5cf6','#10b981','#f43f5e','#3b82f6',
+];
+
+function renderChartYear(data) {
+  destroyChart('year');
+  if (!data.length) return;
+  const ctx = document.getElementById('chart-year').getContext('2d');
+  state.charts['year'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.year),
+      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: '#16a34a', borderRadius: 6 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},x:{grid:{display:false}}} }
+  });
+}
+
+function renderChartMethod(data) {
+  destroyChart('method');
+  if (!data.length) return;
+  const ctx = document.getElementById('chart-method').getContext('2d');
+  state.charts['method'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: data.map(d => d.method),
+      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderWidth: 2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'right', labels:{font:{size:10},boxWidth:12} } } }
+  });
+}
+
+function renderChartStatus(data) {
+  destroyChart('status');
+  if (!data.length) return;
+  const ctx = document.getElementById('chart-status').getContext('2d');
+  state.charts['status'] = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: data.map(d => d.status),
+      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderWidth: 2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'right', labels:{font:{size:10},boxWidth:12} } } }
+  });
+}
+
+function renderChartRegion(data) {
+  destroyChart('region');
+  if (!data.length) return;
+  const ctx = document.getElementById('chart-region').getContext('2d');
+  state.charts['region'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.region),
+      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: PALETTE, borderRadius: 6 }]
+    },
+    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},y:{grid:{display:false}}} }
+  });
+}
+
+function renderChartPurchasers(data) {
+  destroyChart('purchasers');
+  if (!data.length) return;
+  const ctx = document.getElementById('chart-purchasers').getContext('2d');
+  state.charts['purchasers'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.purchaser?.length > 20 ? d.purchaser.substring(0,20)+'…' : d.purchaser),
+      datasets: [{ data: data.map(d => d.tonnes), backgroundColor: '#0ea5e9', borderRadius: 6 }]
+    },
+    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:v=>fmt(v)},grid:{color:'#f3f4f6'}},y:{grid:{display:false},ticks:{font:{size:11}}}} }
+  });
+}
+
+function updateDbCounts(s) {
+  document.getElementById('db-counts').textContent =
+    `${fmt(s.total_transactions)} tx · ${fmt(s.total_tonnes)} tCO₂e`;
+}
+
+// ─── Transactions table ───────────────────────────────────────────────────────
+
+async function loadTransactions() {
+  document.getElementById('table-loader').classList.remove('hidden');
+  document.getElementById('table-body').innerHTML = '';
+  document.getElementById('table-empty').classList.add('hidden');
+
+  const params = new URLSearchParams({
+    skip:     state.pagination.skip,
+    limit:    state.pagination.limit,
+    sort_by:  state.sort.by,
+    sort_dir: state.sort.dir,
+  });
+  if (state.search)          params.set('search',   state.search);
+  if (state.filters.method)  params.set('method',   state.filters.method);
+  if (state.filters.status)  params.set('status',   state.filters.status);
+  if (state.filters.registry)params.set('registry', state.filters.registry);
+  if (state.filters.region)  params.set('region',   state.filters.region);
+  if (state.filters.year)    params.set('year',      state.filters.year);
+
+  try {
+    const res = await apiFetch(`/api/transactions/?${params}`);
+    state.pagination.total = res.total;
+    renderTable(res.data);
+    renderPagination();
+    document.getElementById('result-count').textContent =
+      `${fmt(res.total)} risultat${res.total === 1 ? 'o' : 'i'}`;
+  } catch(e) {
+    showToast('Errore caricamento transazioni', 'error');
+  } finally {
+    document.getElementById('table-loader').classList.add('hidden');
+  }
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('table-body');
+  if (!rows.length) {
+    document.getElementById('table-empty').classList.remove('hidden');
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr onclick="showDetail(${r.id})">
+      <td>${fmtDate(r.date)}</td>
+      <td class="font-medium text-gray-800 max-w-[160px] truncate">${r.purchaser || '—'}</td>
+      <td class="max-w-[160px] truncate" title="${r.supplier_name||''}">${r.supplier_name || '—'}</td>
+      <td><span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">${r.supplier_method || '—'}</span></td>
+      <td class="text-right font-mono">${r.tonnes ? fmt(r.tonnes,1) : '—'}</td>
+      <td class="text-right font-mono">${r.total_value ? '$'+fmt(r.total_value) : '—'}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td class="text-xs text-gray-500">${r.registry || '—'}</td>
+      <td class="text-xs text-gray-500">${r.supplier_region || '—'}</td>
+      <td class="text-center">
+        <button onclick="event.stopPropagation(); showDetail(${r.id})" class="text-gray-400 hover:text-green-600 px-2 transition-colors" data-tooltip="Dettaglio">
+          <i class="fas fa-eye text-xs"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderPagination() {
+  const { skip, limit, total } = state.pagination;
+  const currentPage = Math.floor(skip / limit) + 1;
+  const totalPages  = Math.ceil(total / limit);
+  const from = skip + 1, to = Math.min(skip + limit, total);
+
+  document.getElementById('pagination-info').textContent =
+    total > 0 ? `${fmt(from)}–${fmt(to)} di ${fmt(total)}` : '';
+
+  const btns = document.getElementById('pagination-buttons');
+  if (totalPages <= 1) { btns.innerHTML = ''; return; }
+
+  let pages = [];
+  pages.push(1);
+  if (currentPage > 3) pages.push('...');
+  for (let p = Math.max(2, currentPage-1); p <= Math.min(totalPages-1, currentPage+1); p++) pages.push(p);
+  if (currentPage < totalPages-2) pages.push('...');
+  if (totalPages > 1) pages.push(totalPages);
+
+  btns.innerHTML = `
+    <button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>
+      <i class="fas fa-chevron-left text-xs"></i>
+    </button>
+    ${pages.map(p => p === '...'
+      ? `<span class="px-2 text-gray-400 text-sm">…</span>`
+      : `<button class="page-btn ${p===currentPage?'active':''}" onclick="goToPage(${p})">${p}</button>`
+    ).join('')}
+    <button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>
+      <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+  `;
+}
+
+function goToPage(page) {
+  const { limit, total } = state.pagination;
+  const totalPages = Math.ceil(total / limit);
+  if (page < 1 || page > totalPages) return;
+  state.pagination.skip = (page - 1) * limit;
+  loadTransactions();
+  document.querySelector('#section-transactions').scrollTop = 0;
+}
+
+// ─── Filter options (populate dropdowns) ─────────────────────────────────────
+
+async function loadFilterOptions() {
+  try {
+    const opts = await apiFetch('/api/transactions/filters');
+    const setOptions = (id, values) => {
+      const sel = document.getElementById(id);
+      const cur = sel.value;
+      sel.innerHTML = `<option value="">${sel.options[0].text}</option>` +
+        values.map(v => `<option value="${v}" ${v===cur?'selected':''}>${v}</option>`).join('');
+    };
+    setOptions('filter-method',   opts.methods);
+    setOptions('filter-status',   opts.statuses);
+    setOptions('filter-registry', opts.registries);
+    setOptions('filter-region',   opts.regions);
+    setOptions('filter-year',     opts.years.map(String));
+  } catch(e) { /* silenzioso */ }
+}
+
+// ─── Transaction detail modal ─────────────────────────────────────────────────
+
+async function showDetail(id) {
+  try {
+    const tx = await apiFetch(`/api/transactions/${id}`);
+    const modal = document.getElementById('modal-content');
+    modal.innerHTML = `
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <h3 class="font-bold text-gray-800 text-lg">${tx.purchaser || 'Acquirente sconosciuto'}</h3>
+          <p class="text-sm text-gray-500">${statusBadge(tx.status)}</p>
+        </div>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 ml-4">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        ${[
+          ['Data', fmtDate(tx.date)],
+          ['Anno', tx.year || '—'],
+          ['Tonnellate', tx.tonnes ? fmt(tx.tonnes,2)+' tCO₂e' : '—'],
+          ['Prezzo/t', tx.price_per_tonne ? '$'+fmt(tx.price_per_tonne,2) : '—'],
+          ['Valore Totale', tx.total_value ? '$'+fmt(tx.total_value) : '—'],
+          ['Anno Consegna', tx.delivery_year || '—'],
+          ['Registro', tx.registry || '—'],
+          ['Paese Acquirente', tx.purchaser_country || '—'],
+          ['Settore', tx.purchaser_sector || '—'],
+        ].map(([l,v]) => `
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-xs text-gray-400 mb-0.5">${l}</div>
+            <div class="font-medium text-gray-800">${v}</div>
+          </div>
+        `).join('')}
+      </div>
+      ${tx.supplier_name ? `
+      <div class="mt-4 border-t border-gray-100 pt-4">
+        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Supplier</p>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          ${[
+            ['Nome', tx.supplier_name],
+            ['Metodo', tx.supplier_method || '—'],
+            ['Regione', tx.supplier_region || '—'],
+          ].map(([l,v]) => `
+            <div class="bg-blue-50 rounded-lg p-3">
+              <div class="text-xs text-blue-400 mb-0.5">${l}</div>
+              <div class="font-medium text-blue-900">${v}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+      ${tx.notes ? `<div class="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-gray-600"><i class="fas fa-sticky-note text-yellow-400 mr-1"></i>${tx.notes}</div>` : ''}
+    `;
+    document.getElementById('detail-modal').classList.remove('hidden');
+  } catch(e) {
+    showToast('Errore caricamento dettaglio', 'error');
+  }
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('detail-modal')) {
+    document.getElementById('detail-modal').classList.add('hidden');
+  }
+}
+
+// ─── Suppliers ────────────────────────────────────────────────────────────────
+
+async function loadSuppliers() {
+  document.getElementById('suppliers-loader').classList.remove('hidden');
+  document.getElementById('suppliers-grid').innerHTML = '';
+  try {
+    const data = await apiFetch('/api/suppliers/with-stats');
+    document.getElementById('suppliers-loader').classList.add('hidden');
+    const grid = document.getElementById('suppliers-grid');
+    if (!data.length) {
+      grid.innerHTML = `<div class="col-span-3 text-center py-16 text-gray-400">
+        <i class="fas fa-industry text-4xl mb-3 opacity-30"></i><br>Nessun supplier trovato
+      </div>`;
+      return;
+    }
+    grid.innerHTML = data.map(s => `
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-800 text-sm leading-tight truncate">${s.name}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">${s.location_country || ''} ${s.location_region ? '· '+s.location_region : ''}</p>
+          </div>
+          <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full shrink-0">${s.method || 'N/D'}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs mt-3">
+          <div class="bg-green-50 rounded-lg py-2">
+            <div class="font-bold text-green-700 text-base">${fmt(s.total_tonnes,0)}</div>
+            <div class="text-gray-400 mt-0.5">tCO₂e</div>
+          </div>
+          <div class="bg-blue-50 rounded-lg py-2">
+            <div class="font-bold text-blue-700 text-base">${s.tx_count}</div>
+            <div class="text-gray-400 mt-0.5">Contratti</div>
+          </div>
+          <div class="bg-purple-50 rounded-lg py-2">
+            <div class="font-bold text-purple-700 text-base">${s.price_per_tonne ? '$'+fmt(s.price_per_tonne,0) : '—'}</div>
+            <div class="text-gray-400 mt-0.5">$/t</div>
+          </div>
+        </div>
+        ${s.certification ? `<div class="mt-3 text-xs text-gray-500"><i class="fas fa-certificate text-yellow-400 mr-1"></i>${s.certification}</div>` : ''}
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('suppliers-loader').classList.add('hidden');
+    showToast('Errore caricamento suppliers', 'error');
+  }
+}
+
+// ─── File upload ──────────────────────────────────────────────────────────────
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) setFile(file);
+}
+function setFile(file) {
+  state.selectedFile = file;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = (file.size/1024/1024).toFixed(2)+' MB';
+  document.getElementById('file-selected').classList.remove('hidden');
+  document.getElementById('upload-btn').disabled = false;
+  document.getElementById('upload-result').classList.add('hidden');
+}
+function clearFile() {
+  state.selectedFile = null;
+  document.getElementById('file-selected').classList.add('hidden');
+  document.getElementById('upload-btn').disabled = true;
+  document.getElementById('file-input').value = '';
+}
+
+async function uploadFile() {
+  if (!state.selectedFile) return;
+  document.getElementById('upload-progress').classList.remove('hidden');
+  document.getElementById('upload-btn').disabled = true;
+  document.getElementById('upload-result').classList.add('hidden');
+
+  const formData = new FormData();
+  formData.append('file', state.selectedFile);
+
+  try {
+    const res = await fetch(API + '/api/ingest/upload', { method:'POST', body: formData });
+    const data = await res.json();
+    document.getElementById('upload-progress').classList.add('hidden');
+
+    const ok = res.ok;
+    const resultEl = document.getElementById('upload-result');
+    resultEl.classList.remove('hidden');
+    resultEl.innerHTML = `
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-${ok ? 'check-circle text-green-500' : 'exclamation-triangle text-red-500'} text-xl"></i>
+        <span class="font-semibold text-gray-800">${ok ? 'Importazione completata!' : 'Importazione con errori'}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+        ${[
+          ['Inserite', data.inserted, 'green'],
+          ['Aggiornate', data.updated, 'blue'],
+          ['Saltate', data.skipped, 'gray'],
+          ['Errori', data.total_errors, data.total_errors>0?'red':'gray'],
+        ].map(([l,v,c]) => `
+          <div class="bg-${c}-50 rounded-lg p-3 text-center">
+            <div class="text-2xl font-bold text-${c}-700">${fmt(v)}</div>
+            <div class="text-xs text-gray-500 mt-0.5">${l}</div>
+          </div>
+        `).join('')}
+      </div>
+      ${data.errors?.length ? `
+        <div class="mt-2 p-3 bg-red-50 rounded-lg text-xs text-red-700 max-h-32 overflow-y-auto">
+          <strong>Dettaglio errori:</strong><br>${data.errors.join('<br>')}
+        </div>` : ''}
+    `;
+
+    if (ok) {
+      showToast(`${fmt(data.inserted)} righe importate con successo!`, 'success');
+      clearFile();
+      loadFilterOptions();
+    } else {
+      showToast(data.detail || 'Errore durante l\'importazione', 'error');
+    }
+  } catch(e) {
+    document.getElementById('upload-progress').classList.add('hidden');
+    showToast('Errore di connessione al server', 'error');
+  }
+  document.getElementById('upload-btn').disabled = false;
+}
+
+// ─── Refresh ──────────────────────────────────────────────────────────────────
+
+function refreshAll() {
+  const s = state.currentSection;
+  if (s === 'dashboard') loadDashboard();
+  if (s === 'transactions') { loadTransactions(); loadFilterOptions(); }
+  if (s === 'suppliers') loadSuppliers();
+  showToast('Dati aggiornati', 'success');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+async function init() {
+  await loadFilterOptions();
+  loadDashboard();
+  // Seed dati demo se db vuoto
+  const status = await apiFetch('/api/ingest/status').catch(()=>({transactions:0}));
+  if (status.transactions === 0) {
+    document.getElementById('db-counts').textContent = 'Database vuoto';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
