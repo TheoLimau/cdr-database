@@ -379,76 +379,165 @@
 
   <!-- ════ UPLOAD ══════════════════════════════════════════════════ -->
   <section id="sec-upload" style="display:none;flex:1;overflow:auto;padding:24px 28px;">
-    <div style="max-width:640px;">
-      <div class="chart-card">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <div style="width:40px;height:40px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-cloud-upload-alt" style="color:#6366F1;"></i>
+    <div style="max-width:720px;">
+
+      <!-- Header -->
+      <div style="margin-bottom:20px;">
+        <h2 style="font-size:18px;font-weight:700;color:#111827;margin:0 0 4px;">Data Submission</h2>
+        <p style="font-size:13px;color:#6B7280;margin:0;">Import new transactions and suppliers into the database. Duplicates are automatically skipped.</p>
+      </div>
+
+      <!-- Format badges -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+          <div style="width:28px;height:28px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-globe" style="color:#065F46;font-size:12px;"></i>
           </div>
           <div>
-            <div style="font-size:15px;font-weight:700;color:#111827;">Data Submission</div>
-            <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Upload Excel or CSV to update the database</div>
+            <div style="font-size:12px;font-weight:700;color:#111827;">CDR.fyi Portal Export</div>
+            <div style="font-size:10px;color:#9CA3AF;">.csv — auto-detected</div>
+          </div>
+          <span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:4px;">NEW</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+          <div style="width:28px;height:28px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-file-excel" style="color:#4F46E5;font-size:12px;"></i>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#111827;">Structured Excel</div>
+            <div style="font-size:10px;color:#9CA3AF;">.xlsx — transactions + suppliers</div>
           </div>
         </div>
+      </div>
 
-        <div id="drop-zone" style="text-align:center;padding:48px 24px;cursor:pointer;"
+      <!-- Drop zone card -->
+      <div class="chart-card">
+
+        <div id="drop-zone" style="text-align:center;padding:44px 24px;cursor:pointer;border-radius:10px;"
           onclick="document.getElementById('file-inp').click()"
           ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-          <div style="width:56px;height:56px;background:#EEF2FF;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-            <i class="fas fa-file-excel" style="color:#6366F1;font-size:22px;"></i>
+          <div id="dz-icon" style="width:60px;height:60px;background:#EEF2FF;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;transition:background .2s;">
+            <i class="fas fa-cloud-upload-alt" style="color:#6366F1;font-size:24px;"></i>
           </div>
-          <p style="font-weight:600;color:#374151;margin:0 0 4px;">Drag & drop your file here</p>
-          <p style="font-size:12px;color:#9CA3AF;margin:0;">or click to select · .xlsx and .csv supported</p>
-          <input type="file" id="file-inp" accept=".xlsx,.csv" style="display:none;" onchange="handleFileSelect(event)"/>
+          <p style="font-weight:700;color:#111827;margin:0 0 5px;font-size:14px;">Drag & drop your file here</p>
+          <p style="font-size:12px;color:#9CA3AF;margin:0 0 14px;">or click to browse · <strong>.csv</strong> (portal) and <strong>.xlsx</strong> (excel) supported</p>
+          <span style="display:inline-block;background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px;">Max 50 MB</span>
+          <input type="file" id="file-inp" accept=".xlsx,.csv,.xls" style="display:none;" onchange="handleFileSelect(event)"/>
         </div>
 
+        <!-- File selected info -->
         <div id="file-info" style="display:none;margin-top:14px;padding:12px 16px;background:#F9FAFB;
-             border:1px solid #E5E7EB;border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <i class="fas fa-file-excel" style="color:#6366F1;"></i>
-            <div>
-              <div id="file-name" style="font-size:13px;font-weight:600;color:#374151;"></div>
-              <div id="file-size" style="font-size:11px;color:#9CA3AF;"></div>
+             border:1px solid #E5E7EB;border-radius:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div id="file-icon-wrap" style="width:36px;height:36px;background:#EEF2FF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i id="file-icon" class="fas fa-file-csv" style="color:#6366F1;font-size:15px;"></i>
+              </div>
+              <div>
+                <div id="file-name" style="font-size:13px;font-weight:600;color:#111827;"></div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+                  <span id="file-size" style="font-size:11px;color:#9CA3AF;"></span>
+                  <span id="file-format-badge" style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;"></span>
+                </div>
+              </div>
             </div>
+            <button onclick="clearFile()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:16px;padding:4px;">✕</button>
           </div>
-          <button onclick="clearFile()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:13px;">✕</button>
         </div>
 
+        <!-- Import button -->
         <button id="import-btn" onclick="uploadFile()"
-          style="width:100%;margin-top:14px;padding:11px;background:#6366F1;color:#fff;
-                 border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;
-                 display:flex;align-items:center;justify-content:center;gap:8px;opacity:.4;pointer-events:none;">
-          <i class="fas fa-upload"></i> Import into Database
+          style="width:100%;margin-top:14px;padding:12px;background:#6366F1;color:#fff;
+                 border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;
+                 display:flex;align-items:center;justify-content:center;gap:8px;
+                 opacity:.35;pointer-events:none;transition:opacity .2s;">
+          <i class="fas fa-database"></i> Import into Database
         </button>
 
-        <div id="upload-progress" style="display:none;margin-top:14px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <!-- Progress -->
+        <div id="upload-progress" style="display:none;margin-top:16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
             <div class="spin" style="width:16px;height:16px;border-width:2px;"></div>
-            <span style="font-size:13px;color:#6B7280;font-weight:500;">Importing…</span>
+            <span id="progress-label" style="font-size:13px;color:#6B7280;font-weight:500;">Importing data…</span>
           </div>
-          <div class="prog-bar"><div class="prog-fill" style="width:60%;"></div></div>
+          <div class="prog-bar">
+            <div class="prog-fill" id="prog-fill-bar" style="width:0%;transition:width .4s ease;"></div>
+          </div>
         </div>
-        <div id="upload-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:10px;">
-          <div id="upload-result-text" style="font-size:13px;font-weight:500;"></div>
+
+        <!-- Result -->
+        <div id="upload-result" style="display:none;margin-top:14px;border-radius:10px;overflow:hidden;">
+          <div id="upload-result-inner" style="padding:14px 16px;">
+            <div id="upload-result-text" style="font-size:13px;font-weight:600;margin-bottom:8px;"></div>
+            <div id="upload-result-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Column reference -->
+      <!-- How to export from CDR.fyi -->
       <div class="chart-card" style="margin-top:14px;">
-        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">
-          <i class="fas fa-info-circle" style="color:#6366F1;margin-right:6px;"></i>Recognized Column Names
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <div style="width:28px;height:28px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-globe" style="color:#065F46;font-size:11px;"></i>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:#111827;">How to export from CDR.fyi</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#6B7280;">
-          <div><span style="font-weight:600;color:#374151;">Supplier:</span> supplier, seller, project name</div>
-          <div><span style="font-weight:600;color:#374151;">Method:</span> method, technology, cdr method</div>
-          <div><span style="font-weight:600;color:#374151;">Buyer:</span> purchaser, buyer, company</div>
-          <div><span style="font-weight:600;color:#374151;">Tonnes:</span> tonnes, volume, tco2e</div>
-          <div><span style="font-weight:600;color:#374151;">Date:</span> date, announcement, purchase date</div>
-          <div><span style="font-weight:600;color:#374151;">Status:</span> status, delivery status</div>
-          <div><span style="font-weight:600;color:#374851;">Price:</span> price, usd/tonne, price per tonne</div>
-          <div><span style="font-weight:600;color:#374151;">Registry:</span> registry, carbon registry</div>
+        <ol style="margin:0;padding-left:18px;font-size:12px;color:#6B7280;line-height:2;">
+          <li>Open <strong style="color:#374151;">cdr.fyi → Order Explorer</strong></li>
+          <li>Apply any filters you need (year, method, status…)</li>
+          <li>Click <strong style="color:#374151;">Export CSV</strong> (top-right of the table)</li>
+          <li>Upload the downloaded <strong style="color:#374151;">.csv</strong> file here — it will be auto-detected</li>
+        </ol>
+        <div style="margin-top:12px;padding:10px 14px;background:#ECFDF5;border-radius:8px;font-size:12px;color:#065F46;">
+          <i class="fas fa-check-circle" style="margin-right:6px;"></i>
+          <strong>Smart deduplication:</strong> records already in the database are automatically skipped. Only new orders are added.
         </div>
       </div>
+
+      <!-- Excel format reference -->
+      <div class="chart-card" style="margin-top:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <div style="width:28px;height:28px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-file-excel" style="color:#4F46E5;font-size:11px;"></i>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:#111827;">Excel Format — Recognized Columns</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;color:#6B7280;">
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Supplier</span>
+            supplier, seller, project name
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Method</span>
+            method, technology, cdr method
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Buyer</span>
+            purchaser, buyer, company
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Tonnes</span>
+            tonnes, volume, tco2e
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Date</span>
+            date, announcement, purchase date
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Status</span>
+            status, delivery status
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Price</span>
+            price, usd/tonne, price per tonne
+          </div>
+          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
+            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Registry</span>
+            registry, carbon registry
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </div>
@@ -932,53 +1021,175 @@ function renderSuppliers(){
 }
 
 // ─── Upload ──────────────────────────────────────────────────────────────────
-function handleDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
-function handleDragLeave(){document.getElementById('drop-zone').classList.remove('drag-over');}
+
+// Rileva il formato del file lato client (preview)
+function detectFormat(f){
+  if(!f) return null;
+  const ext=(f.name||'').split('.').pop().toLowerCase();
+  if(ext==='xlsx'||ext==='xls') return 'excel';
+  if(ext==='csv') return 'csv';
+  return null;
+}
+
+function handleDragOver(e){
+  e.preventDefault();
+  const dz=document.getElementById('drop-zone');
+  dz.classList.add('drag-over');
+  document.getElementById('dz-icon').style.background='#C7D2FE';
+}
+function handleDragLeave(){
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  document.getElementById('dz-icon').style.background='#EEF2FF';
+}
 function handleDrop(e){e.preventDefault();handleDragLeave();setFile(e.dataTransfer.files[0]);}
 function handleFileSelect(e){setFile(e.target.files[0]);}
+
 function setFile(f){
   if(!f) return;
   selectedFile=f;
+  const fmt=detectFormat(f);
+  const sizeKB=f.size/1024;
+  const sizeTxt=sizeKB>=1024?(sizeKB/1024).toFixed(1)+' MB':sizeKB.toFixed(1)+' KB';
+
   document.getElementById('file-name').textContent=f.name;
-  document.getElementById('file-size').textContent=(f.size/1024).toFixed(1)+' KB';
-  document.getElementById('file-info').style.display='flex';
-  const btn=document.getElementById('import-btn');
-  btn.style.opacity='1';btn.style.pointerEvents='auto';
+  document.getElementById('file-size').textContent=sizeTxt;
+
+  // Icona e badge per tipo file
+  const icon=document.getElementById('file-icon');
+  const badge=document.getElementById('file-format-badge');
+  const wrap=document.getElementById('file-icon-wrap');
+  if(fmt==='excel'){
+    icon.className='fas fa-file-excel';
+    icon.style.color='#16A34A';
+    wrap.style.background='#DCFCE7';
+    badge.textContent='Excel';
+    badge.style.background='#DCFCE7';
+    badge.style.color='#15803D';
+  } else {
+    icon.className='fas fa-file-csv';
+    icon.style.color='#4F46E5';
+    wrap.style.background='#EEF2FF';
+    badge.textContent='CSV — portal auto-detect';
+    badge.style.background='#EEF2FF';
+    badge.style.color='#4338CA';
+  }
+
+  document.getElementById('file-info').style.display='block';
   document.getElementById('upload-result').style.display='none';
+  const btn=document.getElementById('import-btn');
+  btn.style.opacity='1';
+  btn.style.pointerEvents='auto';
 }
+
 function clearFile(){
   selectedFile=null;
   document.getElementById('file-info').style.display='none';
-  const btn=document.getElementById('import-btn');
-  btn.style.opacity='.4';btn.style.pointerEvents='none';
+  document.getElementById('upload-result').style.display='none';
   document.getElementById('file-inp').value='';
+  const btn=document.getElementById('import-btn');
+  btn.style.opacity='.35';
+  btn.style.pointerEvents='none';
 }
+
+// Animazione progress bar fasulla (dà feedback visivo durante upload)
+let _progTimer=null;
+function startProgress(label){
+  const prog=document.getElementById('upload-progress');
+  const bar=document.getElementById('prog-fill-bar');
+  const lbl=document.getElementById('progress-label');
+  prog.style.display='block';
+  if(lbl) lbl.textContent=label||'Importing data…';
+  bar.style.width='0%';
+  let pct=0;
+  _progTimer=setInterval(()=>{
+    // Sale veloce fino a 80%, poi rallenta (aspetta risposta server)
+    const step=pct<40?4:pct<70?2:pct<85?.5:.1;
+    pct=Math.min(pct+step,88);
+    bar.style.width=pct+'%';
+  },120);
+}
+function stopProgress(){
+  clearInterval(_progTimer);
+  const bar=document.getElementById('prog-fill-bar');
+  bar.style.width='100%';
+  setTimeout(()=>{document.getElementById('upload-progress').style.display='none';},400);
+}
+
 async function uploadFile(){
   if(!selectedFile) return;
   const btn=document.getElementById('import-btn');
-  const prog=document.getElementById('upload-progress');
   const res=document.getElementById('upload-result');
-  btn.style.opacity='.4';btn.style.pointerEvents='none';
-  prog.style.display='block';res.style.display='none';
+  btn.style.opacity='.4';
+  btn.style.pointerEvents='none';
+  res.style.display='none';
+
+  const isCsv=detectFormat(selectedFile)==='csv';
+  startProgress(isCsv?'Detecting format and importing…':'Importing Excel file…');
+
   try{
-    const fd=new FormData();fd.append('file',selectedFile);
+    const fd=new FormData();
+    fd.append('file',selectedFile);
     const r=await fetch('/api/ingest/upload',{method:'POST',body:fd});
     const d=await r.json();
+    stopProgress();
     res.style.display='block';
+
+    const inner=document.getElementById('upload-result-inner');
+    const txt=document.getElementById('upload-result-text');
+    const stats=document.getElementById('upload-result-stats');
+
     if(r.ok){
-      res.style.background='#D1FAE5';res.style.border='1px solid #A7F3D0';res.style.borderRadius='10px';
-      document.getElementById('upload-result-text').innerHTML=
-        `<i class="fas fa-check-circle" style="color:#10B981;margin-right:6px;"></i><span style="color:#065F46;font-weight:600;">Import successful!</span>
-         <div style="font-size:11px;color:#047857;margin-top:4px;">Inserted: ${d.inserted||0} · Updated: ${d.updated||0} · Skipped: ${d.skipped||0}</div>`;
+      const isPortal=d.format==='portal_csv';
+      inner.style.background='#D1FAE5';
+      inner.style.borderTop='3px solid #10B981';
+      txt.innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <i class="fas fa-check-circle" style="color:#10B981;font-size:16px;"></i>
+          <span style="color:#065F46;font-size:14px;font-weight:700;">Import successful!</span>
+          ${isPortal?'<span style="background:#065F46;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">CDR.fyi Portal</span>':'<span style="background:#1D4ED8;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">Excel</span>'}
+        </div>`;
+      stats.innerHTML=`
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#065F46;">${(d.inserted||0).toLocaleString()}</div>
+          <div style="font-size:10px;color:#047857;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">New records</div>
+        </div>
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#1D4ED8;">${(d.updated||0).toLocaleString()}</div>
+          <div style="font-size:10px;color:#1E40AF;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Updated</div>
+        </div>
+        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
+          <div style="font-size:18px;font-weight:800;color:#9CA3AF;">${(d.skipped||0).toLocaleString()}</div>
+          <div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Duplicates skipped</div>
+        </div>`;
+      // Ricarica il dashboard con i nuovi dati
+      if((d.inserted||0)>0) setTimeout(()=>loadInsights(),800);
     } else {
-      res.style.background='#FEE2E2';res.style.border='1px solid #FECACA';res.style.borderRadius='10px';
-      document.getElementById('upload-result-text').innerHTML=
-        `<i class="fas fa-exclamation-circle" style="color:#EF4444;margin-right:6px;"></i><span style="color:#991B1B;">${d.detail||'Import failed'}</span>`;
+      inner.style.background='#FEF2F2';
+      inner.style.borderTop='3px solid #EF4444';
+      txt.innerHTML=`
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-exclamation-circle" style="color:#EF4444;font-size:16px;"></i>
+          <span style="color:#991B1B;font-size:13px;font-weight:600;">${d.detail||'Import failed. Check the file format and try again.'}</span>
+        </div>`;
+      stats.innerHTML='';
     }
-  }catch(e){
-    res.style.display='block';res.style.background='#FEE2E2';res.style.border='1px solid #FECACA';res.style.borderRadius='10px';
-    document.getElementById('upload-result-text').innerHTML='<span style="color:#991B1B;">Network error</span>';
-  }finally{prog.style.display='none';btn.style.opacity='1';btn.style.pointerEvents='auto';}
+  }catch(err){
+    stopProgress();
+    res.style.display='block';
+    const inner=document.getElementById('upload-result-inner');
+    const txt=document.getElementById('upload-result-text');
+    inner.style.background='#FEF2F2';
+    inner.style.borderTop='3px solid #EF4444';
+    txt.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-wifi" style="color:#EF4444;font-size:16px;"></i>
+        <span style="color:#991B1B;font-size:13px;font-weight:600;">Network error — check your connection and retry.</span>
+      </div>`;
+    document.getElementById('upload-result-stats').innerHTML='';
+  }finally{
+    btn.style.opacity='1';
+    btn.style.pointerEvents='auto';
+  }
 }
 
 // ─── Init ────────────────────────────────────────────────────────────────────
