@@ -486,7 +486,7 @@ function refreshCurrent() { goto(currentSection); }
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-US', {maximumFractionDigits:1});
 const fmtM = n => n == null ? '—' : (n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : Number(n).toFixed(0));
-const badgeCls = s => ({delivered:'b-delivered',contracted:'b-contracted',retired:'b-retired',partial:'b-partial'}[(s||'').toLowerCase()] || 'b-default';
+const badgeCls = s => ({delivered:'b-delivered',contracted:'b-contracted',retired:'b-retired',partial:'b-partial'}[(s||'').toLowerCase()] || 'b-default');
 
 async function apiFetch(path) {
   const r = await fetch(API + path);
@@ -563,8 +563,8 @@ function buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers) {
   // Year chart
   destroy('c-year');
   const yrs = byYear.map(r=>r.year||r.Year||r[Object.keys(r)[0]]);
-  const comm= byYear.map(r=>r.total_committed||r.committed||0);
-  const delv= byYear.map(r=>r.total_delivered||r.delivered||0);
+  const comm= byYear.map(r=>r.committed||r.total_committed||0);
+  const delv= byYear.map(r=>r.delivered||r.total_delivered||0);
   charts['c-year'] = new Chart(document.getElementById('c-year'), {
     type:'bar',
     data:{ labels:yrs,
@@ -591,7 +591,7 @@ function buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers) {
   // Method bar
   destroy('c-method');
   const mKeys = byMethod.map(r=>r.method||r.Method||r[Object.keys(r)[0]]);
-  const mVals = byMethod.map(r=>r.total_committed||r.committed||r[Object.keys(r)[1]]||0);
+  const mVals = byMethod.map(r=>r.committed||r.total_committed||0);
   charts['c-method'] = new Chart(document.getElementById('c-method'), {
     type:'bar',
     data:{ labels:mKeys, datasets:[{ label:'tCO₂e Committed', data:mVals,
@@ -604,7 +604,7 @@ function buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers) {
   // Continent polar
   destroy('c-continent');
   const cKeys = byCont.map(r=>r.continent||r.Continent||r[Object.keys(r)[0]]);
-  const cVals = byCont.map(r=>r.total_committed||r.committed||r[Object.keys(r)[1]]||0);
+  const cVals = byCont.map(r=>r.committed||r.total_committed||0);
   charts['c-continent'] = new Chart(document.getElementById('c-continent'), {
     type:'polarArea',
     data:{ labels:cKeys, datasets:[{ data:cVals, backgroundColor:palette.map(c=>c+'cc'), borderWidth:1, borderColor:'#fff' }] },
@@ -628,7 +628,7 @@ function buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers) {
   // Top buyers
   destroy('c-purchasers');
   const bKeys = topBuyers.map(r=>r.purchaser||r.Purchaser||r[Object.keys(r)[0]]);
-  const bVals = topBuyers.map(r=>r.total_committed||r.committed||r[Object.keys(r)[1]]||0);
+  const bVals = topBuyers.map(r=>r.committed||r.total_committed||0);
   charts['c-purchasers'] = new Chart(document.getElementById('c-purchasers'), {
     type:'bar',
     data:{ labels:bKeys, datasets:[{ label:'tCO₂e Committed', data:bVals,
@@ -686,7 +686,7 @@ async function fetchTransactions() {
   if (yr)  url += `&year=${encodeURIComponent(yr)}`;
 
   const data = await apiFetch(url);
-  txData = Array.isArray(data) ? data : (data.items || data.transactions || data.data || []);
+  txData = Array.isArray(data) ? data : (data.data || data.items || data.transactions || []);
   txFiltered = [...txData];
   txPage = 1;
   renderTxTable();
@@ -823,8 +823,8 @@ async function loadSuppliers() {
   document.getElementById('sup-loading').classList.remove('hidden');
   document.getElementById('sup-grid').innerHTML = '';
   try {
-    const data = await apiFetch('/api/suppliers/with-stats?limit=300');
-    supData = Array.isArray(data) ? data : (data.items||data.suppliers||data||[]);
+    const data = await apiFetch('/api/suppliers/?limit=300');
+    supData = Array.isArray(data) ? data : (data.data||data.items||data.suppliers||[]);
 
     // Populate filters
     const techs = [...new Set(supData.map(s=>s.technology||s.method).filter(Boolean))].sort();
@@ -855,13 +855,15 @@ function filterSuppliers(q) {
 
 const techColors = {
   'Biochar Carbon Removal BCR':'bg-amber-100 text-amber-700',
-  'DACCS':'bg-blue-100 text-blue-700',
-  'BECCS':'bg-emerald-100 text-emerald-700',
+  'Direct Air Carbon Capture And Sequestration DACCS':'bg-blue-100 text-blue-700',
+  'Bioenergy With Carbon Capture And Sequestration BECCS':'bg-emerald-100 text-emerald-700',
   'Enhanced Weathering':'bg-cyan-100 text-cyan-700',
   'Mineralization':'bg-violet-100 text-violet-700',
   'Alkalinity Enhancement':'bg-teal-100 text-teal-700',
   'Biomass Geological Sequestration':'bg-orange-100 text-orange-700',
   'Direct Ocean Removal':'bg-sky-100 text-sky-700',
+  'Marine Biomass Carbon Capture And Sequestration MBCCS':'bg-indigo-100 text-indigo-700',
+  'Biomass Direct Storage':'bg-lime-100 text-lime-700',
 };
 const getTechColor = t => techColors[t] || 'bg-slate-100 text-slate-600';
 
