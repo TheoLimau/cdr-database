@@ -336,28 +336,32 @@
        CDR METHODS PAGE
     ═══════════════════════════════════════════ */
 
-    /* ── Outer page wrapper — centers everything ── */
-    #page-methods{ display:none; }
-    #page-methods.active{ display:block!important; animation:fadeIn .2s ease; }
+    /* ── #page-methods visibility + layout override ── */
+    #page-methods{ display:none !important; }
+    #page-methods.active{
+      display:flex !important;
+      flex-direction:column;
+      animation:fadeIn .2s ease;
+      /* Override .page padding — let mpage-inner handle centering */
+      padding:28px 24px;
+    }
 
     /* ── Inner centered column ── */
-    /* NOTE: #main already has margin-left:216px (sidebar width).
-       So we just fill available space with proper padding.
-       DO NOT use margin:0 auto here — it would center vs viewport, creating a big left gap. */
     .mpage-inner{
       width:100%;
-      max-width:1280px;
+      max-width:1100px;
+      margin:0 auto;
       display:flex;
       flex-direction:column;
       gap:24px;
     }
 
-    /* ── Page hero header ── */
+    /* ── Hero header ── */
     .mpage-hero{
       display:flex;
       flex-direction:column;
-      gap:16px;
-      padding-bottom:22px;
+      gap:18px;
+      padding-bottom:24px;
       border-bottom:1px solid var(--border);
     }
     .mpage-hero-top{
@@ -366,41 +370,44 @@
       gap:14px;
     }
     .mpage-icon{
-      width:44px; height:44px; flex-shrink:0;
+      width:48px; height:48px; flex-shrink:0;
       background:rgba(79,142,247,.13);
       border:1px solid rgba(79,142,247,.25);
-      border-radius:12px;
+      border-radius:14px;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px; color:var(--blue);
+      font-size:20px; color:var(--blue);
     }
     .mpage-title{
-      font-size:20px; font-weight:800;
-      color:var(--white); letter-spacing:-.4px;
+      font-size:22px; font-weight:800;
+      color:var(--white); letter-spacing:-.5px;
+      line-height:1.1;
     }
     .mpage-sub{
-      font-size:11.5px; color:var(--text2); margin-top:4px;
+      font-size:11.5px; color:var(--text2); margin-top:5px;
     }
 
-    /* ── KPI pills — horizontal row below title ── */
+    /* ── KPI pills ── 4-column grid ── */
     .mpage-kpis{
-      display:flex; gap:10px; flex-wrap:wrap;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
     }
     .mpage-kpi{
-      display:flex; align-items:center; gap:10px;
+      display:flex; align-items:center; gap:12px;
       background:var(--bg2);
       border:1px solid var(--border);
-      border-radius:8px;
-      padding:10px 16px;
+      border-radius:10px;
+      padding:12px 16px;
       min-width:0;
-      flex:1;
-      max-width:220px;
+      transition:border-color .15s;
     }
+    .mpage-kpi:hover{ border-color:var(--border2); }
     .mpage-kpi-icon{
-      font-size:13px; opacity:.7; flex-shrink:0;
+      font-size:14px; opacity:.8; flex-shrink:0;
     }
     .mpage-kpi-body{ min-width:0; }
     .mpage-kpi-v{
-      font-size:14px; font-weight:800;
+      font-size:15px; font-weight:800;
       color:var(--white); letter-spacing:-.3px;
       line-height:1.2;
     }
@@ -410,10 +417,10 @@
       margin-top:3px;
     }
 
-    /* ── Charts: two columns, equal width ── */
-    .mpage-charts-grid2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
+    /* ── Charts: stacked full-width ── */
+    .mpage-charts-stack{
+      display:flex;
+      flex-direction:column;
       gap:16px;
     }
 
@@ -424,28 +431,28 @@
       border-radius:var(--radius);
       overflow:hidden;
       transition:border-color .15s;
-      min-width:0;
+      width:100%;
     }
     .mpage-card:hover{ border-color:var(--border2); }
     .mpage-card-head{
       display:flex; align-items:center; justify-content:space-between;
-      padding:14px 18px 12px;
+      padding:14px 20px 13px;
       border-bottom:1px solid var(--border);
       gap:8px;
+      background:var(--bg1);
     }
     .mpage-card-title{
-      font-size:12px; font-weight:700; color:var(--white);
-      display:flex; align-items:center; gap:7px;
-      white-space:nowrap;
+      font-size:12.5px; font-weight:700; color:var(--white);
+      display:flex; align-items:center; gap:8px;
     }
     .mpage-card-meta{
-      font-size:9.5px; color:var(--text3); margin-top:3px;
+      font-size:10px; color:var(--text3); margin-top:3px;
     }
 
     /* ── Badges ── */
     .meth-badge{
       font-size:9px; font-weight:700; letter-spacing:.6px;
-      text-transform:uppercase; padding:3px 9px; border-radius:20px;
+      text-transform:uppercase; padding:3px 10px; border-radius:20px;
       white-space:nowrap; flex-shrink:0;
     }
     .meth-badge.vol{ background:rgba(79,142,247,.12); color:#93C5FD; border:1px solid rgba(79,142,247,.22); }
@@ -453,10 +460,10 @@
 
     /* ── Bar list container ── */
     .mpage-hbars{
-      padding:14px 18px 16px;
+      padding:16px 20px 18px;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:5px;
     }
     .mpage-hbars-loading{
       color:var(--text2); font-size:11px;
@@ -464,43 +471,48 @@
       padding:24px 0;
     }
 
-    /* ── Bar row: rank | dot+label | bar | value ── */
+    /* ── Bar row ── */
     .mbar-row{
       display:grid;
-      grid-template-columns:18px 1fr 80px;
+      grid-template-columns:26px 1fr 96px;
       align-items:center;
-      column-gap:8px;
-      min-height:26px;
-      padding:2px 0;
-      border-radius:4px;
+      column-gap:10px;
+      min-height:32px;
+      padding:3px 4px;
+      border-radius:5px;
       cursor:default;
+      transition:background .12s;
     }
-    .mbar-row:hover{ background:rgba(255,255,255,.02); }
+    .mbar-row:hover{ background:rgba(255,255,255,.03); }
 
     /* col-1: rank */
     .mbar-rank{
-      font-size:9px; font-weight:600;
+      font-size:9.5px; font-weight:700;
       color:var(--text3);
-      text-align:right;
+      text-align:center;
       user-select:none;
+      background:var(--bg3);
+      border-radius:3px;
+      padding:2px 0;
+      line-height:1;
     }
 
-    /* col-2: label + bar stacked vertically */
+    /* col-2: label + bar */
     .mbar-main{
       min-width:0;
       display:flex;
       flex-direction:column;
-      gap:4px;
+      gap:5px;
     }
     .mbar-label-row{
-      display:flex; align-items:center; gap:6px;
+      display:flex; align-items:center; gap:7px;
       min-width:0;
     }
     .mbar-label-dot{
-      width:7px; height:7px; border-radius:2px; flex-shrink:0;
+      width:8px; height:8px; border-radius:2px; flex-shrink:0;
     }
     .mbar-label-text{
-      font-size:10.5px; font-weight:500; color:#CBD5E1;
+      font-size:11px; font-weight:500; color:#CBD5E1;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       min-width:0;
       transition:color .15s;
@@ -508,23 +520,24 @@
     .mbar-row:hover .mbar-label-text{ color:var(--white); }
     .mbar-track{
       width:100%;
-      background:rgba(255,255,255,.05);
+      background:rgba(255,255,255,.06);
       border-radius:3px;
-      height:6px;
+      height:7px;
       overflow:hidden;
     }
     .mbar-fill{
       height:100%; border-radius:3px;
-      transition:width .55s cubic-bezier(.4,0,.2,1);
+      transition:width .6s cubic-bezier(.4,0,.2,1);
     }
 
     /* col-3: value */
     .mbar-val{
-      font-size:10px; font-weight:600;
+      font-size:10.5px; font-weight:700;
       color:#94A3B8;
       text-align:right;
       white-space:nowrap;
       align-self:center;
+      font-variant-numeric:tabular-nums;
     }
     /* ═══════════════════════════════════════════
        TABLE WRAPPER
@@ -1353,7 +1366,7 @@
   <!-- ══ HERO HEADER ══ -->
   <div class="mpage-hero">
 
-    <!-- Title row -->
+    <!-- Icon + Title -->
     <div class="mpage-hero-top">
       <div class="mpage-icon"><i class="fas fa-flask"></i></div>
       <div>
@@ -1362,13 +1375,13 @@
       </div>
     </div>
 
-    <!-- KPI pills row -->
+    <!-- KPI pills — 4-column grid -->
     <div id="methods-summary-pills" class="mpage-kpis"></div>
 
   </div>
 
-  <!-- ══ CHARTS: 2-column grid ══ -->
-  <div class="mpage-charts-grid2">
+  <!-- ══ CHARTS: stacked full-width ══ -->
+  <div class="mpage-charts-stack">
 
     <!-- Chart 1: Committed Volume -->
     <div class="mpage-card">
@@ -1378,7 +1391,7 @@
             <i class="fas fa-chart-bar" style="color:var(--blue)"></i>
             Committed tCO&#8322; by Method
           </div>
-          <div class="mpage-card-meta">Sorted by volume &darr;</div>
+          <div class="mpage-card-meta">Sorted by committed volume — descending</div>
         </div>
         <span class="meth-badge vol">Volume</span>
       </div>
@@ -1392,10 +1405,10 @@
       <div class="mpage-card-head">
         <div>
           <div class="mpage-card-title">
-            <i class="fas fa-percentage" style="color:var(--green)"></i>
+            <i class="fas fa-percent" style="color:var(--green)"></i>
             Delivery Rate by Method
           </div>
-          <div class="mpage-card-meta">Delivered ÷ Committed &darr;</div>
+          <div class="mpage-card-meta">Delivered ÷ Committed — descending</div>
         </div>
         <span class="meth-badge rate">Rate %</span>
       </div>
@@ -1412,16 +1425,16 @@
       <span class="xl-title">Method Details</span>
       <span id="methods-count" class="xl-count">—</span>
     </div>
-    <div class="xl-table-scroll" style="max-height:420px">
+    <div class="xl-table-scroll" style="max-height:460px">
       <table class="xl" id="methods-table">
         <thead><tr>
-          <th style="min-width:240px">Method</th>
+          <th style="min-width:220px">Method</th>
           <th class="txt-r">Transactions</th>
           <th class="txt-r">Committed tCO&#8322;</th>
           <th class="txt-r">Delivered tCO&#8322;</th>
           <th class="txt-r">Delivery Rate</th>
           <th class="txt-r">Suppliers</th>
-          <th style="min-width:140px">Market Share</th>
+          <th style="min-width:130px">Market Share</th>
         </tr></thead>
         <tbody id="methods-tbody">
           <tr class="loading-row"><td colspan="7"><i class="fas fa-circle-notch fa-spin"></i> Loading…</td></tr>
@@ -1430,6 +1443,9 @@
       </table>
     </div>
   </div>
+
+</div><!-- /mpage-inner -->
+</div>
 
 </div><!-- /mpage-inner -->
 </div>
