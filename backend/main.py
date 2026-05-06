@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse
 
 from database import init_db
 from routers import transactions, suppliers, ingest
+from utils.auto_seed import auto_seed_if_empty
 
 # ─── App setup ────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -43,6 +44,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 @app.on_event("startup")
 def on_startup():
     init_db()
+    auto_seed_if_empty()
     print("✅ Carbon Credits DB avviato!")
     print("   Docs: http://localhost:8000/api/docs")
 
