@@ -330,6 +330,7 @@
     .chart-sub{font-size:10.5px;color:var(--text3);margin-top:4px}
     .chart-wrap{display:block;width:100%;height:230px;position:relative}
     .chart-wrap.tall{height:290px}
+    .chart-wrap.tall-auto{height:auto;min-height:320px}
     .chart-wrap.donut{height:240px}
 
     /* ═══════════════════════════════════════════
@@ -1160,11 +1161,11 @@
     <div class="charts-grid" style="grid-template-columns:1fr 1fr">
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Committed tCO₂ by Method</div></div></div>
-        <div class="chart-wrap tall"><canvas id="meth-vol-chart"></canvas></div>
+        <div id="meth-vol-wrap" style="position:relative;width:100%;height:320px"><canvas id="meth-vol-chart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Delivery Rate by Method</div></div></div>
-        <div class="chart-wrap tall"><canvas id="meth-rate-chart"></canvas></div>
+        <div id="meth-rate-wrap" style="position:relative;width:100%;height:320px"><canvas id="meth-rate-chart"></canvas></div>
       </div>
     </div>
     <div class="xl-wrap">
@@ -2031,51 +2032,144 @@ async function loadMethods(){
     const me = await fetch(BASE+'/api/transactions/stats/by-method').then(r=>r.json());
     const totalCommitted = me.reduce((a,r)=>a+(r.committed||r.total_committed||0),0);
 
+    // Altezza dinamica: 28px per riga + 60px padding, minimo 320px
+    const dynH = Math.max(320, me.length * 28 + 60) + 'px';
+    document.getElementById('meth-vol-wrap').style.height  = dynH;
+    document.getElementById('meth-rate-wrap').style.height = dynH;
+
+    // Helper: abbreviazioni per tutti i 23 metodi CDR reali
+    const shortLabel = s => {
+      const map = {
+        'Bioenergy With Carbon Capture And Sequestration BECCS':          'BECCS',
+        'Bioenergy With Carbon Capture And Sequestration (BECCS)':         'BECCS',
+        'BiCRS - Bioenergy with Carbon Capture and Sequestration (BECCS)': 'BiCRS (BECCS)',
+        'Biochar Carbon Removal BCR':                                       'Biochar (BCR)',
+        'Biochar Carbon Removal (BCR)':                                     'Biochar (BCR)',
+        'Biomass Geological Sequestration':                                 'Bio. Geo. Seq.',
+        'BiCRS - Biomass Geological Sequestration':                         'BiCRS (Bio. Geo.)',
+        'Direct Air Carbon Capture And Sequestration DACCS':               'DACCS',
+        'Direct Air Carbon Capture And Sequestration (DACCS)':              'DACCS',
+        'Enhanced Weathering':                                              'Enhanced Weathering',
+        'Mineralization':                                                   'Mineralization',
+        'Mineralization - Ex-situ':                                         'Mineral. (Ex-situ)',
+        'Mineralization - In-situ':                                         'Mineral. (In-situ)',
+        'Mineralization - Microbial':                                       'Mineral. (Microbial)',
+        'Alkalinity Enhancement':                                           'Alkalinity Enh.',
+        'Direct Ocean Removal':                                             'Direct Ocean',
+        'Biomass Direct Storage':                                           'Biomass Direct Stor.',
+        'Other':                                                            'Other',
+        'Marine Biomass Carbon Capture And Sequestration MBCCS':           'MBCCS',
+        'Marine Biomass Carbon Capture And Sequestration (MBCCS)':          'MBCCS',
+        'mCDR - Alkalinity Enhancement - Coastal':                          'mCDR Alk. (Coastal)',
+        'mCDR - Alkalinity Enhancement - River':                            'mCDR Alk. (River)',
+        'mCDR - Alkalinity Enhancement - Wastewater':                       'mCDR Alk. (Wastewater)',
+        'mCDR - Alkalinity Enhancement - Ocean':                            'mCDR Alk. (Ocean)',
+        'mCDR - Marine Biomass Carbon Capture and Sequestration (MBCCS) - Microalgal': 'mCDR MBCCS (Microalgal)',
+        'mCDR - Marine Biomass Carbon Capture and Sequestration (MBCCS) - Marine':     'mCDR MBCCS (Marine)',
+        'BiCRS - Biochar Carbon Removal (BCR)':                             'BiCRS (BCR)',
+      };
+      if(map[s]) return map[s];
+      if(s.length <= 24) return s;
+      // Fallback automatico per nomi non mappati
+      return s.replace(/Carbon Capture and Sequestration/gi,'CCS')
+               .replace(/Carbon Capture And Sequestration/gi,'CCS')
+               .replace(/Bioenergy With /gi,'Bioenergy ')
+               .replace(/Direct Air /gi,'Dir. Air ')
+               .replace(/Marine Biomass /gi,'Mar. Biomass ')
+               .substring(0, 26) + '…';
+    };
+
     // Volume chart
     mkChart('meth-vol-chart',{
       type:'bar',
       data:{
-        labels:me.map(r=>r.method),
+        labels: me.map(r=>shortLabel(r.method)),
         datasets:[{
           label:'Committed tCO₂',
           data:me.map(r=>r.committed||r.total_committed||0),
           backgroundColor:me.map(r=>methodColor(r.method)+'99'),
           borderColor:me.map(r=>methodColor(r.method)),
           borderWidth:1,
+          borderRadius:3,
         }]
       },
       options:{
-        indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
+        indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        layout:{ padding:{ right:16 } },
+        plugins:{
+          legend:{display:false},
+          datalabels:{
+            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+            anchor:'end', align:'end',
+            color:'#94A3B8', font:{size:9},
+            formatter: v => fmt(v),
+            clamp: true,
+            clip: false,
+          }
+        },
         scales:{
-          x:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},
-          y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}},
+          x:{
+            ticks:{color:'#475569', font:{size:9}, callback:v=>fmt(v), maxRotation:0},
+            grid:{color:'#1A2035'},
+          },
+          y:{
+            ticks:{
+              color:'#CBD5E1', font:{size:10},
+              autoSkip:false,
+              crossAlign:'far',
+            },
+            grid:{display:false},
+          },
         }
-      }
+      },
+      plugins:[ChartDataLabels]
     });
 
     // Rate chart
-    const withRate = me.map(r=>({...r,rate:(r.committed||0)>0?((r.delivered||0)/(r.committed||1))*100:0}));
+    const withRate = me.map(r=>({...r, rate:(r.committed||0)>0?((r.delivered||0)/(r.committed||1))*100:0}));
     mkChart('meth-rate-chart',{
       type:'bar',
       data:{
-        labels:withRate.map(r=>r.method),
+        labels: withRate.map(r=>shortLabel(r.method)),
         datasets:[{
           label:'Delivery Rate %',
-          data:withRate.map(r=>(r.rate||0).toFixed(2)),
+          data:withRate.map(r=>parseFloat((r.rate||0).toFixed(2))),
           backgroundColor:withRate.map(r=>methodColor(r.method)+'88'),
           borderColor:withRate.map(r=>methodColor(r.method)),
           borderWidth:1,
+          borderRadius:3,
         }]
       },
       options:{
-        indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
+        indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        layout:{ padding:{ right:24 } },
+        plugins:{
+          legend:{display:false},
+          datalabels:{
+            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+            anchor:'end', align:'end',
+            color:'#94A3B8', font:{size:9},
+            formatter: v => v.toFixed(1)+'%',
+            clamp: true,
+            clip: false,
+          }
+        },
         scales:{
-          x:{ticks:{color:'#475569',callback:v=>v+'%'},grid:{color:'#1A2035'}},
-          y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}},
+          x:{
+            ticks:{color:'#475569', font:{size:9}, callback:v=>v+'%', maxRotation:0},
+            grid:{color:'#1A2035'},
+          },
+          y:{
+            ticks:{
+              color:'#CBD5E1', font:{size:10},
+              autoSkip:false,
+              crossAlign:'far',
+            },
+            grid:{display:false},
+          },
         }
-      }
+      },
+      plugins:[ChartDataLabels]
     });
 
     // Table
