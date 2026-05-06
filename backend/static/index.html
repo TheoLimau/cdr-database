@@ -334,6 +334,72 @@
     .chart-wrap.donut{height:240px}
 
     /* ═══════════════════════════════════════════
+       CDR METHODS PAGE
+    ═══════════════════════════════════════════ */
+    .methods-inner{
+      max-width:1280px;
+      margin:0 auto;
+      display:flex;flex-direction:column;gap:24px;
+    }
+    .methods-header{
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:16px;
+      padding-bottom:20px;
+      border-bottom:1px solid var(--border);
+    }
+    .methods-header-left{display:flex;align-items:center;gap:16px}
+    .methods-icon{
+      width:42px;height:42px;
+      background:rgba(79,142,247,.12);
+      border:1px solid rgba(79,142,247,.22);
+      border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:17px;color:var(--blue);flex-shrink:0;
+    }
+    .methods-title{font-size:20px;font-weight:800;color:var(--white);letter-spacing:-.4px;line-height:1.2}
+    .methods-sub{font-size:11px;color:var(--text2);margin-top:3px}
+    .methods-kpis{display:flex;gap:10px;flex-wrap:wrap}
+    .methods-kpi{
+      background:var(--bg2);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:8px 14px;
+      text-align:center;
+      min-width:90px;
+    }
+    .methods-kpi-v{font-size:15px;font-weight:700;color:var(--white);line-height:1.2}
+    .methods-kpi-l{font-size:9.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+    /* Charts row */
+    .methods-charts-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .methods-chart-card{
+      background:var(--bg2);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:20px 20px 16px;
+      transition:border-color .15s;
+    }
+    .methods-chart-card:hover{border-color:var(--border2)}
+    .methods-chart-head{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:16px;
+    }
+    .methods-chart-label{
+      font-size:12.5px;font-weight:700;color:var(--white);
+      display:flex;align-items:center;gap:7px;
+    }
+    .methods-chart-label i{font-size:11px}
+    .meth-badge{
+      font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+      padding:3px 9px;border-radius:20px;
+    }
+    .meth-badge.vol{background:rgba(79,142,247,.12);color:#93C5FD;border:1px solid rgba(79,142,247,.2)}
+    .meth-badge.rate{background:rgba(52,211,153,.1);color:#6EE7B7;border:1px solid rgba(52,211,153,.18)}
+
+    /* ═══════════════════════════════════════════
        TABLE WRAPPER
     ═══════════════════════════════════════════ */
     .xl-wrap{
@@ -1155,37 +1221,68 @@
      PAGE: CDR METHODS
 ════════════════════════════════════════════════ -->
 <div class="page" id="page-methods">
-    <div class="sec-head">
-      <div><h2><i class="fas fa-flask"></i> CDR Methods</h2><div class="sec-desc">Technology breakdown by volume, delivery rate and supplier count</div></div>
-    </div>
-    <div class="charts-grid" style="grid-template-columns:1fr 1fr">
-      <div class="chart-box">
-        <div class="chart-head"><div><div class="chart-title">Committed tCO₂ by Method</div></div></div>
-        <div id="meth-vol-wrap" style="position:relative;width:100%;height:320px"><canvas id="meth-vol-chart"></canvas></div>
+  <div class="methods-inner">
+
+    <!-- ── Header ── -->
+    <div class="methods-header">
+      <div class="methods-header-left">
+        <div class="methods-icon"><i class="fas fa-flask"></i></div>
+        <div>
+          <h2 class="methods-title">CDR Methods</h2>
+          <div class="methods-sub">Technology breakdown by committed volume, delivery rate &amp; supplier count</div>
+        </div>
       </div>
-      <div class="chart-box">
-        <div class="chart-head"><div><div class="chart-title">Delivery Rate by Method</div></div></div>
-        <div id="meth-rate-wrap" style="position:relative;width:100%;height:320px"><canvas id="meth-rate-chart"></canvas></div>
+      <div id="methods-summary-pills" class="methods-kpis"></div>
+    </div>
+
+    <!-- ── Two charts side-by-side ── -->
+    <div class="methods-charts-row">
+      <div class="methods-chart-card">
+        <div class="methods-chart-head">
+          <span class="methods-chart-label"><i class="fas fa-chart-bar"></i> Committed tCO&#8322; by Method</span>
+          <span class="meth-badge vol">Volume</span>
+        </div>
+        <div id="meth-vol-wrap" style="position:relative;width:100%;height:320px">
+          <canvas id="meth-vol-chart"></canvas>
+        </div>
+      </div>
+      <div class="methods-chart-card">
+        <div class="methods-chart-head">
+          <span class="methods-chart-label"><i class="fas fa-percentage"></i> Delivery Rate by Method</span>
+          <span class="meth-badge rate">Rate</span>
+        </div>
+        <div id="meth-rate-wrap" style="position:relative;width:100%;height:320px">
+          <canvas id="meth-rate-chart"></canvas>
+        </div>
       </div>
     </div>
-    <div class="xl-wrap">
-      <div class="xl-toolbar"><span class="xl-title">Method Details</span></div>
-      <div class="xl-table-scroll" style="max-height:400px">
+
+    <!-- ── Detail table ── -->
+    <div class="xl-wrap" style="margin-bottom:0">
+      <div class="xl-toolbar">
+        <span class="xl-title">Method Details</span>
+        <span id="methods-count" class="xl-count">—</span>
+      </div>
+      <div class="xl-table-scroll" style="max-height:calc(100vh - 330px)">
         <table class="xl" id="methods-table">
           <thead><tr>
-            <th>Method</th>
+            <th style="min-width:220px">Method</th>
             <th class="txt-r">Transactions</th>
-            <th class="txt-r">Committed tCO₂</th>
-            <th class="txt-r">Delivered tCO₂</th>
+            <th class="txt-r">Committed tCO&#8322;</th>
+            <th class="txt-r">Delivered tCO&#8322;</th>
             <th class="txt-r">Delivery Rate</th>
-            <th class="txt-r">Unique Suppliers</th>
-            <th>Market Share</th>
+            <th class="txt-r">Suppliers</th>
+            <th style="min-width:160px">Market Share</th>
           </tr></thead>
-          <tbody id="methods-tbody"><tr class="loading-row"><td colspan="7"><i class="fas fa-circle-notch"></i>Loading…</td></tr></tbody>
+          <tbody id="methods-tbody">
+            <tr class="loading-row"><td colspan="7"><i class="fas fa-circle-notch"></i>Loading…</td></tr>
+          </tbody>
           <tfoot><tr id="methods-tfoot"><td colspan="7"></td></tr></tfoot>
         </table>
       </div>
     </div>
+
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════
@@ -2030,10 +2127,33 @@ function closeTxModal(e){
 async function loadMethods(){
   try{
     const me = await fetch(BASE+'/api/transactions/stats/by-method').then(r=>r.json());
-    const totalCommitted = me.reduce((a,r)=>a+(r.committed||r.total_committed||0),0);
+    const totalCommitted  = me.reduce((a,r)=>a+(r.committed||0),0);
+    const totalDelivered  = me.reduce((a,r)=>a+(r.delivered||0),0);
+    const totalTx         = me.reduce((a,r)=>a+(r.count||0),0);
+    const totalSuppliers  = me.reduce((a,r)=>Math.max(a,(r.unique_suppliers||0)),0);
+    const overallRate     = totalCommitted>0 ? (totalDelivered/totalCommitted*100).toFixed(1)+'%' : '—';
 
-    // Altezza dinamica: 28px per riga + 60px padding, minimo 320px
-    const dynH = Math.max(320, me.length * 28 + 60) + 'px';
+    // ── Summary pills nel header
+    const pillsEl = document.getElementById('methods-summary-pills');
+    if(pillsEl){
+      pillsEl.innerHTML = [
+        {v: me.length,           l: 'Methods'},
+        {v: fmt(totalTx),        l: 'Transactions'},
+        {v: fmt(totalCommitted), l: 'Committed tCO₂'},
+        {v: overallRate,         l: 'Avg Delivery'},
+      ].map(p=>`
+        <div class="methods-kpi">
+          <div class="methods-kpi-v">${p.v}</div>
+          <div class="methods-kpi-l">${p.l}</div>
+        </div>`).join('');
+    }
+
+    // ── Count tabella
+    const countEl = document.getElementById('methods-count');
+    if(countEl) countEl.textContent = me.length + ' methods';
+
+    // ── Altezza dinamica: 28px per riga + 60px padding, minimo 400px
+    const dynH = Math.max(400, me.length * 28 + 60) + 'px';
     document.getElementById('meth-vol-wrap').style.height  = dynH;
     document.getElementById('meth-rate-wrap').style.height = dynH;
 
@@ -2079,96 +2199,97 @@ async function loadMethods(){
                .substring(0, 26) + '…';
     };
 
-    // Volume chart
+    // ── common chart options builder
+    const methChartOpts = (isRate) => ({
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      layout:{ padding:{ right: isRate ? 44 : 56, top:4, bottom:4 } },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label: ctx => isRate
+              ? ' ' + Number(ctx.raw).toFixed(1) + '%'
+              : ' ' + fmt(ctx.raw) + ' tCO₂'
+          }
+        },
+        datalabels:{
+          display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+          anchor:'end', align:'end',
+          color:'#94A3B8',
+          font:{size:9, weight:'600'},
+          formatter: v => isRate ? Number(v).toFixed(1)+'%' : fmt(v),
+          clamp:true,
+          clip:false,
+          padding:{left:4},
+        }
+      },
+      scales:{
+        x:{
+          ticks:{
+            color:'#475569',
+            font:{size:9},
+            callback: v => isRate ? v+'%' : fmt(v),
+            maxRotation:0,
+            maxTicksLimit:6,
+          },
+          grid:{color:'rgba(255,255,255,.03)'},
+          border:{color:'transparent'},
+        },
+        y:{
+          ticks:{
+            color:'#CBD5E1',
+            font:{size:10.5, weight:'500'},
+            autoSkip:false,
+            crossAlign:'far',
+            padding:4,
+          },
+          grid:{display:false},
+          border:{color:'transparent'},
+        },
+      }
+    });
+
+    // ── Volume chart
     mkChart('meth-vol-chart',{
       type:'bar',
       data:{
         labels: me.map(r=>shortLabel(r.method)),
         datasets:[{
           label:'Committed tCO₂',
-          data:me.map(r=>r.committed||r.total_committed||0),
-          backgroundColor:me.map(r=>methodColor(r.method)+'99'),
-          borderColor:me.map(r=>methodColor(r.method)),
+          data: me.map(r=>r.committed||0),
+          backgroundColor: me.map(r=>methodColor(r.method)+'99'),
+          borderColor:     me.map(r=>methodColor(r.method)),
           borderWidth:1,
           borderRadius:3,
+          borderSkipped:'left',
         }]
       },
-      options:{
-        indexAxis:'y', responsive:true, maintainAspectRatio:false,
-        layout:{ padding:{ right:16 } },
-        plugins:{
-          legend:{display:false},
-          datalabels:{
-            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-            anchor:'end', align:'end',
-            color:'#94A3B8', font:{size:9},
-            formatter: v => fmt(v),
-            clamp: true,
-            clip: false,
-          }
-        },
-        scales:{
-          x:{
-            ticks:{color:'#475569', font:{size:9}, callback:v=>fmt(v), maxRotation:0},
-            grid:{color:'#1A2035'},
-          },
-          y:{
-            ticks:{
-              color:'#CBD5E1', font:{size:10},
-              autoSkip:false,
-              crossAlign:'far',
-            },
-            grid:{display:false},
-          },
-        }
-      },
+      options: methChartOpts(false),
       plugins:[ChartDataLabels]
     });
 
-    // Rate chart
-    const withRate = me.map(r=>({...r, rate:(r.committed||0)>0?((r.delivered||0)/(r.committed||1))*100:0}));
+    // ── Rate chart
+    const withRate = me.map(r=>({
+      ...r,
+      rate:(r.committed||0)>0 ? (r.delivered||0)/(r.committed||1)*100 : 0
+    }));
     mkChart('meth-rate-chart',{
       type:'bar',
       data:{
         labels: withRate.map(r=>shortLabel(r.method)),
         datasets:[{
           label:'Delivery Rate %',
-          data:withRate.map(r=>parseFloat((r.rate||0).toFixed(2))),
-          backgroundColor:withRate.map(r=>methodColor(r.method)+'88'),
-          borderColor:withRate.map(r=>methodColor(r.method)),
+          data: withRate.map(r=>parseFloat((r.rate||0).toFixed(2))),
+          backgroundColor: withRate.map(r=>methodColor(r.method)+'88'),
+          borderColor:     withRate.map(r=>methodColor(r.method)),
           borderWidth:1,
           borderRadius:3,
+          borderSkipped:'left',
         }]
       },
-      options:{
-        indexAxis:'y', responsive:true, maintainAspectRatio:false,
-        layout:{ padding:{ right:24 } },
-        plugins:{
-          legend:{display:false},
-          datalabels:{
-            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-            anchor:'end', align:'end',
-            color:'#94A3B8', font:{size:9},
-            formatter: v => v.toFixed(1)+'%',
-            clamp: true,
-            clip: false,
-          }
-        },
-        scales:{
-          x:{
-            ticks:{color:'#475569', font:{size:9}, callback:v=>v+'%', maxRotation:0},
-            grid:{color:'#1A2035'},
-          },
-          y:{
-            ticks:{
-              color:'#CBD5E1', font:{size:10},
-              autoSkip:false,
-              crossAlign:'far',
-            },
-            grid:{display:false},
-          },
-        }
-      },
+      options: methChartOpts(true),
       plugins:[ChartDataLabels]
     });
 
@@ -2209,7 +2330,18 @@ async function loadMethods(){
     document.getElementById('methods-tbody').innerHTML = thtml;
     const totRate = totCom>0 ? (totDel/totCom*100).toFixed(1)+'%' : '—';
     document.getElementById('methods-tfoot').innerHTML =
-      `<td colspan="7" style="color:#64748B">Total: ${fmt(totTx)} transactions · ${fmt(totCom)} tCO₂ committed · ${fmt(totDel)} tCO₂ delivered · ${totRate} delivery rate</td>`;
+      `<td style="font-weight:700;color:#94A3B8;padding:10px 16px">
+         <div style="display:flex;align-items:center;gap:6px">
+           <div style="width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,.15);flex-shrink:0"></div>
+           Total (${me.length} methods)
+         </div>
+       </td>
+       <td class="txt-r" style="color:#94A3B8;font-weight:600">${fmt(totTx)}</td>
+       <td class="txt-r" style="color:#93C5FD;font-weight:600">${fmt(totCom)}</td>
+       <td class="txt-r" style="color:#6EE7B7;font-weight:600">${fmt(totDel)}</td>
+       <td class="txt-r" style="font-weight:700;color:${parseFloat(totRate)>10?'#4ADE80':parseFloat(totRate)>3?'#FB923C':'#94A3B8'}">${totRate}</td>
+       <td class="txt-r" style="color:#94A3B8">—</td>
+       <td style="color:#94A3B8;font-size:10px">100%</td>`;
   } catch(e){ console.error(e); }
 }
 
