@@ -61,6 +61,10 @@ def stats_by_marketplace(db: Session = Depends(get_db)):
 def top_purchasers(limit: int = Query(10, ge=1, le=50), db: Session = Depends(get_db)):
     return TransactionService.get_top_purchasers(db, limit=limit)
 
+@router.get("/stats/top-suppliers")
+def top_suppliers(limit: int = Query(10, ge=1, le=50), db: Session = Depends(get_db)):
+    return TransactionService.get_top_suppliers(db, limit=limit)
+
 @router.get("/stats/timeline")
 def timeline(db: Session = Depends(get_db)):
     return TransactionService.get_timeline(db)

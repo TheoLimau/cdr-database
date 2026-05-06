@@ -253,6 +253,41 @@ class TransactionService:
         ]
 
     @staticmethod
+    def get_top_suppliers(db: Session, limit: int = 10) -> List[Dict]:
+        rows = (
+            db.query(
+                Supplier.name,
+                Supplier.technology,
+                Supplier.country,
+                Supplier.continent,
+                Supplier.total_tonnes_committed,
+                Supplier.total_tonnes_delivered,
+                Supplier.transaction_count,
+                Supplier.price_per_tonne,
+                Supplier.certification,
+            )
+            .filter(Supplier.name.isnot(None))
+            .filter(Supplier.name != "Not Disclosed")
+            .order_by(Supplier.total_tonnes_delivered.desc().nullslast())
+            .limit(limit)
+            .all()
+        )
+        return [
+            {
+                "supplier":   r.name,
+                "technology": r.technology,
+                "country":    r.country,
+                "continent":  r.continent,
+                "committed":  round(r.total_tonnes_committed or 0, 2),
+                "delivered":  round(r.total_tonnes_delivered or 0, 2),
+                "count":      r.transaction_count or 0,
+                "price":      r.price_per_tonne,
+                "certification": r.certification,
+            }
+            for r in rows
+        ]
+
+    @staticmethod
     def get_timeline(db: Session) -> List[Dict]:
         """Crescita cumulativa tCO₂e per anno."""
         rows = (
