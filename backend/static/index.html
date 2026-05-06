@@ -434,6 +434,82 @@
 <div class="page active" id="page-dashboard">
   <div style="padding:18px 22px">
 
+    <!-- ══ PANNELLO 2026 ══ -->
+    <div id="panel-2026" style="margin-bottom:14px;background:linear-gradient(135deg,#0A1628,#0F2040);border:1px solid #1E3A5F;border-radius:10px;padding:14px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:8px;height:8px;background:#22C55E;border-radius:50%;animation:pulse 2s infinite"></div>
+          <span style="font-size:13px;font-weight:800;color:#F1F5F9">2026 — Anno in corso</span>
+          <span id="p26-lastdate" style="font-size:10.5px;color:#475569;background:#0A0C10;border:1px solid #1E2D3D;border-radius:4px;padding:2px 8px">aggiornato al —</span>
+        </div>
+        <button onclick="goto2026()" style="border:1px solid #3B82F6;background:#0F1E35;border-radius:6px;padding:5px 13px;font-size:11.5px;font-weight:600;color:#60A5FA;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s" onmouseover="this.style.background='#1E3A5F'" onmouseout="this.style.background='#0F1E35'">
+          <i class="fas fa-table"></i> Vedi tutte le transazioni 2026
+        </button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Transazioni</div>
+          <div id="p26-tx" style="font-size:1.4rem;font-weight:800;color:#60A5FA;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">ordini registrati</div>
+        </div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Committed tCO₂</div>
+          <div id="p26-committed" style="font-size:1.4rem;font-weight:800;color:#F1F5F9;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">volume ordinato</div>
+        </div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Delivered tCO₂</div>
+          <div id="p26-delivered" style="font-size:1.4rem;font-weight:800;color:#4ADE80;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">rimosso confermato</div>
+        </div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Delivery Rate</div>
+          <div id="p26-rate" style="font-size:1.4rem;font-weight:800;color:#A78BFA;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">delivered / committed</div>
+        </div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Buyer Unici</div>
+          <div id="p26-buyers" style="font-size:1.4rem;font-weight:800;color:#FB923C;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">acquirenti attivi</div>
+        </div>
+      </div>
+      <!-- Metodi 2026 bar chart orizzontale -->
+      <div style="font-size:9px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Volume per metodo (2026)</div>
+      <div id="p26-methods" style="display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+
+    <!-- ══ ULTIME TRANSAZIONI ══ -->
+    <div class="xl-wrap" style="margin-bottom:14px">
+      <div class="xl-toolbar">
+        <span class="xl-title">Ultime Transazioni</span>
+        <span class="xl-count" id="recent-count">—</span>
+        <div style="display:flex;align-items:center;gap:5px;margin-left:6px">
+          <select class="xl-sel" id="recent-filter-year" onchange="loadRecent()" style="font-size:10.5px;padding:4px 7px">
+            <option value="">Tutti gli anni</option>
+            <option value="2026" selected>Solo 2026</option>
+            <option value="2025">Solo 2025</option>
+          </select>
+        </div>
+        <div class="xl-spacer"></div>
+        <button onclick="goto2026()" style="border:1px solid #1E2D3D;background:#0E1117;border-radius:5px;padding:4px 10px;font-size:11px;color:#64748B;cursor:pointer;font-family:inherit">Vedi tutte →</button>
+      </div>
+      <div class="xl-table-scroll" style="max-height:280px">
+        <table class="xl">
+          <thead><tr>
+            <th>Data</th>
+            <th>Supplier</th>
+            <th>Purchaser</th>
+            <th>Metodo</th>
+            <th class="txt-r">Committed</th>
+            <th class="txt-r">Delivered</th>
+            <th>Status</th>
+            <th>Marketplace</th>
+          </tr></thead>
+          <tbody id="recent-tbody"><tr class="loading-row"><td colspan="8"><i class="fas fa-circle-notch"></i>Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- KPI strip -->
     <div class="kpi-strip" id="kpi-strip">
       <div class="kpi" style="--kc:#3B82F6"><div class="kpi-l">Committed tCO₂</div><div class="kpi-v" id="kpi-committed">—</div><div class="kpi-s">Total volume ordered</div></div>
@@ -487,6 +563,8 @@
       <div class="xl-toolbar">
         <span class="xl-title">Marketplace Rankings</span>
         <span class="xl-count" id="mp-count">—</span>
+        <div class="xl-spacer"></div>
+        <span style="font-size:10px;color:#475569">Tutti gli anni</span>
       </div>
       <div class="xl-table-scroll" style="max-height:220px">
         <table class="xl" id="mp-table">
@@ -564,6 +642,7 @@
         <select class="xl-sel" id="f-market" onchange="loadTx()"><option value="">All Marketplaces</option></select>
         <select class="xl-sel" id="f-continent" onchange="loadTx()"><option value="">All Continents</option></select>
         <select class="xl-sel" id="f-year" onchange="loadTx()"><option value="">All Years</option></select>
+        <button onclick="set2026Filter()" style="border:1px solid #3B82F6;background:#0F1E35;border-radius:5px;padding:5px 11px;font-size:11px;font-weight:600;color:#60A5FA;cursor:pointer;font-family:inherit;white-space:nowrap" title="Mostra solo transazioni 2026">📅 2026</button>
         <div class="xl-spacer"></div>
         <button class="xl-reset" onclick="resetTxFilters()"><i class="fas fa-times"></i> Reset</button>
       </div>
@@ -1481,15 +1560,107 @@ async function uploadFile(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   2026 PANEL + RECENT TRANSACTIONS
+═══════════════════════════════════════════════════════════════ */
+async function load2026Panel(){
+  try{
+    const s = await fetch(BASE+'/api/transactions/stats/year-snapshot?year=2026').then(r=>r.json());
+    document.getElementById('p26-tx').textContent        = fmt(s.total_tx);
+    document.getElementById('p26-committed').textContent = fmt(s.committed);
+    document.getElementById('p26-delivered').textContent = fmt(s.delivered);
+    document.getElementById('p26-rate').textContent      = (s.del_rate||0).toFixed(1)+'%';
+    document.getElementById('p26-buyers').textContent    = fmt(s.buyers);
+    if(s.last_date){
+      const d = new Date(s.last_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      document.getElementById('p26-lastdate').textContent = 'aggiornato al '+d;
+    }
+    // Barre metodi
+    const methods = s.methods || [];
+    const maxCom  = Math.max(...methods.map(m=>m.committed||0), 1);
+    const mHtml   = methods.slice(0,8).map(m=>{
+      const pct   = Math.min(100,(m.committed/maxCom)*100);
+      const col   = methodColor(m.method);
+      const short = m.method.length > 48 ? m.method.substring(0,46)+'…' : m.method;
+      return `<div style="display:flex;align-items:center;gap:8px">
+        <div style="width:180px;font-size:10.5px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0" title="${esc(m.method)}">${esc(short)}</div>
+        <div style="flex:1;height:6px;background:#1A2035;border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div>
+        </div>
+        <div style="width:70px;font-size:10.5px;color:${col};font-weight:700;text-align:right;flex-shrink:0">${fmt(m.committed)} t</div>
+        <div style="width:28px;font-size:9.5px;color:#475569;text-align:right;flex-shrink:0">${m.count}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('p26-methods').innerHTML = mHtml || '<div style="color:#334155;font-size:11px">Nessun dato</div>';
+  } catch(e){ console.error('2026 panel error',e); }
+}
+
+async function loadRecent(){
+  const yearFilter = document.getElementById('recent-filter-year')?.value || '';
+  const tbody = document.getElementById('recent-tbody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="8"><i class="fas fa-circle-notch"></i>Loading…</td></tr>';
+  try{
+    // Usa l’endpoint /api/transactions/ con filtro anno e ordinamento per data
+    const params = new URLSearchParams({ skip:0, limit:50, sort_by:'announcement', sort_dir:'desc' });
+    if(yearFilter) params.set('year', yearFilter);
+    const r = await fetch(BASE+'/api/transactions/?'+params).then(r=>r.json());
+    const items = r.data || [];
+    document.getElementById('recent-count').textContent =
+      (yearFilter ? yearFilter+': ' : '') + fmt(r.total) + ' transazioni';
+    let html = '';
+    items.forEach(t=>{
+      const txDate = t.announcement
+        ? new Date(t.announcement).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+        : (t.year||'—');
+      const isNew2026 = t.year === 2026;
+      html += `<tr onclick='openTxModal(${JSON.stringify(t).replace(/'/g,"&#39;")})' style="${isNew2026?'background:#0A1628;':''} ">
+        <td class="fw7" style="white-space:nowrap;color:${isNew2026?'#60A5FA':'#94A3B8'}">${txDate}</td>
+        <td>${esc(t.supplier_name||t.supplier||'—')}</td>
+        <td style="color:#94A3B8">${esc(t.purchaser||'—')}</td>
+        <td>${methodChip(t.method)}</td>
+        <td class="txt-r c-blue">${fmt(t.tonnes)}</td>
+        <td class="txt-r c-green">${fmt(t.tonnes_delivered||0)}</td>
+        <td>${statusChip(t.status)}</td>
+        <td class="c-gray">${esc(t.marketplace||'—')}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;padding:20px;color:#334155">Nessuna transazione</td></tr>';
+  } catch(e){ console.error(e); tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#EF4444">Errore caricamento</td></tr>'; }
+}
+
+function goto2026(){
+  // Naviga a Order Explorer con filtro 2026 attivo
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>{
+    if(i.textContent.trim().includes('Order Explorer')) i.classList.add('active');
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-orders').classList.add('active');
+  document.getElementById('page-title').textContent = 'Order Explorer';
+  document.getElementById('page-sub').textContent   = 'Full transaction database — all CDR purchases';
+  // Imposta filtro 2026 e carica
+  const fy = document.getElementById('f-year');
+  if(fy){ fy.value='2026'; }
+  txOffset = 0; txSort = 'announcement'; txDir = 'desc';
+  fetchTx();
+}
+
+function set2026Filter(){
+  const fy = document.getElementById('f-year');
+  if(fy){ fy.value='2026'; }
+  txOffset = 0; txSort = 'announcement'; txDir = 'desc';
+  loadTx();
+}
+
+/* ═══════════════════════════════════════════════════════════════
    INIT & REFRESH
 ═══════════════════════════════════════════════════════════════ */
 async function refreshAll(){
-  await loadDashboard();
+  await Promise.all([loadDashboard(), load2026Panel(), loadRecent()]);
 }
 
 (async function init(){
   await loadTxFilters();
-  await loadDashboard();
+  await Promise.all([loadDashboard(), load2026Panel(), loadRecent()]);
 })();
 </script>
 </body>

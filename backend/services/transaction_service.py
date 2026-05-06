@@ -350,6 +350,52 @@ class TransactionService:
             "years":        years,
         }
 
+    @staticmethod
+    def get_recent(db: Session, limit: int = 30) -> List[Dict]:
+        """Ultime transazioni ordinate per data, con dati supplier."""
+        rows = (
+            db.query(Transaction)
+            .options(joinedload(Transaction.supplier))
+            .join(Transaction.supplier, isouter=True)
+            .order_by(Transaction.announcement.desc(), Transaction.id.desc())
+            .limit(limit)
+            .all()
+        )
+        return [t.to_dict() for t in rows]
+
+    @staticmethod
+    def get_year_snapshot(db: Session, year: int) -> Dict[str, Any]:
+        """Snapshot completo per un anno specifico."""
+        base = db.query(Transaction).filter(Transaction.year == year)
+        total_tx   = base.count()
+        committed  = db.query(func.sum(Transaction.tonnes)).filter(Transaction.year == year).scalar() or 0
+        delivered  = db.query(func.sum(Transaction.tonnes_delivered)).filter(Transaction.year == year).scalar() or 0
+        last_date  = db.query(func.max(Transaction.announcement)).filter(Transaction.year == year).scalar()
+        buyers     = db.query(func.count(distinct(Transaction.purchaser))).filter(Transaction.year == year).scalar() or 0
+
+        methods = (
+            db.query(
+                Transaction.method,
+                func.count(Transaction.id).label("count"),
+                func.sum(Transaction.tonnes).label("committed"),
+            )
+            .filter(Transaction.year == year, Transaction.method.isnot(None))
+            .group_by(Transaction.method)
+            .order_by(func.sum(Transaction.tonnes).desc())
+            .all()
+        )
+
+        return {
+            "year":       year,
+            "total_tx":   total_tx,
+            "committed":  round(committed, 2),
+            "delivered":  round(delivered, 2),
+            "del_rate":   round(delivered / committed * 100, 2) if committed > 0 else 0,
+            "last_date":  last_date.isoformat() if last_date else None,
+            "buyers":     buyers,
+            "methods":    [{"method": r.method, "count": r.count, "committed": round(r.committed or 0, 2)} for r in methods],
+        }
+
     # ─── CRUD base ───────────────────────────────────────────────────────────
 
     @staticmethod

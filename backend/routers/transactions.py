@@ -69,6 +69,14 @@ def top_suppliers(limit: int = Query(10, ge=1, le=50), db: Session = Depends(get
 def timeline(db: Session = Depends(get_db)):
     return TransactionService.get_timeline(db)
 
+@router.get("/stats/recent")
+def recent(limit: int = Query(30, ge=1, le=100), db: Session = Depends(get_db)):
+    return TransactionService.get_recent(db, limit=limit)
+
+@router.get("/stats/year-snapshot")
+def year_snapshot(year: int = Query(2026), db: Session = Depends(get_db)):
+    return TransactionService.get_year_snapshot(db, year=year)
+
 @router.get("/filters")
 def filter_options(db: Session = Depends(get_db)):
     return TransactionService.get_filter_options(db)
