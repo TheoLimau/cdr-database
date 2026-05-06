@@ -212,7 +212,7 @@
     .page{flex:1;padding:28px 32px;display:none}
     .page.active{display:block;animation:fadeIn .2s ease}
     #page-methods{display:none;}
-    #page-methods.active{display:flex!important;flex-direction:column;gap:22px;animation:fadeIn .2s ease}
+    #page-methods.active{display:block!important;animation:fadeIn .2s ease}
 
     /* ═══════════════════════════════════════════
        SECTION HEADER
@@ -345,6 +345,7 @@
       flex-wrap:wrap; gap:16px;
       padding-bottom:20px;
       border-bottom:1px solid var(--border);
+      margin-bottom:4px;
     }
     .mpage-header-left{ display:flex; align-items:center; gap:14px; }
     .mpage-icon{
@@ -367,10 +368,10 @@
     .mpage-kpi-v{ font-size:13px; font-weight:700; color:var(--white); line-height:1.3; }
     .mpage-kpi-l{ font-size:9px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
 
-    /* ── Charts: 2 colonne affiancate ── */
-    .mpage-charts-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
+    /* ── Charts layout: full-width stacked ── */
+    .mpage-charts-stack{
+      display:flex;
+      flex-direction:column;
       gap:16px;
     }
 
@@ -379,76 +380,82 @@
       background:var(--bg2); border:1px solid var(--border);
       border-radius:var(--radius); overflow:hidden;
       transition:border-color .15s;
-      min-width:0;           /* CRITICAL: evita overflow griglia */
+      width:100%;
     }
     .mpage-card:hover{ border-color:var(--border2); }
     .mpage-card-head{
       display:flex; align-items:center; justify-content:space-between;
-      padding:13px 18px 11px; border-bottom:1px solid var(--border);
+      padding:14px 20px 12px; border-bottom:1px solid var(--border);
     }
     .mpage-card-title{
-      font-size:12px; font-weight:700; color:var(--white);
+      font-size:12.5px; font-weight:700; color:var(--white);
       display:flex; align-items:center; gap:8px;
+    }
+    .mpage-card-meta{
+      font-size:10px; color:var(--text2); margin-top:2px;
     }
 
     /* ── Horizontal bar list ── */
     .mpage-hbars{
-      padding:14px 18px 16px;
+      padding:16px 20px 18px;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:7px;
     }
     .mpage-hbars-loading{
       color:var(--text2); font-size:11px;
       display:flex; align-items:center; gap:8px;
-      padding:24px 0;
+      padding:28px 0;
     }
 
     /*
-      Una riga = [label_fissa | barra_flex | valore_fisso]
-      La barra prende tutto lo spazio residuo.
-      Usiamo subgrid via grid, NON flex, per allineamento perfetto.
+      Bar row layout: [rank | label | bar | value]
+      Rank = 22px, Label = 180px, Bar = flexible, Value = 72px
     */
     .mbar-row{
       display:grid;
-      grid-template-columns:128px 1fr 58px;
+      grid-template-columns:22px 180px 1fr 72px;
       align-items:center;
-      column-gap:8px;
-      min-height:22px;
+      column-gap:10px;
+      min-height:24px;
+      padding:1px 0;
     }
-    /* Colonna 1: etichetta — troncata se troppo lunga */
+    .mbar-row:hover .mbar-label-text{ color:var(--white); }
+    /* Rank number */
+    .mbar-rank{
+      font-size:9.5px; font-weight:600; color:var(--text3);
+      text-align:right; flex-shrink:0;
+    }
+    /* Label column */
     .mbar-label{
-      display:flex; align-items:center; gap:6px;
+      display:flex; align-items:center; gap:7px;
       min-width:0; overflow:hidden;
     }
     .mbar-label-dot{
       width:8px; height:8px; border-radius:2px; flex-shrink:0;
     }
     .mbar-label-text{
-      font-size:10.5px; font-weight:500; color:#CBD5E1;
+      font-size:11px; font-weight:500; color:#CBD5E1;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      min-width:0;
+      min-width:0; transition:color .15s;
     }
-    /* Colonna 2: barra — si estende per riempire il residuo */
+    /* Bar track column */
     .mbar-track{
       width:100%; min-width:0;
       background:rgba(255,255,255,.05);
-      border-radius:3px;
-      height:13px;
+      border-radius:4px;
+      height:12px;
       overflow:hidden;
     }
     .mbar-fill{
       height:100%;
-      border-radius:3px;
-      transition:width .5s cubic-bezier(.4,0,.2,1);
-      min-width:0;
+      border-radius:4px;
+      transition:width .6s cubic-bezier(.4,0,.2,1);
     }
-    /* Colonna 3: valore — allineato a destra, non va a capo */
+    /* Value column */
     .mbar-val{
-      font-size:9.5px; font-weight:600; color:#94A3B8;
+      font-size:10px; font-weight:600; color:#94A3B8;
       text-align:right; white-space:nowrap;
-      overflow:hidden; text-overflow:ellipsis;
-      min-width:0;
     }
 
     /* ── Badges ── */
@@ -460,6 +467,12 @@
     .meth-badge.vol{ background:rgba(79,142,247,.12); color:#93C5FD; border:1px solid rgba(79,142,247,.2); }
     .meth-badge.rate{ background:rgba(52,211,153,.1); color:#6EE7B7; border:1px solid rgba(52,211,153,.18); }
 
+    /* ── Methods page inner wrapper ── */
+    .mpage-inner{
+      display:flex; flex-direction:column; gap:20px;
+      max-width:1100px; width:100%;
+      margin:0 auto;
+    }
     /* ═══════════════════════════════════════════
        TABLE WRAPPER
     ═══════════════════════════════════════════ */
@@ -1295,13 +1308,18 @@
     <div id="methods-summary-pills" class="mpage-kpis"></div>
   </div>
 
-  <!-- ══ CHARTS: side-by-side HTML bar charts ══ -->
-  <div class="mpage-charts-grid">
+  <div class="mpage-inner">
+
+  <!-- ══ CHARTS: full-width stacked ══ -->
+  <div class="mpage-charts-stack">
 
     <!-- Chart 1: Committed Volume -->
     <div class="mpage-card">
       <div class="mpage-card-head">
-        <div class="mpage-card-title"><i class="fas fa-chart-bar" style="color:var(--blue)"></i> Committed tCO&#8322; by Method</div>
+        <div>
+          <div class="mpage-card-title"><i class="fas fa-chart-bar" style="color:var(--blue)"></i> Committed tCO&#8322; by Method</div>
+          <div class="mpage-card-meta">Ranked by total committed volume — sorted descending</div>
+        </div>
         <span class="meth-badge vol">Volume</span>
       </div>
       <div class="mpage-hbars" id="vol-bars">
@@ -1312,7 +1330,10 @@
     <!-- Chart 2: Delivery Rate -->
     <div class="mpage-card">
       <div class="mpage-card-head">
-        <div class="mpage-card-title"><i class="fas fa-percentage" style="color:var(--green)"></i> Delivery Rate by Method</div>
+        <div>
+          <div class="mpage-card-title"><i class="fas fa-percentage" style="color:var(--green)"></i> Delivery Rate by Method</div>
+          <div class="mpage-card-meta">Delivered ÷ Committed — sorted by rate descending</div>
+        </div>
         <span class="meth-badge rate">Rate %</span>
       </div>
       <div class="mpage-hbars" id="rate-bars">
@@ -1331,7 +1352,7 @@
     <div class="xl-table-scroll" style="max-height:420px">
       <table class="xl" id="methods-table">
         <thead><tr>
-          <th style="min-width:240px">Method</th>
+          <th style="min-width:260px">Method</th>
           <th class="txt-r">Transactions</th>
           <th class="txt-r">Committed tCO&#8322;</th>
           <th class="txt-r">Delivered tCO&#8322;</th>
@@ -1346,6 +1367,8 @@
       </table>
     </div>
   </div>
+
+  </div><!-- /mpage-inner -->
 
 </div>
 
@@ -2239,45 +2262,51 @@ async function loadMethods(){
     };
     const sl = s => SHORT[s] || (s.length<=22 ? s : s.substring(0,21)+'…');
 
-    // ── Build pure-HTML horizontal bar chart (no Chart.js — perfect alignment)
+    // ── Build pure-HTML horizontal bar chart
+    // data must already be sorted in the desired display order
     const buildHBars = (containerId, data, getValue, formatVal, barColor) => {
       const el = document.getElementById(containerId);
       if(!el) return;
       const maxVal = Math.max(...data.map(getValue), 0.001);
-      el.innerHTML = data.map(r=>{
+      el.innerHTML = data.map((r, i)=>{
         const v    = getValue(r);
         const pct  = maxVal > 0 ? Math.min(100, v/maxVal*100) : 0;
         const col  = methodColor(r.method);
+        const bc   = barColor(r, v);
         return `<div class="mbar-row" title="${esc(r.method)}">
+          <div class="mbar-rank">${i+1}</div>
           <div class="mbar-label">
             <div class="mbar-label-dot" style="background:${col}"></div>
             <span class="mbar-label-text">${esc(sl(r.method))}</span>
           </div>
           <div class="mbar-track">
-            <div class="mbar-fill" style="width:${pct.toFixed(2)}%;background:${barColor(r)};opacity:.85"></div>
+            <div class="mbar-fill" style="width:${pct.toFixed(2)}%;background:${bc}"></div>
           </div>
           <div class="mbar-val">${formatVal(v)}</div>
         </div>`;
       }).join('');
     };
 
-    // ── Chart 1: Committed Volume
+    // ── Chart 1: Committed Volume — sorted desc by committed
+    const meSortedVol = [...me].sort((a,b)=>(b.committed||0)-(a.committed||0));
     buildHBars(
-      'vol-bars', me,
+      'vol-bars',
+      meSortedVol,
       r => r.committed||0,
       v => fmt(v),
-      r => methodColor(r.method)
+      (r) => methodColor(r.method)
     );
 
-    // ── Chart 2: Delivery Rate
+    // ── Chart 2: Delivery Rate — sorted desc by rate
+    const meSortedRate = [...me]
+      .map(r=>({...r, _rate: (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0}))
+      .sort((a,b)=>b._rate - a._rate);
     buildHBars(
-      'rate-bars', me,
-      r => (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0,
+      'rate-bars',
+      meSortedRate,
+      r => r._rate,
       v => v.toFixed(1)+'%',
-      r => {
-        const rate = (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0;
-        return rate > 20 ? '#4ADE80' : rate > 5 ? '#FB923C' : '#64748B';
-      }
+      (r, v) => v > 20 ? '#4ADE80' : v > 5 ? '#FB923C' : '#64748B'
     );
 
     // ── Detail table
