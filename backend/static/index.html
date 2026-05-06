@@ -382,28 +382,60 @@
     }
 
     /* Chart area: labels left, chart right */
-    .mpage-chart-area{
-      display:flex; align-items:stretch;
-      padding:16px 20px 14px;
-      gap:0;
+    /* Charts 2-col grid */
+    .mpage-charts-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
     }
-    /* Fixed-width Y-label column */
-    .mpage-ylabels{
-      width:160px; flex-shrink:0;
-      display:flex; flex-direction:column;
-      justify-content:space-around;
-      padding-right:10px;
+
+    /* HTML horizontal bar list */
+    .mpage-hbars{
+      padding:12px 16px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
     }
-    .mpage-ylabel{
+    .mpage-hbars-loading{
+      color:var(--text2); font-size:11px;
+      display:flex; align-items:center; gap:8px;
+      padding:24px 0;
+    }
+    /* One row = label + bar + value */
+    .mbar-row{
+      display:grid;
+      grid-template-columns:170px 1fr 64px;
+      align-items:center;
+      gap:8px;
+      min-height:22px;
+    }
+    .mbar-label{
       font-size:10.5px; font-weight:500; color:#CBD5E1;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      line-height:1; display:flex; align-items:center; gap:6px;
+      display:flex; align-items:center; gap:6px;
+      cursor:default;
     }
-    .mpage-ylabel-dot{
+    .mbar-label-dot{
       width:8px; height:8px; border-radius:2px; flex-shrink:0;
     }
-    /* Chart canvas column */
-    .mpage-chart-col{ flex:1; min-width:0; }
+    .mbar-track{
+      background:rgba(255,255,255,.04);
+      border-radius:3px;
+      height:14px;
+      overflow:hidden;
+      position:relative;
+    }
+    .mbar-fill{
+      height:100%;
+      border-radius:3px;
+      transition:width .4s ease;
+      position:relative;
+    }
+    .mbar-val{
+      font-size:9.5px; font-weight:600; color:#94A3B8;
+      text-align:right;
+      white-space:nowrap;
+    }
 
     /* Badges */
     .meth-badge{
@@ -1248,38 +1280,31 @@
     <div id="methods-summary-pills" class="mpage-kpis"></div>
   </div>
 
-  <!-- ══ CHART 1: Committed Volume ══ -->
-  <div class="mpage-card">
-    <div class="mpage-card-head">
-      <div class="mpage-card-title"><i class="fas fa-chart-bar" style="color:var(--blue)"></i> Committed tCO&#8322; by Method</div>
-      <span class="meth-badge vol">Volume</span>
-    </div>
-    <div class="mpage-chart-area">
-      <!-- Y-axis labels column -->
-      <div class="mpage-ylabels" id="vol-ylabels"></div>
-      <!-- Bar chart -->
-      <div class="mpage-chart-col">
-        <div id="meth-vol-wrap" style="position:relative;width:100%;height:320px">
-          <canvas id="meth-vol-chart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- ══ CHARTS: side-by-side HTML bar charts ══ -->
+  <div class="mpage-charts-grid">
 
-  <!-- ══ CHART 2: Delivery Rate ══ -->
-  <div class="mpage-card">
-    <div class="mpage-card-head">
-      <div class="mpage-card-title"><i class="fas fa-percentage" style="color:var(--green)"></i> Delivery Rate by Method</div>
-      <span class="meth-badge rate">Rate %</span>
-    </div>
-    <div class="mpage-chart-area">
-      <div class="mpage-ylabels" id="rate-ylabels"></div>
-      <div class="mpage-chart-col">
-        <div id="meth-rate-wrap" style="position:relative;width:100%;height:320px">
-          <canvas id="meth-rate-chart"></canvas>
-        </div>
+    <!-- Chart 1: Committed Volume -->
+    <div class="mpage-card">
+      <div class="mpage-card-head">
+        <div class="mpage-card-title"><i class="fas fa-chart-bar" style="color:var(--blue)"></i> Committed tCO&#8322; by Method</div>
+        <span class="meth-badge vol">Volume</span>
+      </div>
+      <div class="mpage-hbars" id="vol-bars">
+        <div class="mpage-hbars-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
       </div>
     </div>
+
+    <!-- Chart 2: Delivery Rate -->
+    <div class="mpage-card">
+      <div class="mpage-card-head">
+        <div class="mpage-card-title"><i class="fas fa-percentage" style="color:var(--green)"></i> Delivery Rate by Method</div>
+        <span class="meth-badge rate">Rate %</span>
+      </div>
+      <div class="mpage-hbars" id="rate-bars">
+        <div class="mpage-hbars-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ══ DETAIL TABLE ══ -->
@@ -2155,6 +2180,8 @@ async function loadMethods(){
     const totalDelivered = me.reduce((a,r)=>a+(r.delivered||0),0);
     const totalTx        = me.reduce((a,r)=>a+(r.count||0),0);
     const overallRate    = totalCommitted>0 ? (totalDelivered/totalCommitted*100).toFixed(1)+'%' : '—';
+    const maxCommitted   = Math.max(...me.map(r=>r.committed||0));
+    const maxRate        = Math.max(...me.map(r=> (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0));
 
     // ── Summary KPI pills
     const pillsEl = document.getElementById('methods-summary-pills');
@@ -2165,11 +2192,11 @@ async function loadMethods(){
       {v: overallRate,         l:'Avg Delivery Rate'},
     ].map(p=>`<div class="mpage-kpi"><div class="mpage-kpi-v">${p.v}</div><div class="mpage-kpi-l">${p.l}</div></div>`).join('');
 
-    // ── Table count
+    // ── Table count badge
     const countEl = document.getElementById('methods-count');
     if(countEl) countEl.textContent = me.length+' methods';
 
-    // ── Abbreviation map for Y-axis labels
+    // ── Short label map (full name → display name)
     const SHORT = {
       'Bioenergy With Carbon Capture And Sequestration BECCS':                        'BECCS',
       'BiCRS - Bioenergy with Carbon Capture and Sequestration (BECCS)':              'BiCRS – BECCS',
@@ -2197,130 +2224,56 @@ async function loadMethods(){
     };
     const sl = s => SHORT[s] || (s.length<=22 ? s : s.substring(0,21)+'…');
 
-    // ── Row height so every bar has same visual height across both charts
-    const ROW_H = 26; // px per bar
-    const CHART_PAD_V = 20; // top+bottom padding
-    const dynH = me.length * ROW_H + CHART_PAD_V;
-
-    // ── Helper: build HTML Y-labels column synced with chart rows
-    const buildYLabels = (data, labelId) => {
-      const el = document.getElementById(labelId);
+    // ── Build pure-HTML horizontal bar chart (no Chart.js — perfect alignment)
+    const buildHBars = (containerId, data, getValue, formatVal, barColor) => {
+      const el = document.getElementById(containerId);
       if(!el) return;
-      el.style.height = dynH+'px';
+      const maxVal = Math.max(...data.map(getValue), 0.001);
       el.innerHTML = data.map(r=>{
-        const col = methodColor(r.method);
-        return `<div class="mpage-ylabel" style="height:${ROW_H}px">
-          <div class="mpage-ylabel-dot" style="background:${col}"></div>
-          <span title="${esc(r.method)}">${esc(sl(r.method))}</span>
+        const v    = getValue(r);
+        const pct  = maxVal > 0 ? Math.min(100, v/maxVal*100) : 0;
+        const col  = methodColor(r.method);
+        return `<div class="mbar-row" title="${esc(r.method)}">
+          <div class="mbar-label">
+            <div class="mbar-label-dot" style="background:${col}"></div>
+            <span>${esc(sl(r.method))}</span>
+          </div>
+          <div class="mbar-track">
+            <div class="mbar-fill" style="width:${pct.toFixed(2)}%;background:${barColor(r)};opacity:.85"></div>
+          </div>
+          <div class="mbar-val">${formatVal(v)}</div>
         </div>`;
       }).join('');
     };
 
-    buildYLabels(me, 'vol-ylabels');
+    // ── Chart 1: Committed Volume
+    buildHBars(
+      'vol-bars', me,
+      r => r.committed||0,
+      v => fmt(v),
+      r => methodColor(r.method)
+    );
 
-    // ── Chart options — NO Y axis (labels are in HTML), clean X axis
-    const mkMethOpts = (isRate) => ({
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      layout:{ padding:{ right: isRate ? 52 : 66, left:0, top:0, bottom:0 } },
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            title: ctx => me[ctx[0].dataIndex]?.method || '',
-            label: ctx => isRate
-              ? '  Delivery Rate: '+Number(ctx.raw).toFixed(1)+'%'
-              : '  Committed: '+fmt(ctx.raw)+' tCO₂'
-          }
-        },
-        datalabels:{
-          display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-          anchor:'end', align:'end',
-          color:'#94A3B8',
-          font:{size:9, weight:'500'},
-          formatter: v => isRate ? Number(v).toFixed(1)+'%' : fmt(v),
-          clamp:true,
-          clip:false,
-          padding:{left:3},
-        }
-      },
-      scales:{
-        x:{
-          ticks:{
-            color:'#4A5568', font:{size:9},
-            callback: v => isRate ? v+'%' : fmt(v),
-            maxRotation:0, maxTicksLimit:5,
-          },
-          grid:{color:'rgba(255,255,255,.04)'},
-          border:{color:'rgba(255,255,255,.06)'},
-        },
-        y:{
-          display:false,   // ← etichette Y gestite dall'HTML, non da Chart.js
-          ticks:{ autoSkip:false },
-          grid:{display:false},
-        },
+    // ── Chart 2: Delivery Rate
+    buildHBars(
+      'rate-bars', me,
+      r => (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0,
+      v => v.toFixed(1)+'%',
+      r => {
+        const rate = (r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0;
+        return rate > 20 ? '#4ADE80' : rate > 5 ? '#FB923C' : '#64748B';
       }
-    });
-
-    // ── Update wrapper heights
-    document.getElementById('meth-vol-wrap').style.height  = dynH+'px';
-    document.getElementById('meth-rate-wrap').style.height = dynH+'px';
-
-    // ── Volume chart
-    mkChart('meth-vol-chart',{
-      type:'bar',
-      data:{
-        labels: me.map(r=>sl(r.method)),
-        datasets:[{
-          label:'Committed tCO₂',
-          data: me.map(r=>r.committed||0),
-          backgroundColor: me.map(r=>methodColor(r.method)+'99'),
-          borderColor:     me.map(r=>methodColor(r.method)),
-          borderWidth:1,
-          borderRadius:{ topRight:3, bottomRight:3 },
-          borderSkipped:'left',
-          barThickness: ROW_H - 8,
-        }]
-      },
-      options: mkMethOpts(false),
-      plugins:[ChartDataLabels]
-    });
-
-    // ── Rate chart — same Y labels, so re-use same HTML column
-    const withRate = me.map(r=>({
-      ...r,
-      rate:(r.committed||0)>0 ? (r.delivered||0)/(r.committed)*100 : 0
-    }));
-    buildYLabels(withRate, 'rate-ylabels');
-
-    mkChart('meth-rate-chart',{
-      type:'bar',
-      data:{
-        labels: withRate.map(r=>sl(r.method)),
-        datasets:[{
-          label:'Delivery Rate %',
-          data: withRate.map(r=>parseFloat((r.rate||0).toFixed(2))),
-          backgroundColor: withRate.map(r=>methodColor(r.method)+'88'),
-          borderColor:     withRate.map(r=>methodColor(r.method)),
-          borderWidth:1,
-          borderRadius:{ topRight:3, bottomRight:3 },
-          borderSkipped:'left',
-          barThickness: ROW_H - 8,
-        }]
-      },
-      options: mkMethOpts(true),
-      plugins:[ChartDataLabels]
-    });
+    );
 
     // ── Detail table
     let thtml='', totTx=0, totCom=0, totDel=0;
     me.forEach(r=>{
-      const com   = r.committed||0;
-      const del   = r.delivered||0;
-      const rate  = com>0 ? del/com*100 : 0;
-      const shareN= totalCommitted>0 ? com/totalCommitted*100 : 0;
-      const col   = methodColor(r.method);
+      const com    = r.committed||0;
+      const del    = r.delivered||0;
+      const rate   = com>0 ? del/com*100 : 0;
+      const shareN = totalCommitted>0 ? com/totalCommitted*100 : 0;
+      const col    = methodColor(r.method);
+      const rateCol= rate>20?'#4ADE80':rate>5?'#FB923C':'#64748B';
       totTx += r.count||0; totCom += com; totDel += del;
       thtml += `<tr>
         <td style="font-weight:600;color:#F1F5F9">
@@ -2332,7 +2285,7 @@ async function loadMethods(){
         <td class="txt-r">${fmt(r.count)}</td>
         <td class="txt-r c-blue">${fmt(com)}</td>
         <td class="txt-r c-green">${fmt(del)}</td>
-        <td class="txt-r fw7" style="color:${rate>20?'#4ADE80':rate>5?'#FB923C':'#64748B'}">${rate.toFixed(1)}%</td>
+        <td class="txt-r fw7" style="color:${rateCol}">${rate.toFixed(1)}%</td>
         <td class="txt-r">${r.unique_suppliers||'—'}</td>
         <td>
           <div style="display:flex;align-items:center;gap:8px">
@@ -2346,19 +2299,21 @@ async function loadMethods(){
     });
     document.getElementById('methods-tbody').innerHTML = thtml;
     const totRate = totCom>0 ? (totDel/totCom*100).toFixed(1)+'%' : '—';
+    const totRateCol = parseFloat(totRate)>10?'#4ADE80':parseFloat(totRate)>3?'#FB923C':'#94A3B8';
     document.getElementById('methods-tfoot').innerHTML =
       `<td style="padding:10px 16px;font-weight:700;color:#94A3B8">
         <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,.15)"></div>
+          <div style="width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,.2)"></div>
           Total — ${me.length} methods
         </div>
        </td>
        <td class="txt-r" style="color:#94A3B8;font-weight:600">${fmt(totTx)}</td>
        <td class="txt-r" style="color:#93C5FD;font-weight:600">${fmt(totCom)}</td>
        <td class="txt-r" style="color:#6EE7B7;font-weight:600">${fmt(totDel)}</td>
-       <td class="txt-r fw7" style="color:${parseFloat(totRate)>10?'#4ADE80':parseFloat(totRate)>3?'#FB923C':'#94A3B8'}">${totRate}</td>
+       <td class="txt-r fw7" style="color:${totRateCol}">${totRate}</td>
        <td class="txt-r" style="color:#94A3B8">—</td>
        <td style="color:#94A3B8;font-size:10px;padding-left:8px">100%</td>`;
+
   } catch(e){ console.error('loadMethods error:', e); }
 }
 
