@@ -341,10 +341,12 @@
     #page-methods.active{ display:block!important; animation:fadeIn .2s ease; }
 
     /* ── Inner centered column ── */
+    /* NOTE: #main already has margin-left:216px (sidebar width).
+       So we just fill available space with proper padding.
+       DO NOT use margin:0 auto here — it would center vs viewport, creating a big left gap. */
     .mpage-inner{
-      max-width:960px;
       width:100%;
-      margin:0 auto;
+      max-width:1280px;
       display:flex;
       flex-direction:column;
       gap:24px;
@@ -413,9 +415,6 @@
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:16px;
-    }
-    @media(max-width:700px){
-      .mpage-charts-grid2{ grid-template-columns:1fr; }
     }
 
     /* ── Chart card ── */
