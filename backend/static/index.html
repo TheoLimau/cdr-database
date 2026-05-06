@@ -9,345 +9,361 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    * { font-family: 'Inter', system-ui, sans-serif; }
+    *{font-family:'Inter',system-ui,sans-serif;box-sizing:border-box;}
+    body{background:#F7F8FA;min-height:100vh;}
 
     /* ── Sidebar ── */
-    .sidebar { background: linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #0a1f2e 100%); }
-    .nav-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px;
-                font-size:13px; font-weight:500; cursor:pointer; color:#94a3b8;
-                transition:all .2s; }
-    .nav-item:hover  { background:rgba(99,179,237,.1); color:#63b3ed; }
-    .nav-item.active { background:rgba(99,179,237,.15); color:#63b3ed; border-left:3px solid #63b3ed; }
-    .nav-item .icon  { width:16px; text-align:center; }
+    .sidebar{width:220px;min-height:100vh;background:#fff;border-right:1px solid #EAECF0;
+             display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:40;}
+    .nav-section{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.08em;
+                 text-transform:uppercase;padding:16px 16px 6px;}
+    .nav-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:7px;
+              font-size:13px;font-weight:500;cursor:pointer;color:#6B7280;margin:1px 6px;
+              transition:all .15s;}
+    .nav-item:hover{background:#F3F4F6;color:#111827;}
+    .nav-item.active{background:#F3F4F6;color:#111827;font-weight:600;}
+    .nav-item .ni{width:15px;text-align:center;font-size:13px;}
 
-    /* ── KPI Cards ── */
-    .kpi { background:#fff; border-radius:16px; padding:20px 22px;
-           border:1px solid #e8edf5; box-shadow:0 2px 8px rgba(0,0,0,.04);
-           transition:transform .2s, box-shadow .2s; }
-    .kpi:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); }
-    .kpi-val  { font-size:1.6rem; font-weight:800; color:#0f172a; line-height:1.1; }
-    .kpi-lbl  { font-size:11px; color:#94a3b8; margin-top:4px; font-weight:500; letter-spacing:.03em; text-transform:uppercase; }
-    .kpi-delta { font-size:11px; font-weight:600; margin-top:6px; }
+    /* ── Main content ── */
+    .main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{background:#fff;border-bottom:1px solid #EAECF0;padding:14px 28px;
+            display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;}
 
-    /* ── Charts ── */
-    .chart-card { background:#fff; border-radius:16px; padding:22px;
-                  border:1px solid #e8edf5; box-shadow:0 2px 8px rgba(0,0,0,.04); }
-    .chart-title { font-size:12px; font-weight:700; color:#64748b; margin-bottom:16px;
-                   text-transform:uppercase; letter-spacing:.06em; }
+    /* ── KPI cards ── */
+    .kpi-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:20px 24px;
+              box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .kpi-value{font-size:2rem;font-weight:700;color:#111827;line-height:1.1;}
+    .kpi-label{font-size:12px;color:#6B7280;margin-bottom:6px;font-weight:500;}
+    .kpi-trend{font-size:11px;font-weight:600;margin-top:6px;}
+    .trend-up{color:#10B981;}
+    .trend-neutral{color:#9CA3AF;}
+
+    /* ── Chart cards ── */
+    .chart-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:22px 24px;
+                box-shadow:0 1px 3px rgba(0,0,0,.04);}
+    .chart-heading{font-size:14px;font-weight:600;color:#111827;margin-bottom:3px;}
+    .chart-sub{font-size:12px;color:#9CA3AF;margin-bottom:18px;}
 
     /* ── Table ── */
-    #tx-table th { padding:12px 16px; text-align:left; font-size:10.5px; font-weight:700;
-                   color:#94a3b8; text-transform:uppercase; letter-spacing:.06em;
-                   cursor:pointer; white-space:nowrap; background:#f8fafc;
-                   border-bottom:2px solid #e8edf5; }
-    #tx-table th:hover { color:#3b82f6; }
-    #tx-table td { padding:12px 16px; font-size:13px; color:#374151;
-                   border-bottom:1px solid #f1f5f9; white-space:nowrap; }
-    #tx-table tbody tr { cursor:pointer; transition:background .1s; }
-    #tx-table tbody tr:hover { background:#eff6ff; }
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;
+                   color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;
+                   border-bottom:1px solid #EAECF0;white-space:nowrap;cursor:pointer;
+                   background:#fff;}
+    .data-table th:hover{color:#111827;}
+    .data-table td{padding:11px 14px;font-size:13px;color:#374151;
+                   border-bottom:1px solid #F3F4F6;white-space:nowrap;max-width:180px;
+                   overflow:hidden;text-overflow:ellipsis;}
+    .data-table tbody tr{transition:background .1s;cursor:pointer;}
+    .data-table tbody tr:hover{background:#F9FAFB;}
 
     /* ── Badges ── */
-    .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px;
-             font-size:11px; font-weight:600; }
-    .b-delivered  { background:#dcfce7; color:#15803d; }
-    .b-contracted { background:#dbeafe; color:#1d4ed8; }
-    .b-retired    { background:#f3e8ff; color:#7c3aed; }
-    .b-partial    { background:#fef3c7; color:#92400e; }
-    .b-default    { background:#f1f5f9; color:#64748b; }
+    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;
+           font-size:11px;font-weight:600;}
+    .b-delivered {background:#D1FAE5;color:#065F46;}
+    .b-contracted{background:#DBEAFE;color:#1E40AF;}
+    .b-retired   {background:#EDE9FE;color:#5B21B6;}
+    .b-partial   {background:#FEF3C7;color:#92400E;}
+    .b-default   {background:#F3F4F6;color:#6B7280;}
 
-    .method-pill { display:inline-block; padding:3px 9px; border-radius:6px;
-                   font-size:11px; font-weight:500; background:#eff6ff; color:#2563eb;
-                   max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .method-tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;
+                font-weight:500;background:#EFF6FF;color:#1D4ED8;
+                max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-    /* ── Filters ── */
-    .fsel { font-size:12.5px; border:1.5px solid #e2e8f0; border-radius:10px;
-            padding:8px 12px; background:#fff; cursor:pointer; color:#374151;
-            transition:border-color .15s, box-shadow .15s; }
-    .fsel:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+    /* ── Filters / selects ── */
+    .fsel{font-size:12.5px;border:1px solid #E5E7EB;border-radius:8px;
+          padding:7px 10px;background:#fff;cursor:pointer;color:#374151;
+          transition:border-color .15s;}
+    .fsel:focus{outline:none;border-color:#6366F1;}
+    .search-box{border:1px solid #E5E7EB;border-radius:8px;padding:7px 12px 7px 34px;
+                font-size:13px;color:#374151;background:#fff;width:280px;
+                transition:border-color .15s;}
+    .search-box:focus{outline:none;border-color:#6366F1;}
 
-    /* ── Search ── */
-    #search-inp:focus { box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+    /* ── Tabs ── */
+    .tab-group{display:flex;gap:2px;background:#F3F4F6;border-radius:8px;padding:3px;}
+    .tab-btn{padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:500;
+             cursor:pointer;border:none;background:transparent;color:#6B7280;transition:all .15s;}
+    .tab-btn.active{background:#fff;color:#111827;font-weight:600;
+                    box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
     /* ── Pagination ── */
-    .pgbtn { padding:6px 12px; border-radius:8px; font-size:12.5px; font-weight:500;
-             border:1.5px solid #e2e8f0; transition:all .15s; color:#374151; }
-    .pgbtn:hover:not(:disabled) { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
-    .pgbtn.active { background:#3b82f6; color:#fff; border-color:#3b82f6; }
-    .pgbtn:disabled { opacity:.35; cursor:not-allowed; }
+    .pgbtn{padding:5px 11px;border-radius:7px;font-size:12.5px;font-weight:500;
+           border:1px solid #E5E7EB;background:#fff;color:#374151;transition:all .15s;cursor:pointer;}
+    .pgbtn:hover:not(:disabled){background:#F9FAFB;border-color:#D1D5DB;}
+    .pgbtn.active{background:#6366F1;color:#fff;border-color:#6366F1;}
+    .pgbtn:disabled{opacity:.35;cursor:not-allowed;}
 
     /* ── Supplier card ── */
-    .sup-card { background:#fff; border-radius:16px; padding:20px;
-                border:1px solid #e8edf5; box-shadow:0 2px 8px rgba(0,0,0,.04);
-                transition:all .2s; }
-    .sup-card:hover { box-shadow:0 8px 24px rgba(0,0,0,.1); transform:translateY(-3px); }
+    .sup-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:18px;
+              box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s,transform .15s;}
+    .sup-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px);}
 
     /* ── Progress bar ── */
-    .prog-bar { height:6px; border-radius:4px; background:#e8edf5; overflow:hidden; }
-    .prog-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#3b82f6,#06b6d4); }
+    .prog-bar{height:5px;border-radius:3px;background:#F3F4F6;overflow:hidden;}
+    .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#6366F1,#8B5CF6);}
 
     /* ── Spinner ── */
-    .spin { width:28px; height:28px; border:3px solid #e2e8f0;
-            border-top-color:#3b82f6; border-radius:50%; animation:spin .7s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+    .spin{width:26px;height:26px;border:2.5px solid #E5E7EB;border-top-color:#6366F1;
+          border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ── Drop zone ── */
-    #drop-zone { border:2px dashed #93c5fd; border-radius:16px; transition:all .2s; }
-    #drop-zone.drag-over { border-color:#3b82f6; background:#eff6ff; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width:5px; height:5px; }
-    ::-webkit-scrollbar-track { background:transparent; }
-    ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
+    #drop-zone{border:1.5px dashed #C7D2FE;border-radius:12px;transition:all .2s;}
+    #drop-zone.drag-over{border-color:#6366F1;background:#EEF2FF;}
 
     /* ── Modal ── */
-    #modal-overlay { transition:opacity .2s; }
+    #modal-overlay{transition:opacity .2s;}
 
-    /* ── Hero gradient header ── */
-    .page-header { background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%); }
-
-    /* ── Stat pill ── */
-    .stat-pill { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
-                 border-radius:12px; padding:14px 18px; }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
   </style>
 </head>
 
-<body class="bg-slate-50 min-h-screen flex">
+<body>
 
-<!-- ═══════════════════ SIDEBAR ═══════════════════════════════════════════ -->
-<aside class="sidebar w-[210px] min-h-screen flex flex-col flex-shrink-0 fixed left-0 top-0 bottom-0 z-30">
-
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
   <!-- Logo -->
-  <div class="px-5 py-5 border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-        <i class="fas fa-leaf text-white text-base"></i>
-      </div>
-      <div>
-        <div class="text-white font-bold text-sm leading-tight">CDR Database</div>
-        <div class="text-slate-400 text-[10px] mt-0.5">Carbon Removal Tracker</div>
-      </div>
-    </div>
+  <div style="padding:20px 16px 12px;border-bottom:1px solid #EAECF0;">
+    <div style="font-size:19px;font-weight:800;color:#111827;letter-spacing:-.5px;">CDR<span style="color:#6366F1;">.db</span></div>
+    <div style="font-size:10.5px;color:#9CA3AF;margin-top:1px;">Carbon Removal Intelligence</div>
   </div>
 
   <!-- Nav -->
-  <nav class="flex-1 px-3 py-4 space-y-0.5">
-    <div class="text-slate-500 text-[9px] font-700 uppercase tracking-widest px-3 mb-2">Navigation</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="goto('dashboard')">
-      <i class="fas fa-chart-pie icon"></i><span>Dashboard</span>
+  <nav style="flex:1;padding:8px 0;overflow-y:auto;">
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item active" id="nav-insights" onclick="goto('insights')">
+      <i class="fas fa-chart-line ni"></i> Order Insights
     </div>
-    <div class="nav-item" id="nav-transactions" onclick="goto('transactions')">
-      <i class="fas fa-table icon"></i><span>Transactions</span>
+    <div class="nav-item" id="nav-explorer" onclick="goto('explorer')">
+      <i class="fas fa-table ni"></i> Order Explorer
     </div>
+    <div class="nav-section">Market</div>
     <div class="nav-item" id="nav-suppliers" onclick="goto('suppliers')">
-      <i class="fas fa-industry icon"></i><span>Suppliers</span>
+      <i class="fas fa-industry ni"></i> Market Actors
     </div>
+    <div class="nav-section">Data</div>
     <div class="nav-item" id="nav-upload" onclick="goto('upload')">
-      <i class="fas fa-cloud-upload-alt icon"></i><span>Import Data</span>
+      <i class="fas fa-cloud-upload-alt ni"></i> Data Submission
     </div>
-    <div class="text-slate-500 text-[9px] font-700 uppercase tracking-widest px-3 mt-4 mb-2">Tools</div>
     <div class="nav-item" onclick="window.open('/api/docs','_blank')">
-      <i class="fas fa-code icon"></i><span>API Docs</span>
+      <i class="fas fa-code ni"></i> API
     </div>
   </nav>
 
-  <!-- Status footer -->
-  <div class="px-4 pb-5 border-t border-white/5 pt-4">
-    <div class="flex items-center gap-2 text-[11px] text-slate-400 mb-1">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
-      Live Database
+  <!-- Bottom -->
+  <div style="padding:12px 16px;border-top:1px solid #EAECF0;">
+    <div style="background:#EEF2FF;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:600;color:#4F46E5;margin-bottom:2px;">
+        <i class="fas fa-circle" style="font-size:7px;color:#10B981;margin-right:5px;"></i>Live Data
+      </div>
+      <div id="sidebar-counts" style="font-size:11px;color:#6B7280;">Loading...</div>
     </div>
-    <div id="sidebar-counts" class="text-[11px] text-slate-500">Loading...</div>
   </div>
 </aside>
 
-<!-- ═══════════════════ MAIN ══════════════════════════════════════════════ -->
-<main class="flex-1 flex flex-col overflow-hidden ml-[210px]">
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
+<div class="main">
 
-  <!-- Top bar -->
-  <header class="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between z-20 shadow-sm sticky top-0">
-    <div class="flex items-center gap-3">
-      <h1 id="page-title" class="text-sm font-700 text-slate-800 tracking-tight">Dashboard</h1>
-      <span id="page-badge" class="hidden text-xs bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full font-600"></span>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <h1 id="page-title" style="font-size:18px;font-weight:700;color:#111827;margin:0;">Order Insights</h1>
+      <p id="page-sub" style="font-size:12px;color:#9CA3AF;margin:2px 0 0;">Comprehensive analysis of the carbon removal market</p>
     </div>
-    <div class="flex items-center gap-4">
-      <button onclick="refreshCurrent()" title="Refresh"
-        class="text-slate-400 hover:text-blue-500 transition-colors text-sm px-3 py-1.5 rounded-lg hover:bg-blue-50">
-        <i class="fas fa-sync-alt mr-1.5"></i><span class="text-xs font-500">Refresh</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="refreshCurrent()"
+        style="border:1px solid #E5E7EB;background:#fff;border-radius:8px;padding:6px 14px;
+               font-size:12.5px;font-weight:500;color:#374151;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-sync-alt" style="font-size:11px;"></i> Refresh
       </button>
-      <span id="last-refresh" class="text-[11px] text-slate-400"></span>
+      <span id="last-refresh" style="font-size:11px;color:#9CA3AF;"></span>
     </div>
-  </header>
+  </div>
 
-  <!-- ════ DASHBOARD ════ -->
-  <section id="sec-dashboard" class="flex-1 overflow-auto">
+  <!-- ════ INSIGHTS (Dashboard) ════════════════════════════════════════ -->
+  <section id="sec-insights" style="flex:1;overflow:auto;padding:24px 28px;">
 
-    <!-- Hero header -->
-    <div class="page-header px-6 py-8 text-white">
-      <div class="max-w-5xl">
-        <div class="flex items-center gap-2 text-blue-300 text-xs font-600 uppercase tracking-widest mb-2">
-          <i class="fas fa-globe-americas"></i> Global CDR Market Intelligence
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+      <div class="kpi-card">
+        <div class="kpi-label">Cumulative Tonnes Contracted</div>
+        <div class="kpi-value" id="k-committed">—</div>
+        <div class="kpi-trend trend-neutral" id="k-committed-sub">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Cumulative Tonnes Delivered</div>
+        <div class="kpi-value" id="k-delivered">—</div>
+        <div class="kpi-trend trend-up" id="k-delivered-sub">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Transactions</div>
+        <div class="kpi-value" id="k-tx">—</div>
+        <div class="kpi-trend trend-neutral" id="k-tx-sub">—</div>
+      </div>
+    </div>
+
+    <!-- Row 2: secondary KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
+        <div style="width:40px;height:40px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-percent" style="color:#6366F1;font-size:15px;"></i>
         </div>
-        <h2 class="text-2xl font-800 mb-1">Carbon Dioxide Removal</h2>
-        <p class="text-slate-300 text-sm">Real-time tracking of CDR transactions, suppliers and delivery performance worldwide</p>
-
-        <!-- Hero stats row -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6" id="hero-stats">
-          <div class="stat-pill">
-            <div class="text-white font-800 text-lg" id="h-tx">—</div>
-            <div class="text-slate-400 text-[10px] uppercase tracking-wide mt-0.5">Transactions</div>
-          </div>
-          <div class="stat-pill">
-            <div class="text-white font-800 text-lg" id="h-committed">—</div>
-            <div class="text-slate-400 text-[10px] uppercase tracking-wide mt-0.5">tCO₂e Committed</div>
-          </div>
-          <div class="stat-pill">
-            <div class="text-white font-800 text-lg" id="h-buyers">—</div>
-            <div class="text-slate-400 text-[10px] uppercase tracking-wide mt-0.5">Unique Buyers</div>
-          </div>
-          <div class="stat-pill">
-            <div class="text-white font-800 text-lg" id="h-suppliers">—</div>
-            <div class="text-slate-400 text-[10px] uppercase tracking-wide mt-0.5">Suppliers</div>
-          </div>
+        <div>
+          <div class="kpi-label" style="margin-bottom:2px;">Delivery Rate</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-dr">—</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
+        <div style="width:40px;height:40px;background:#F0FDF4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-building" style="color:#10B981;font-size:15px;"></i>
+        </div>
+        <div>
+          <div class="kpi-label" style="margin-bottom:2px;">Unique Buyers</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-buyers">—</div>
+        </div>
+      </div>
+      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
+        <div style="width:40px;height:40px;background:#FFF7ED;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fas fa-industry" style="color:#F59E0B;font-size:15px;"></i>
+        </div>
+        <div>
+          <div class="kpi-label" style="margin-bottom:2px;">Suppliers</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-suppliers">—</div>
         </div>
       </div>
     </div>
 
-    <div class="p-6 space-y-5">
-
-      <!-- KPI row -->
-      <div id="kpi-row" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4"></div>
-
-      <!-- Delivery rate -->
-      <div class="bg-white rounded-2xl px-6 py-4 border border-slate-200 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
+    <!-- Row 3: Line chart + Donut -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="chart-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
           <div>
-            <div class="text-xs font-700 text-slate-500 uppercase tracking-widest">Global Delivery Rate</div>
-            <div class="text-xs text-slate-400 mt-0.5">Percentage of committed tCO₂e actually delivered</div>
+            <div class="chart-heading">Cumulative Tonnes vs Quarterly Tonnes</div>
+            <div class="chart-sub">Track cumulative and quarterly tonnes purchased and delivered</div>
           </div>
-          <span id="dr-pct" class="text-2xl font-800 text-blue-600">—</span>
+          <div class="tab-group" id="year-tabs">
+            <button class="tab-btn active" onclick="setYearTab('cumulative',this)">Cumulative</button>
+            <button class="tab-btn" onclick="setYearTab('quarterly',this)">Quarterly</button>
+          </div>
         </div>
-        <div class="prog-bar"><div id="dr-fill" class="prog-fill" style="width:0%"></div></div>
-        <div class="flex justify-between mt-2 text-[11px] text-slate-400 font-500">
-          <span id="dr-delivered">Delivered: —</span>
-          <span id="dr-committed">Committed: —</span>
-        </div>
+        <div style="height:230px;"><canvas id="c-year"></canvas></div>
       </div>
-
-      <!-- Charts row 1 -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="chart-card lg:col-span-2">
-          <div class="chart-title"><i class="fas fa-chart-bar text-blue-400 mr-2"></i>tCO₂e Committed vs Delivered by Year</div>
-          <div style="height:220px"><canvas id="c-year"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><i class="fas fa-circle-dot text-violet-400 mr-2"></i>Transaction Status</div>
-          <div style="height:220px"><canvas id="c-status"></canvas></div>
-        </div>
+      <div class="chart-card">
+        <div class="chart-heading">Method Distribution</div>
+        <div class="chart-sub">Breakdown of carbon removal methods by tonnes purchased</div>
+        <div style="height:230px;"><canvas id="c-method"></canvas></div>
       </div>
-
-      <!-- Charts row 2 -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="chart-card lg:col-span-2">
-          <div class="chart-title"><i class="fas fa-cogs text-emerald-400 mr-2"></i>CDR Methods Distribution (tCO₂e Committed)</div>
-          <div style="height:260px"><canvas id="c-method"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><i class="fas fa-globe text-cyan-400 mr-2"></i>tCO₂e by Continent</div>
-          <div style="height:260px"><canvas id="c-continent"></canvas></div>
-        </div>
-      </div>
-
-      <!-- Charts row 3 -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div class="chart-card">
-          <div class="chart-title"><i class="fas fa-store text-orange-400 mr-2"></i>Top Marketplaces by Transaction Count</div>
-          <div style="height:240px"><canvas id="c-marketplace"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title"><i class="fas fa-trophy text-amber-400 mr-2"></i>Top 10 Buyers (tCO₂e Committed)</div>
-          <div style="height:240px"><canvas id="c-purchasers"></canvas></div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Row 4: Top Purchasers -->
+    <div class="chart-card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="chart-heading">Top Purchasers by Removal Method</div>
+          <div class="chart-sub" style="margin-bottom:0;">Top 5 purchasers by tonnes contracted for each removal method</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="tab-group" id="actor-tabs">
+            <button class="tab-btn active" onclick="setActorTab('purchasers',this)">Purchasers</button>
+            <button class="tab-btn" onclick="setActorTab('suppliers',this)">Suppliers</button>
+          </div>
+          <select class="fsel" id="method-filter-chart" onchange="updateActorChart()">
+            <option value="">All Methods</option>
+          </select>
+        </div>
+      </div>
+      <div style="height:220px;"><canvas id="c-actors"></canvas></div>
+    </div>
+
+    <!-- Row 5: Recent activity -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="chart-card">
+        <div class="chart-heading">CDR Contracted by Year</div>
+        <div class="chart-sub">Volume contracted and number of orders per year</div>
+        <div style="height:200px;"><canvas id="c-contracted"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-heading">CDR Delivered by Year</div>
+        <div class="chart-sub">Volume of carbon removal actually delivered</div>
+        <div style="height:200px;"><canvas id="c-delivered"></canvas></div>
+      </div>
+    </div>
+
   </section>
 
-  <!-- ════ TRANSACTIONS ════ -->
-  <section id="sec-transactions" class="hidden flex-1 flex flex-col overflow-hidden">
-
+  <!-- ════ EXPLORER (Transactions) ════════════════════════════════════ -->
+  <section id="sec-explorer" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
     <!-- Toolbar -->
-    <div class="bg-white border-b border-slate-200 px-5 py-3 space-y-3">
-      <div class="flex items-center gap-3">
-        <div class="relative flex-1 max-w-xl">
-          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
-          <input id="search-inp" type="text"
-            placeholder="Search by purchaser, supplier, method, marketplace…"
-            class="w-full pl-10 pr-9 py-2.5 border-1.5 border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-400 bg-slate-50 transition"
-            oninput="onSearch(this.value)"/>
+    <div style="background:#fff;border-bottom:1px solid #EAECF0;padding:12px 24px;display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="position:relative;">
+          <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#D1D5DB;font-size:12px;"></i>
+          <input class="search-box" id="search-inp" type="text"
+            placeholder="Search orders…" oninput="onSearch(this.value)"/>
           <button id="clr-search" onclick="clearSearch()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-600 hidden">
-            <i class="fas fa-times text-xs"></i>
-          </button>
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                   border:none;background:none;color:#D1D5DB;cursor:pointer;display:none;font-size:11px;">✕</button>
         </div>
-        <span id="res-count" class="text-xs text-slate-400 whitespace-nowrap font-500"></span>
-      </div>
-      <div class="flex flex-wrap gap-2 items-center">
-        <select id="f-method"      class="fsel" onchange="applyFilters()"><option value="">All Methods</option></select>
-        <select id="f-status"      class="fsel" onchange="applyFilters()"><option value="">All Statuses</option></select>
-        <select id="f-marketplace" class="fsel" onchange="applyFilters()"><option value="">All Marketplaces</option></select>
-        <select id="f-registry"    class="fsel" onchange="applyFilters()"><option value="">All Registries</option></select>
-        <select id="f-continent"   class="fsel" onchange="applyFilters()"><option value="">All Continents</option></select>
-        <select id="f-year"        class="fsel" onchange="applyFilters()"><option value="">All Years</option></select>
+        <span id="res-count" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
         <button onclick="resetFilters()"
-          class="ml-auto text-xs text-slate-400 hover:text-red-500 flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 hover:border-red-200 transition">
-          <i class="fas fa-times"></i> Reset
+          style="margin-left:auto;border:1px solid #E5E7EB;background:#fff;border-radius:7px;
+                 padding:6px 12px;font-size:12px;color:#6B7280;cursor:pointer;">
+          <i class="fas fa-times" style="margin-right:4px;"></i>Reset
         </button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <select id="f-method"      class="fsel" onchange="applyFilters()"><option value="">Method</option></select>
+        <select id="f-status"      class="fsel" onchange="applyFilters()"><option value="">Status</option></select>
+        <select id="f-marketplace" class="fsel" onchange="applyFilters()"><option value="">Marketplace</option></select>
+        <select id="f-registry"    class="fsel" onchange="applyFilters()"><option value="">Registry</option></select>
+        <select id="f-continent"   class="fsel" onchange="applyFilters()"><option value="">Continent</option></select>
+        <select id="f-year"        class="fsel" onchange="applyFilters()"><option value="">Year</option></select>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="flex-1 overflow-auto px-5 py-4">
-      <div id="tx-loading" class="hidden flex justify-center py-20"><div class="spin"></div></div>
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <table id="tx-table" class="w-full border-collapse">
+    <div style="flex:1;overflow:auto;padding:20px 24px;">
+      <div id="tx-loading" style="display:none;justify-content:center;padding:60px 0;"><div class="spin"></div></div>
+      <div style="background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);">
+        <table class="data-table" id="tx-table">
           <thead>
             <tr>
-              <th onclick="sortBy('announcement')">Date <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('purchaser')">Buyer <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('supplier_name')">Supplier <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('method')">Method <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('tonnes')">Committed (t) <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('tonnes_delivered')">Delivered (t) <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('status')">Status <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('marketplace')">Marketplace <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th onclick="sortBy('registry_name')">Registry <i class="fas fa-sort text-slate-300 ml-1"></i></th>
-              <th>Continent</th>
+              <th onclick="sortBy('announcement')">Contract Date <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('method')">Method <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('supplier_name')">Supplier <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('purchaser')">Purchaser <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('marketplace')">Marketplace <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('tonnes')" style="text-align:right;">Purchased (t) <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('tonnes_delivered')" style="text-align:right;">Delivered (t) <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('status')">Status <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th onclick="sortBy('continent')">Continent <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
             </tr>
           </thead>
           <tbody id="tx-body"></tbody>
         </table>
-        <div id="tx-empty" class="hidden py-20 text-center text-slate-400">
-          <i class="fas fa-search text-4xl mb-3 opacity-30"></i>
-          <p class="font-500">No transactions found</p>
+        <div id="tx-empty" style="display:none;padding:60px;text-align:center;color:#9CA3AF;">
+          <i class="fas fa-search" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>
+          No orders found
         </div>
       </div>
-
-      <!-- Pagination -->
-      <div class="flex items-center justify-between mt-4">
-        <span id="pg-info" class="text-xs text-slate-400 font-500"></span>
-        <div id="pg-btns" class="flex gap-1.5"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+        <span id="pg-info" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
+        <div id="pg-btns" style="display:flex;gap:4px;"></div>
       </div>
     </div>
   </section>
 
-  <!-- ════ SUPPLIERS ════ -->
-  <section id="sec-suppliers" class="hidden flex-1 overflow-auto p-6">
-    <div class="flex items-center gap-3 mb-5">
-      <div class="relative flex-1 max-w-md">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 text-sm"></i>
-        <input id="sup-search" type="text" placeholder="Search suppliers…"
-          class="w-full pl-10 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-blue-400 bg-white"
-          oninput="filterSuppliers(this.value)"/>
+  <!-- ════ SUPPLIERS ════════════════════════════════════════════════ -->
+  <section id="sec-suppliers" style="display:none;flex:1;overflow:auto;padding:24px 28px;">
+    <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;">
+      <div style="position:relative;">
+        <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#D1D5DB;font-size:12px;"></i>
+        <input class="search-box" id="sup-search" type="text"
+          placeholder="Search suppliers…" oninput="filterSuppliers(this.value)"/>
       </div>
       <select id="sup-tech" class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)">
         <option value="">All Technologies</option>
@@ -355,628 +371,625 @@
       <select id="sup-continent" class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)">
         <option value="">All Continents</option>
       </select>
+      <span id="sup-count" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
     </div>
-    <div id="sup-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
-    <div id="sup-loading" class="flex justify-center py-20"><div class="spin"></div></div>
+    <div id="sup-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+    <div id="sup-loading" style="display:flex;justify-content:center;padding:60px;"><div class="spin"></div></div>
   </section>
 
-  <!-- ════ UPLOAD ════ -->
-  <section id="sec-upload" class="hidden flex-1 overflow-auto p-6">
-    <div class="max-w-2xl mx-auto">
-
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-            <i class="fas fa-cloud-upload-alt text-blue-500"></i>
+  <!-- ════ UPLOAD ══════════════════════════════════════════════════ -->
+  <section id="sec-upload" style="display:none;flex:1;overflow:auto;padding:24px 28px;">
+    <div style="max-width:640px;">
+      <div class="chart-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+          <div style="width:40px;height:40px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-cloud-upload-alt" style="color:#6366F1;"></i>
           </div>
           <div>
-            <h2 class="text-base font-700 text-slate-800">Import New Data</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Upload Excel (.xlsx) or CSV files to update the database</p>
+            <div style="font-size:15px;font-weight:700;color:#111827;">Data Submission</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Upload Excel or CSV to update the database</div>
           </div>
         </div>
 
-        <div id="drop-zone" class="text-center py-14 px-8 cursor-pointer"
+        <div id="drop-zone" style="text-align:center;padding:48px 24px;cursor:pointer;"
           onclick="document.getElementById('file-inp').click()"
           ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-          <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-file-excel text-blue-400 text-2xl"></i>
+          <div style="width:56px;height:56px;background:#EEF2FF;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fas fa-file-excel" style="color:#6366F1;font-size:22px;"></i>
           </div>
-          <p class="font-600 text-slate-700 mb-1">Drag & Drop your file here</p>
-          <p class="text-xs text-slate-400">or click to select — .xlsx, .csv supported</p>
-          <input type="file" id="file-inp" accept=".xlsx,.csv" class="hidden" onchange="handleFileSelect(event)"/>
+          <p style="font-weight:600;color:#374151;margin:0 0 4px;">Drag & drop your file here</p>
+          <p style="font-size:12px;color:#9CA3AF;margin:0;">or click to select · .xlsx and .csv supported</p>
+          <input type="file" id="file-inp" accept=".xlsx,.csv" style="display:none;" onchange="handleFileSelect(event)"/>
         </div>
 
-        <div id="file-info" class="hidden mt-4 p-4 bg-blue-50 rounded-xl flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <i class="fas fa-file-excel text-blue-500"></i>
+        <div id="file-info" style="display:none;margin-top:14px;padding:12px 16px;background:#F9FAFB;
+             border:1px solid #E5E7EB;border-radius:10px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-file-excel" style="color:#6366F1;"></i>
             <div>
-              <div id="file-name" class="text-sm font-600 text-slate-700"></div>
-              <div id="file-size" class="text-xs text-slate-400"></div>
+              <div id="file-name" style="font-size:13px;font-weight:600;color:#374151;"></div>
+              <div id="file-size" style="font-size:11px;color:#9CA3AF;"></div>
             </div>
           </div>
-          <button onclick="clearFile()" class="text-slate-400 hover:text-red-500 transition">
-            <i class="fas fa-times"></i>
-          </button>
+          <button onclick="clearFile()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:13px;">✕</button>
         </div>
 
         <button id="import-btn" onclick="uploadFile()"
-          class="w-full mt-5 py-3 bg-blue-600 text-white rounded-xl font-600 text-sm
-                 hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          disabled>
+          style="width:100%;margin-top:14px;padding:11px;background:#6366F1;color:#fff;
+                 border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;
+                 display:flex;align-items:center;justify-content:center;gap:8px;opacity:.4;pointer-events:none;">
           <i class="fas fa-upload"></i> Import into Database
         </button>
 
-        <div id="upload-progress" class="hidden mt-4">
-          <div class="flex items-center gap-3 mb-2">
-            <div class="spin" style="width:18px;height:18px;border-width:2px"></div>
-            <span class="text-sm text-slate-600 font-500">Importing data…</span>
+        <div id="upload-progress" style="display:none;margin-top:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div class="spin" style="width:16px;height:16px;border-width:2px;"></div>
+            <span style="font-size:13px;color:#6B7280;font-weight:500;">Importing…</span>
           </div>
-          <div class="prog-bar"><div id="up-fill" class="prog-fill" style="width:60%"></div></div>
+          <div class="prog-bar"><div class="prog-fill" style="width:60%;"></div></div>
         </div>
-
-        <div id="upload-result" class="hidden mt-4 p-4 rounded-xl">
-          <div id="upload-result-text" class="text-sm font-500"></div>
+        <div id="upload-result" style="display:none;margin-top:14px;padding:12px 16px;border-radius:10px;">
+          <div id="upload-result-text" style="font-size:13px;font-weight:500;"></div>
         </div>
       </div>
 
-      <!-- Info card -->
-      <div class="mt-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <h3 class="text-sm font-700 text-slate-700 mb-3"><i class="fas fa-info-circle text-blue-400 mr-2"></i>Recognized Column Names</h3>
-        <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
-          <div><span class="font-600 text-slate-600">Supplier:</span> supplier, seller, project name</div>
-          <div><span class="font-600 text-slate-600">Method:</span> method, technology, cdr method</div>
-          <div><span class="font-600 text-slate-600">Buyer:</span> purchaser, buyer, company</div>
-          <div><span class="font-600 text-slate-600">Tonnes:</span> tonnes, volume, tco2e</div>
-          <div><span class="font-600 text-slate-600">Date:</span> date, announcement, purchase date</div>
-          <div><span class="font-600 text-slate-600">Status:</span> status, delivery status</div>
-          <div><span class="font-600 text-slate-600">Price:</span> price, usd/tonne, price per tonne</div>
-          <div><span class="font-600 text-slate-600">Registry:</span> registry, carbon registry</div>
+      <!-- Column reference -->
+      <div class="chart-card" style="margin-top:14px;">
+        <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;">
+          <i class="fas fa-info-circle" style="color:#6366F1;margin-right:6px;"></i>Recognized Column Names
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:#6B7280;">
+          <div><span style="font-weight:600;color:#374151;">Supplier:</span> supplier, seller, project name</div>
+          <div><span style="font-weight:600;color:#374151;">Method:</span> method, technology, cdr method</div>
+          <div><span style="font-weight:600;color:#374151;">Buyer:</span> purchaser, buyer, company</div>
+          <div><span style="font-weight:600;color:#374151;">Tonnes:</span> tonnes, volume, tco2e</div>
+          <div><span style="font-weight:600;color:#374151;">Date:</span> date, announcement, purchase date</div>
+          <div><span style="font-weight:600;color:#374151;">Status:</span> status, delivery status</div>
+          <div><span style="font-weight:600;color:#374851;">Price:</span> price, usd/tonne, price per tonne</div>
+          <div><span style="font-weight:600;color:#374151;">Registry:</span> registry, carbon registry</div>
         </div>
       </div>
     </div>
   </section>
+</div>
 
-</main>
-
-<!-- ═══════════════════ MODAL ═══════════════════════════════════════════ -->
-<div id="modal-overlay" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4"
+<!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);
+     z-index:50;align-items:center;justify-content:center;padding:16px;"
   onclick="if(event.target===this)closeModal()">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-      <h3 class="font-700 text-slate-800 text-sm">Transaction Detail</h3>
-      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition">
-        <i class="fas fa-times"></i>
-      </button>
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;
+              max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);">
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:16px 20px;border-bottom:1px solid #EAECF0;">
+      <span style="font-size:14px;font-weight:700;color:#111827;">Order Detail</span>
+      <button onclick="closeModal()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:16px;">✕</button>
     </div>
-    <div id="modal-content" class="px-6 py-5 space-y-3"></div>
+    <div id="modal-content" style="padding:20px;"></div>
   </div>
 </div>
 
-<!-- ═══════════════════ JAVASCRIPT ═══════════════════════════════════════ -->
+<!-- ═══ JS ════════════════════════════════════════════════════════════════ -->
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-const API = '';
-let currentSection = 'dashboard';
-let txData = [], txFiltered = [], txPage = 1, txPerPage = 50;
-let txSort = { col: 'announcement', dir: 'desc' };
-let supData = [], supFiltered = [];
-let filterOpts = {};
-let searchTimer = null;
-let charts = {};
-let selectedFile = null;
+// ─── State ───────────────────────────────────────────────────────────────────
+let currentSection = 'insights';
+let txData=[], txFiltered=[], txPage=1, txPerPage=50;
+let txSort={col:'announcement',dir:'desc'};
+let supData=[], supFiltered=[];
+let charts={};
+let allYearData=[], actorMode='purchasers', selectedFile=null;
+let searchTimer=null;
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
-function goto(sec) {
-  currentSection = sec;
-  ['dashboard','transactions','suppliers','upload'].forEach(s => {
-    document.getElementById(`sec-${s}`).classList.toggle('hidden', s !== sec);
-    const nav = document.getElementById(`nav-${s}`);
-    if (nav) nav.classList.toggle('active', s === sec);
-  });
-  const titles = { dashboard:'Dashboard', transactions:'Transactions', suppliers:'Suppliers', upload:'Import Data' };
-  document.getElementById('page-title').textContent = titles[sec] || sec;
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const fmt  = n => n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:1});
+const fmtM = n => n==null?'—':(n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Number(n).toFixed(0));
+const badgeCls = s => ({'delivered':'b-delivered','contracted':'b-contracted','retired':'b-retired','partial':'b-partial'}[(s||'').toLowerCase()]||'b-default');
 
-  if (sec === 'dashboard') loadDashboard();
-  if (sec === 'transactions') loadTransactions();
-  if (sec === 'suppliers') loadSuppliers();
-}
-
-function refreshCurrent() { goto(currentSection); }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-US', {maximumFractionDigits:1});
-const fmtM = n => n == null ? '—' : (n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : Number(n).toFixed(0));
-const badgeCls = s => ({delivered:'b-delivered',contracted:'b-contracted',retired:'b-retired',partial:'b-partial'}[(s||'').toLowerCase()] || 'b-default');
-
-async function apiFetch(path) {
-  const r = await fetch(API + path);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+async function apiFetch(path){
+  const r=await fetch(path);
+  if(!r.ok) throw new Error('HTTP '+r.status);
   return r.json();
 }
 
-function setTS() {
-  document.getElementById('last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+function setTS(){
+  document.getElementById('last-refresh').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
-async function loadDashboard() {
-  try {
-    const [sum, byYear, byMethod, byStatus, byCont, byMkt, topBuyers] = await Promise.all([
+// ─── Navigation ──────────────────────────────────────────────────────────────
+const SECTIONS={insights:'Order Insights',explorer:'Order Explorer',suppliers:'Market Actors',upload:'Data Submission'};
+const SUBS={insights:'Comprehensive analysis of the carbon removal market',explorer:'Browse and filter all CDR transactions',suppliers:'Suppliers and market participants',upload:'Submit new data to the database'};
+const NAV_IDS={insights:'nav-insights',explorer:'nav-explorer',suppliers:'nav-suppliers',upload:'nav-upload'};
+
+function goto(sec){
+  currentSection=sec;
+  Object.keys(SECTIONS).forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.style.display=s===sec?'block':'none';
+    const nav=document.getElementById(NAV_IDS[s]);
+    if(nav) nav.classList.toggle('active',s===sec);
+  });
+  document.getElementById('page-title').textContent=SECTIONS[sec]||sec;
+  document.getElementById('page-sub').textContent=SUBS[sec]||'';
+  if(sec==='insights') loadInsights();
+  if(sec==='explorer') loadExplorer();
+  if(sec==='suppliers') loadSuppliers();
+}
+
+function refreshCurrent(){goto(currentSection);}
+
+// ─── INSIGHTS ────────────────────────────────────────────────────────────────
+async function loadInsights(){
+  try{
+    const [sum,byYear,byMethod,topBuyers,topSuppliers] = await Promise.all([
       apiFetch('/api/transactions/stats/summary'),
       apiFetch('/api/transactions/stats/by-year'),
       apiFetch('/api/transactions/stats/by-method'),
-      apiFetch('/api/transactions/stats/by-status'),
-      apiFetch('/api/transactions/stats/by-continent'),
-      apiFetch('/api/transactions/stats/by-marketplace?limit=8'),
       apiFetch('/api/transactions/stats/top-purchasers?limit=10'),
+      apiFetch('/api/transactions/stats/top-suppliers?limit=10'),
     ]);
 
-    // Hero stats
-    document.getElementById('h-tx').textContent        = fmt(sum.total_transactions);
-    document.getElementById('h-committed').textContent = fmtM(sum.total_tonnes_committed);
-    document.getElementById('h-buyers').textContent    = fmt(sum.unique_purchasers);
-    document.getElementById('h-suppliers').textContent = fmt(sum.unique_suppliers);
+    // KPIs
+    document.getElementById('k-committed').textContent   = fmtM(sum.total_tonnes_committed);
+    document.getElementById('k-delivered').textContent   = fmtM(sum.total_tonnes_delivered);
+    document.getElementById('k-tx').textContent          = fmt(sum.total_transactions);
+    document.getElementById('k-dr').textContent          = (sum.delivery_rate_pct||0).toFixed(2)+'%';
+    document.getElementById('k-buyers').textContent      = fmt(sum.unique_purchasers);
+    document.getElementById('k-suppliers').textContent   = fmt(sum.unique_suppliers);
 
-    // Sidebar
+    document.getElementById('k-committed-sub').textContent  = `${fmt(sum.unique_suppliers)} active suppliers`;
+    document.getElementById('k-delivered-sub').textContent  = `${(sum.delivery_rate_pct||0).toFixed(2)}% delivery rate`;
+    document.getElementById('k-tx-sub').textContent         = `${fmt(sum.unique_purchasers)} unique buyers`;
+
     document.getElementById('sidebar-counts').textContent =
       `${fmt(sum.total_transactions)} tx · ${fmt(sum.unique_suppliers)} suppliers`;
 
-    // KPIs
-    const kpis = [
-      { icon:'fa-exchange-alt', color:'bg-blue-50 text-blue-500',   val: fmt(sum.total_transactions),        lbl:'Total Transactions' },
-      { icon:'fa-mountain',     color:'bg-emerald-50 text-emerald-500', val: fmtM(sum.total_tonnes_committed),  lbl:'tCO₂e Committed' },
-      { icon:'fa-check-circle', color:'bg-cyan-50 text-cyan-500',    val: fmtM(sum.total_tonnes_delivered),   lbl:'tCO₂e Delivered' },
-      { icon:'fa-percent',      color:'bg-violet-50 text-violet-500',val: (sum.delivery_rate_pct||0).toFixed(2)+'%', lbl:'Delivery Rate' },
-      { icon:'fa-building',     color:'bg-amber-50 text-amber-500',  val: fmt(sum.unique_purchasers),         lbl:'Unique Buyers' },
-      { icon:'fa-industry',     color:'bg-rose-50 text-rose-500',    val: fmt(sum.unique_suppliers),          lbl:'Suppliers' },
-    ];
-    document.getElementById('kpi-row').innerHTML = kpis.map(k => `
-      <div class="kpi flex items-center gap-4">
-        <div class="w-11 h-11 rounded-xl ${k.color} flex items-center justify-center flex-shrink-0">
-          <i class="fas ${k.icon} text-base"></i>
-        </div>
-        <div>
-          <div class="kpi-val">${k.val}</div>
-          <div class="kpi-lbl">${k.lbl}</div>
-        </div>
-      </div>`).join('');
+    allYearData=byYear;
 
-    // Delivery bar
-    const dr = sum.delivery_rate_pct || 0;
-    document.getElementById('dr-pct').textContent      = dr.toFixed(2) + '%';
-    document.getElementById('dr-fill').style.width     = Math.min(dr, 100) + '%';
-    document.getElementById('dr-delivered').textContent = 'Delivered: ' + fmtM(sum.total_tonnes_delivered) + ' t';
-    document.getElementById('dr-committed').textContent  = 'Committed: ' + fmtM(sum.total_tonnes_committed) + ' t';
+    // Method filter for chart
+    const methods=[...new Set((byMethod||[]).map(r=>r.method).filter(Boolean))];
+    document.getElementById('method-filter-chart').innerHTML=
+      '<option value="">All Methods</option>'+methods.map(m=>`<option>${m}</option>`).join('');
 
-    buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers);
+    // Store for actor chart
+    window._topBuyers=topBuyers||[];
+    window._topSuppliers=topSuppliers||[];
+
+    buildInsightCharts(byYear,byMethod,topBuyers);
     setTS();
-  } catch(e) { console.error('Dashboard error:', e); }
+  }catch(e){console.error('Insights error:',e);}
 }
 
-function buildCharts(byYear, byMethod, byStatus, byCont, byMkt, topBuyers) {
-  const destroy = id => { if (charts[id]) { charts[id].destroy(); delete charts[id]; } };
+function buildInsightCharts(byYear,byMethod,topBuyers){
+  const destroy=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
+  const PAL=['#6366F1','#10B981','#F59E0B','#EF4444','#06B6D4','#8B5CF6','#EC4899','#84CC16','#F97316','#0EA5E9','#14B8A6'];
+  const GREEN='#10B981'; const TEAL='#06B6D4';
 
-  // Palette
-  const BLUE  = '#3b82f6'; const CYAN = '#06b6d4';
-  const palette = ['#3b82f6','#06b6d4','#8b5cf6','#f59e0b','#10b981','#f43f5e','#6366f1','#84cc16','#ec4899','#0ea5e9','#14b8a6'];
-
-  // Year chart
+  // Year chart (cumulative)
   destroy('c-year');
-  const yrs = byYear.map(r=>r.year||r.Year||r[Object.keys(r)[0]]);
-  const comm= byYear.map(r=>r.committed||r.total_committed||0);
-  const delv= byYear.map(r=>r.delivered||r.total_delivered||0);
-  charts['c-year'] = new Chart(document.getElementById('c-year'), {
-    type:'bar',
-    data:{ labels:yrs,
-           datasets:[
-             { label:'Committed', data:comm, backgroundColor:'rgba(59,130,246,.7)', borderRadius:6, borderSkipped:false },
-             { label:'Delivered', data:delv, backgroundColor:'rgba(6,182,212,.8)',  borderRadius:6, borderSkipped:false }
-           ]},
-    options:{ responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{ labels:{ font:{size:11}, boxWidth:12 } } },
-              scales:{ x:{ grid:{display:false} }, y:{ grid:{color:'#f1f5f9'}, ticks:{callback:v=>fmtM(v)} } } }
+  const yrs=(byYear||[]).map(r=>r.year);
+  let cumC=0,cumD=0;
+  const cumComm=(byYear||[]).map(r=>{cumC+=r.committed||0;return parseFloat(cumC.toFixed(1));});
+  const cumDelv=(byYear||[]).map(r=>{cumD+=r.delivered||0;return parseFloat(cumD.toFixed(1));});
+  charts['c-year']=new Chart(document.getElementById('c-year'),{
+    type:'line',
+    data:{labels:yrs,datasets:[
+      {label:'Cumulative Contracted',data:cumComm,borderColor:GREEN,backgroundColor:'rgba(16,185,129,.08)',
+       fill:true,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'Cumulative Delivered',data:cumDelv,borderColor:TEAL,backgroundColor:'rgba(6,182,212,.05)',
+       fill:true,tension:.4,pointRadius:3,borderWidth:2,borderDash:[5,4]},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12,padding:12}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
+              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
   });
 
-  // Status doughnut
-  destroy('c-status');
-  const stKeys = byStatus.map(r=>r.status||r.Status||r[Object.keys(r)[0]]);
-  const stVals = byStatus.map(r=>r.count||r.total||r[Object.keys(r)[1]]||0);
-  charts['c-status'] = new Chart(document.getElementById('c-status'), {
-    type:'doughnut',
-    data:{ labels:stKeys, datasets:[{ data:stVals, backgroundColor:palette, borderWidth:2, borderColor:'#fff' }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
-              plugins:{ legend:{ position:'bottom', labels:{ font:{size:10}, boxWidth:10, padding:8 } } } }
-  });
-
-  // Method bar
+  // Method donut
   destroy('c-method');
-  const mKeys = byMethod.map(r=>r.method||r.Method||r[Object.keys(r)[0]]);
-  const mVals = byMethod.map(r=>r.committed||r.total_committed||0);
-  charts['c-method'] = new Chart(document.getElementById('c-method'), {
-    type:'bar',
-    data:{ labels:mKeys, datasets:[{ label:'tCO₂e Committed', data:mVals,
-           backgroundColor:palette, borderRadius:6, borderSkipped:false }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{display:false} },
-              scales:{ x:{ grid:{color:'#f1f5f9'}, ticks:{callback:v=>fmtM(v)} }, y:{ grid:{display:false}, ticks:{font:{size:11}} } } }
+  const mKeys=(byMethod||[]).map(r=>r.method);
+  const mVals=(byMethod||[]).map(r=>r.committed||0);
+  const total=mVals.reduce((a,b)=>a+b,0);
+  charts['c-method']=new Chart(document.getElementById('c-method'),{
+    type:'doughnut',
+    data:{labels:mKeys,datasets:[{data:mVals,backgroundColor:PAL,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:6,
+        generateLabels:(chart)=>{
+          const ds=chart.data.datasets[0];
+          return chart.data.labels.map((l,i)=>({
+            text:`${l.length>22?l.slice(0,22)+'…':l}  ${((ds.data[i]/total)*100).toFixed(1)}%`,
+            fillStyle:ds.backgroundColor[i],strokeStyle:'#fff',lineWidth:2,index:i
+          }));
+        }
+      }}}}
   });
 
-  // Continent polar
-  destroy('c-continent');
-  const cKeys = byCont.map(r=>r.continent||r.Continent||r[Object.keys(r)[0]]);
-  const cVals = byCont.map(r=>r.committed||r.total_committed||0);
-  charts['c-continent'] = new Chart(document.getElementById('c-continent'), {
-    type:'polarArea',
-    data:{ labels:cKeys, datasets:[{ data:cVals, backgroundColor:palette.map(c=>c+'cc'), borderWidth:1, borderColor:'#fff' }] },
-    options:{ responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{ position:'bottom', labels:{ font:{size:10}, boxWidth:10, padding:6 } } } }
+  // Actor chart (top buyers by default)
+  buildActorChart(topBuyers,'purchaser');
+
+  // Contracted bar
+  destroy('c-contracted');
+  charts['c-contracted']=new Chart(document.getElementById('c-contracted'),{
+    type:'bar',
+    data:{labels:yrs,datasets:[
+      {label:'Volume (t)',data:(byYear||[]).map(r=>r.committed||0),backgroundColor:'rgba(99,102,241,.75)',borderRadius:5,borderSkipped:false,yAxisID:'y'},
+      {label:'# Orders',data:(byYear||[]).map(r=>r.count||0),backgroundColor:'rgba(167,139,250,.4)',borderRadius:5,borderSkipped:false,yAxisID:'y1'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
+              y1:{position:'right',grid:{display:false},ticks:{font:{size:10}}}}}
   });
 
-  // Marketplace bar
-  destroy('c-marketplace');
-  const mkKeys = byMkt.map(r=>r.marketplace||r.Marketplace||r[Object.keys(r)[0]]);
-  const mkVals = byMkt.map(r=>r.count||r.total||r[Object.keys(r)[1]]||0);
-  charts['c-marketplace'] = new Chart(document.getElementById('c-marketplace'), {
+  // Delivered bar
+  destroy('c-delivered');
+  charts['c-delivered']=new Chart(document.getElementById('c-delivered'),{
     type:'bar',
-    data:{ labels:mkKeys, datasets:[{ label:'Transactions', data:mkVals,
-           backgroundColor:'rgba(249,115,22,.75)', borderRadius:6, borderSkipped:false }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{display:false} },
-              scales:{ x:{ grid:{color:'#f1f5f9'} }, y:{ grid:{display:false}, ticks:{font:{size:11}} } } }
-  });
-
-  // Top buyers
-  destroy('c-purchasers');
-  const bKeys = topBuyers.map(r=>r.purchaser||r.Purchaser||r[Object.keys(r)[0]]);
-  const bVals = topBuyers.map(r=>r.committed||r.total_committed||0);
-  charts['c-purchasers'] = new Chart(document.getElementById('c-purchasers'), {
-    type:'bar',
-    data:{ labels:bKeys, datasets:[{ label:'tCO₂e Committed', data:bVals,
-           backgroundColor:'rgba(139,92,246,.75)', borderRadius:6, borderSkipped:false }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
-              plugins:{ legend:{display:false} },
-              scales:{ x:{ grid:{color:'#f1f5f9'}, ticks:{callback:v=>fmtM(v)} },
-                       y:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+    data:{labels:yrs,datasets:[
+      {label:'Delivered (t)',data:(byYear||[]).map(r=>r.delivered||0),backgroundColor:'rgba(6,182,212,.75)',borderRadius:5,borderSkipped:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
   });
 }
 
-// ─── Transactions ─────────────────────────────────────────────────────────────
-async function loadTransactions() {
-  document.getElementById('tx-loading').classList.remove('hidden');
-  try {
-    const [opts] = await Promise.all([ apiFetch('/api/transactions/filters') ]);
-    filterOpts = opts;
+function buildActorChart(data,labelKey){
+  const destroy=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
+  destroy('c-actors');
+  const labels=(data||[]).map(r=>r[labelKey]||r.name||'—');
+  const vals=(data||[]).map(r=>r.committed||0);
+  charts['c-actors']=new Chart(document.getElementById('c-actors'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'tCO₂e Committed',data:vals,backgroundColor:'rgba(99,102,241,.75)',borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
+              y:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+}
+
+function setYearTab(mode,btn){
+  document.querySelectorAll('#year-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(!charts['c-year']) return;
+  const c=charts['c-year'];
+  const byYear=allYearData;
+  const yrs=(byYear||[]).map(r=>r.year);
+  if(mode==='cumulative'){
+    let cc=0,cd=0;
+    c.data.datasets[0].data=(byYear||[]).map(r=>{cc+=r.committed||0;return parseFloat(cc.toFixed(1));});
+    c.data.datasets[1].data=(byYear||[]).map(r=>{cd+=r.delivered||0;return parseFloat(cd.toFixed(1));});
+    c.data.datasets[0].label='Cumulative Contracted';
+    c.data.datasets[1].label='Cumulative Delivered';
+  } else {
+    c.data.datasets[0].data=(byYear||[]).map(r=>r.committed||0);
+    c.data.datasets[1].data=(byYear||[]).map(r=>r.delivered||0);
+    c.data.datasets[0].label='Quarterly Contracted';
+    c.data.datasets[1].label='Quarterly Delivered';
+  }
+  c.update();
+}
+
+function setActorTab(mode,btn){
+  document.querySelectorAll('#actor-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  actorMode=mode;
+  updateActorChart();
+}
+
+function updateActorChart(){
+  if(actorMode==='purchasers') buildActorChart(window._topBuyers||[],'purchaser');
+  else buildActorChart(window._topSuppliers||[],'name');
+}
+
+// ─── EXPLORER ────────────────────────────────────────────────────────────────
+async function loadExplorer(){
+  document.getElementById('tx-loading').style.display='flex';
+  try{
+    const opts=await apiFetch('/api/transactions/filters');
     populateFilters(opts);
     await fetchTransactions();
-  } catch(e) { console.error(e); }
-  finally { document.getElementById('tx-loading').classList.add('hidden'); }
+  }catch(e){console.error(e);}
+  finally{document.getElementById('tx-loading').style.display='none';}
 }
 
-function populateFilters(opts) {
-  const fill = (id, arr, all) => {
-    const sel = document.getElementById(id);
-    const cur = sel.value;
-    sel.innerHTML = `<option value="">${all}</option>` + (arr||[]).map(v=>`<option value="${v}">${v}</option>`).join('');
-    if (cur) sel.value = cur;
+function populateFilters(opts){
+  const fill=(id,arr,lbl)=>{
+    const sel=document.getElementById(id);
+    const cur=sel.value;
+    sel.innerHTML=`<option value="">${lbl}</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join('');
+    if(cur) sel.value=cur;
   };
-  fill('f-method',      opts.methods,      'All Methods');
-  fill('f-status',      opts.statuses,     'All Statuses');
-  fill('f-marketplace', opts.marketplaces, 'All Marketplaces');
-  fill('f-registry',    opts.registries,   'All Registries');
-  fill('f-continent',   opts.continents,   'All Continents');
-  fill('f-year',        opts.years,        'All Years');
+  fill('f-method',opts.methods,'Method');
+  fill('f-status',opts.statuses,'Status');
+  fill('f-marketplace',opts.marketplaces,'Marketplace');
+  fill('f-registry',opts.registries,'Registry');
+  fill('f-continent',opts.continents,'Continent');
+  fill('f-year',opts.years,'Year');
 }
 
-async function fetchTransactions() {
-  const q   = document.getElementById('search-inp').value.trim();
-  const m   = document.getElementById('f-method').value;
-  const st  = document.getElementById('f-status').value;
-  const mk  = document.getElementById('f-marketplace').value;
-  const reg = document.getElementById('f-registry').value;
-  const con = document.getElementById('f-continent').value;
-  const yr  = document.getElementById('f-year').value;
-
-  let url = `/api/transactions/?limit=5000`;
-  if (q)   url += `&search=${encodeURIComponent(q)}`;
-  if (m)   url += `&method=${encodeURIComponent(m)}`;
-  if (st)  url += `&status=${encodeURIComponent(st)}`;
-  if (mk)  url += `&marketplace=${encodeURIComponent(mk)}`;
-  if (reg) url += `&registry_name=${encodeURIComponent(reg)}`;
-  if (con) url += `&continent=${encodeURIComponent(con)}`;
-  if (yr)  url += `&year=${encodeURIComponent(yr)}`;
-
-  const data = await apiFetch(url);
-  txData = Array.isArray(data) ? data : (data.data || data.items || data.transactions || []);
-  txFiltered = [...txData];
-  txPage = 1;
+async function fetchTransactions(){
+  const q   =document.getElementById('search-inp').value.trim();
+  const m   =document.getElementById('f-method').value;
+  const st  =document.getElementById('f-status').value;
+  const mk  =document.getElementById('f-marketplace').value;
+  const reg =document.getElementById('f-registry').value;
+  const con =document.getElementById('f-continent').value;
+  const yr  =document.getElementById('f-year').value;
+  let url='/api/transactions/?limit=5000';
+  if(q)   url+=`&search=${encodeURIComponent(q)}`;
+  if(m)   url+=`&method=${encodeURIComponent(m)}`;
+  if(st)  url+=`&status=${encodeURIComponent(st)}`;
+  if(mk)  url+=`&marketplace=${encodeURIComponent(mk)}`;
+  if(reg) url+=`&registry_name=${encodeURIComponent(reg)}`;
+  if(con) url+=`&continent=${encodeURIComponent(con)}`;
+  if(yr)  url+=`&year=${encodeURIComponent(yr)}`;
+  const data=await apiFetch(url);
+  txData=Array.isArray(data)?data:(data.data||data.items||[]);
+  txFiltered=[...txData];
+  txPage=1;
   renderTxTable();
-  document.getElementById('res-count').textContent = `${fmt(txFiltered.length)} results`;
+  document.getElementById('res-count').textContent=`${fmt(txFiltered.length)} records`;
 }
 
-function renderTxTable() {
-  const start = (txPage-1)*txPerPage;
-  const rows  = txFiltered.slice(start, start+txPerPage);
-  const tbody = document.getElementById('tx-body');
-
-  if (!txFiltered.length) {
-    tbody.innerHTML = '';
-    document.getElementById('tx-empty').classList.remove('hidden');
-    document.getElementById('pg-info').textContent = '';
-    document.getElementById('pg-btns').innerHTML = '';
+function renderTxTable(){
+  const start=(txPage-1)*txPerPage;
+  const rows=txFiltered.slice(start,start+txPerPage);
+  const tbody=document.getElementById('tx-body');
+  if(!txFiltered.length){
+    tbody.innerHTML='';
+    document.getElementById('tx-empty').style.display='block';
+    document.getElementById('pg-info').textContent='';
+    document.getElementById('pg-btns').innerHTML='';
     return;
   }
-  document.getElementById('tx-empty').classList.add('hidden');
+  document.getElementById('tx-empty').style.display='none';
+  tbody.innerHTML=rows.map((r,i)=>`
+    <tr onclick="openModal(${start+i})">
+      <td style="color:#6B7280;">${r.announcement?r.announcement.slice(0,10):'—'}</td>
+      <td><span class="method-tag" title="${r.method||''}">${r.method||'—'}</span></td>
+      <td style="font-weight:500;color:#111827;">${r.supplier_name||'—'}</td>
+      <td>${r.purchaser||'Not Disclosed'}</td>
+      <td style="color:#6B7280;font-size:12px;">${r.marketplace||'—'}</td>
+      <td style="text-align:right;font-weight:600;">${fmt(r.tonnes)}</td>
+      <td style="text-align:right;color:#6B7280;">${fmt(r.tonnes_delivered)||'—'}</td>
+      <td><span class="badge ${badgeCls(r.status)}">${r.status||'—'}</span></td>
+      <td style="color:#6B7280;font-size:12px;">${r.continent||'—'}</td>
+    </tr>`).join('');
 
-  tbody.innerHTML = rows.map((r,i) => {
-    const s = (r.status||'').toLowerCase();
-    const bc = badgeCls(s);
-    return `<tr onclick="openModal(${start+i})">
-      <td class="text-slate-500">${r.announcement ? r.announcement.slice(0,10) : '—'}</td>
-      <td class="font-500 text-slate-800">${r.purchaser||'—'}</td>
-      <td class="text-slate-600">${r.supplier_name||r.supplier||'—'}</td>
-      <td><span class="method-pill">${r.method||'—'}</span></td>
-      <td class="font-600">${fmt(r.tonnes)}</td>
-      <td class="text-cyan-700 font-500">${fmt(r.tonnes_delivered)}</td>
-      <td><span class="badge ${bc}">${r.status||'—'}</span></td>
-      <td class="text-slate-500 text-xs">${r.marketplace||'—'}</td>
-      <td class="text-slate-500 text-xs">${r.registry_name||'—'}</td>
-      <td class="text-slate-500 text-xs">${r.continent||'—'}</td>
-    </tr>`;
-  }).join('');
+  const total=txFiltered.length;
+  const pages=Math.ceil(total/txPerPage);
+  document.getElementById('pg-info').textContent=`Showing ${start+1}–${Math.min(start+txPerPage,total)} of ${fmt(total)}`;
 
-  // Pagination
-  const total = txFiltered.length;
-  const pages = Math.ceil(total / txPerPage);
-  document.getElementById('pg-info').textContent = `Showing ${start+1}–${Math.min(start+txPerPage,total)} of ${fmt(total)}`;
-
-  const btns = document.getElementById('pg-btns');
-  let html = `<button class="pgbtn" onclick="changePage(${txPage-1})" ${txPage===1?'disabled':''}>‹</button>`;
-  const range = [];
-  for (let p=1;p<=pages;p++) if (p===1||p===pages||Math.abs(p-txPage)<=1) range.push(p);
+  let html=`<button class="pgbtn" onclick="changePage(${txPage-1})" ${txPage===1?'disabled':''}>‹</button>`;
   let last=0;
-  range.forEach(p => {
-    if (last && p-last>1) html += `<span class="text-slate-300 px-1">…</span>`;
-    html += `<button class="pgbtn ${p===txPage?'active':''}" onclick="changePage(${p})">${p}</button>`;
+  const range=[];
+  for(let p=1;p<=pages;p++) if(p===1||p===pages||Math.abs(p-txPage)<=1) range.push(p);
+  range.forEach(p=>{
+    if(last&&p-last>1) html+=`<span style="color:#D1D5DB;padding:0 4px;">…</span>`;
+    html+=`<button class="pgbtn ${p===txPage?'active':''}" onclick="changePage(${p})">${p}</button>`;
     last=p;
   });
-  html += `<button class="pgbtn" onclick="changePage(${txPage+1})" ${txPage===pages?'disabled':''}>›</button>`;
-  btns.innerHTML = html;
+  html+=`<button class="pgbtn" onclick="changePage(${txPage+1})" ${txPage===pages?'disabled':''}>›</button>`;
+  document.getElementById('pg-btns').innerHTML=html;
 }
 
-function changePage(p) {
-  const pages = Math.ceil(txFiltered.length / txPerPage);
-  if (p<1||p>pages) return;
-  txPage = p;
+function changePage(p){
+  const pages=Math.ceil(txFiltered.length/txPerPage);
+  if(p<1||p>pages) return;
+  txPage=p;
   renderTxTable();
-  document.querySelector('#sec-transactions .flex-1.overflow-auto').scrollTop = 0;
+  document.querySelector('#sec-explorer').scrollTop=0;
 }
 
-function onSearch(v) {
+function onSearch(v){
   clearTimeout(searchTimer);
-  document.getElementById('clr-search').classList.toggle('hidden', !v);
-  searchTimer = setTimeout(() => { txPage=1; fetchTransactions(); }, 350);
+  document.getElementById('clr-search').style.display=v?'block':'none';
+  searchTimer=setTimeout(()=>{txPage=1;fetchTransactions();},350);
 }
-
-function clearSearch() {
-  document.getElementById('search-inp').value = '';
-  document.getElementById('clr-search').classList.add('hidden');
-  txPage=1; fetchTransactions();
-}
-
-function applyFilters() { txPage=1; fetchTransactions(); }
-function resetFilters() {
-  ['f-method','f-status','f-marketplace','f-registry','f-continent','f-year'].forEach(id=>{
-    document.getElementById(id).value='';
-  });
+function clearSearch(){document.getElementById('search-inp').value='';document.getElementById('clr-search').style.display='none';txPage=1;fetchTransactions();}
+function applyFilters(){txPage=1;fetchTransactions();}
+function resetFilters(){
+  ['f-method','f-status','f-marketplace','f-registry','f-continent','f-year'].forEach(id=>document.getElementById(id).value='');
   clearSearch();
 }
 
-function sortBy(col) {
-  if (txSort.col === col) txSort.dir = txSort.dir==='asc'?'desc':'asc';
-  else { txSort.col=col; txSort.dir='asc'; }
-  txFiltered.sort((a,b) => {
-    let av=a[col]||'', bv=b[col]||'';
-    if (!isNaN(Number(av))) { av=Number(av); bv=Number(bv); }
-    if (av<bv) return txSort.dir==='asc'?-1:1;
-    if (av>bv) return txSort.dir==='asc'?1:-1;
+function sortBy(col){
+  if(txSort.col===col) txSort.dir=txSort.dir==='asc'?'desc':'asc';
+  else{txSort.col=col;txSort.dir='asc';}
+  txFiltered.sort((a,b)=>{
+    let av=a[col]||'',bv=b[col]||'';
+    if(!isNaN(Number(av))){av=Number(av);bv=Number(bv);}
+    if(av<bv) return txSort.dir==='asc'?-1:1;
+    if(av>bv) return txSort.dir==='asc'?1:-1;
     return 0;
   });
-  txPage=1; renderTxTable();
+  txPage=1;renderTxTable();
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
-function openModal(idx) {
-  const r = txFiltered[idx];
-  if (!r) return;
-  const fields = [
-    ['Date', r.announcement?.slice(0,10)],
-    ['Buyer', r.purchaser],
-    ['Supplier', r.supplier_name||r.supplier],
-    ['Method', r.method],
-    ['Committed (t)', fmt(r.tonnes)],
-    ['Delivered (t)', fmt(r.tonnes_delivered)],
-    ['Status', r.status],
-    ['Marketplace', r.marketplace],
-    ['Registry', r.registry_name],
-    ['Continent', r.continent],
-    ['Country', r.country],
-    ['Technology', r.technology],
-    ['Certification', r.certification],
-    ['Price (USD/t)', r.price_per_tonne ? '$'+r.price_per_tonne : null],
-  ].filter(([,v])=>v!=null);
-
-  document.getElementById('modal-content').innerHTML = `
-    <div class="grid grid-cols-2 gap-3">
+// ─── Modal ───────────────────────────────────────────────────────────────────
+function openModal(idx){
+  const r=txFiltered[idx]; if(!r) return;
+  const fields=[
+    ['Contract Date',r.announcement?.slice(0,10)],
+    ['Buyer',r.purchaser],
+    ['Supplier',r.supplier_name],
+    ['Method',r.method],
+    ['Purchased (t)',fmt(r.tonnes)],
+    ['Delivered (t)',fmt(r.tonnes_delivered)],
+    ['Status',r.status],
+    ['Marketplace',r.marketplace],
+    ['Registry',r.registry_name],
+    ['Continent',r.continent],
+    ['Country',r.country||r.supplier_country],
+    ['Technology',r.technology||r.supplier_technology],
+    ['Certification',r.certification],
+    ['Price (USD/t)',r.price_per_tonne?'$'+r.price_per_tonne:null],
+  ].filter(([,v])=>v!=null&&v!=='—');
+  document.getElementById('modal-content').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       ${fields.map(([l,v])=>`
-        <div class="bg-slate-50 rounded-xl px-4 py-3">
-          <div class="text-[10px] text-slate-400 uppercase tracking-wide font-600 mb-1">${l}</div>
-          <div class="text-sm font-600 text-slate-700">${v||'—'}</div>
+        <div style="background:#F9FAFB;border-radius:9px;padding:12px 14px;">
+          <div style="font-size:10px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">${l}</div>
+          <div style="font-size:13px;font-weight:600;color:#374151;">${v||'—'}</div>
         </div>`).join('')}
     </div>`;
-  document.getElementById('modal-overlay').classList.remove('hidden');
+  const ov=document.getElementById('modal-overlay');
+  ov.style.display='flex';
 }
-
-function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+function closeModal(){document.getElementById('modal-overlay').style.display='none';}
 
 // ─── Suppliers ────────────────────────────────────────────────────────────────
-async function loadSuppliers() {
-  document.getElementById('sup-loading').classList.remove('hidden');
-  document.getElementById('sup-grid').innerHTML = '';
-  try {
-    const data = await apiFetch('/api/suppliers/?limit=300');
-    supData = Array.isArray(data) ? data : (data.data||data.items||data.suppliers||[]);
-
-    // Populate filters
-    const techs = [...new Set(supData.map(s=>s.technology||s.method).filter(Boolean))].sort();
-    const conts = [...new Set(supData.map(s=>s.continent).filter(Boolean))].sort();
-    document.getElementById('sup-tech').innerHTML =
-      '<option value="">All Technologies</option>' + techs.map(t=>`<option>${t}</option>`).join('');
-    document.getElementById('sup-continent').innerHTML =
-      '<option value="">All Continents</option>' + conts.map(c=>`<option>${c}</option>`).join('');
-
+async function loadSuppliers(){
+  document.getElementById('sup-loading').style.display='flex';
+  document.getElementById('sup-grid').innerHTML='';
+  try{
+    const data=await apiFetch('/api/suppliers/?limit=300');
+    supData=Array.isArray(data)?data:(data.data||data.items||[]);
+    const techs=[...new Set(supData.map(s=>s.technology).filter(Boolean))].sort();
+    const conts=[...new Set(supData.map(s=>s.continent).filter(Boolean))].sort();
+    document.getElementById('sup-tech').innerHTML='<option value="">All Technologies</option>'+techs.map(t=>`<option>${t}</option>`).join('');
+    document.getElementById('sup-continent').innerHTML='<option value="">All Continents</option>'+conts.map(c=>`<option>${c}</option>`).join('');
     filterSuppliers('');
-  } catch(e) { console.error(e); }
-  finally { document.getElementById('sup-loading').classList.add('hidden'); }
+  }catch(e){console.error(e);}
+  finally{document.getElementById('sup-loading').style.display='none';}
 }
 
-function filterSuppliers(q) {
-  const tech = document.getElementById('sup-tech').value;
-  const cont = document.getElementById('sup-continent').value;
-  const qL = q.toLowerCase();
-  supFiltered = supData.filter(s => {
-    const name = (s.name||'').toLowerCase();
-    const ok = !q || name.includes(qL) || (s.technology||s.method||'').toLowerCase().includes(qL);
-    const okT = !tech || (s.technology||s.method||'')=== tech;
-    const okC = !cont || s.continent === cont;
-    return ok && okT && okC;
+const TECH_COLORS={
+  'Biochar Carbon Removal BCR':'background:#FEF3C7;color:#92400E;',
+  'Direct Air Carbon Capture And Sequestration DACCS':'background:#DBEAFE;color:#1E40AF;',
+  'Bioenergy With Carbon Capture And Sequestration BECCS':'background:#D1FAE5;color:#065F46;',
+  'Enhanced Weathering':'background:#CFFAFE;color:#155E75;',
+  'Mineralization':'background:#EDE9FE;color:#5B21B6;',
+  'Alkalinity Enhancement':'background:#CCFBF1;color:#134E4A;',
+  'Biomass Geological Sequestration':'background:#FED7AA;color:#92400E;',
+  'Direct Ocean Removal':'background:#BAE6FD;color:#0C4A6E;',
+  'Marine Biomass Carbon Capture And Sequestration MBCCS':'background:#E0E7FF;color:#3730A3;',
+  'Biomass Direct Storage':'background:#DCFCE7;color:#14532D;',
+};
+const getTechStyle=t=>TECH_COLORS[t]||'background:#F3F4F6;color:#6B7280;';
+
+function filterSuppliers(q){
+  const tech=document.getElementById('sup-tech').value;
+  const cont=document.getElementById('sup-continent').value;
+  const qL=q.toLowerCase();
+  supFiltered=supData.filter(s=>{
+    const ok=!q||(s.name||'').toLowerCase().includes(qL)||(s.technology||'').toLowerCase().includes(qL);
+    const okT=!tech||s.technology===tech;
+    const okC=!cont||s.continent===cont;
+    return ok&&okT&&okC;
   });
+  document.getElementById('sup-count').textContent=`${fmt(supFiltered.length)} suppliers`;
   renderSuppliers();
 }
 
-const techColors = {
-  'Biochar Carbon Removal BCR':'bg-amber-100 text-amber-700',
-  'Direct Air Carbon Capture And Sequestration DACCS':'bg-blue-100 text-blue-700',
-  'Bioenergy With Carbon Capture And Sequestration BECCS':'bg-emerald-100 text-emerald-700',
-  'Enhanced Weathering':'bg-cyan-100 text-cyan-700',
-  'Mineralization':'bg-violet-100 text-violet-700',
-  'Alkalinity Enhancement':'bg-teal-100 text-teal-700',
-  'Biomass Geological Sequestration':'bg-orange-100 text-orange-700',
-  'Direct Ocean Removal':'bg-sky-100 text-sky-700',
-  'Marine Biomass Carbon Capture And Sequestration MBCCS':'bg-indigo-100 text-indigo-700',
-  'Biomass Direct Storage':'bg-lime-100 text-lime-700',
-};
-const getTechColor = t => techColors[t] || 'bg-slate-100 text-slate-600';
-
-function renderSuppliers() {
-  const grid = document.getElementById('sup-grid');
-  if (!supFiltered.length) {
-    grid.innerHTML = '<div class="col-span-3 text-center py-20 text-slate-400"><i class="fas fa-search text-4xl mb-3 opacity-30"></i><p>No suppliers found</p></div>';
+function renderSuppliers(){
+  const grid=document.getElementById('sup-grid');
+  if(!supFiltered.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:#9CA3AF;"><i class="fas fa-search" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>No suppliers found</div>';
     return;
   }
-  grid.innerHTML = supFiltered.map(s => {
-    const dr = s.total_tonnes_committed > 0
-      ? Math.min((s.total_tonnes_delivered||0) / s.total_tonnes_committed * 100, 100) : 0;
-    const tech = s.technology || s.method || '';
-    const tc = getTechColor(tech);
+  grid.innerHTML=supFiltered.map(s=>{
+    const dr=s.total_tonnes_committed>0?Math.min((s.total_tonnes_delivered||0)/s.total_tonnes_committed*100,100):0;
+    const tech=s.technology||'';
+    const ts=getTechStyle(tech);
+    const loc=[s.city_region,s.country,s.continent].filter(Boolean).join(' · ')||'—';
     return `
     <div class="sup-card">
-      <div class="flex items-start justify-between mb-3">
-        <div class="flex-1 min-w-0">
-          <h3 class="font-700 text-slate-800 text-sm truncate">${s.name||'—'}</h3>
-          <p class="text-xs text-slate-400 mt-0.5">${[s.city_region, s.country, s.continent].filter(Boolean).join(' · ')||'—'}</p>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name||'—'}</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${loc}</div>
         </div>
-        ${s.price_per_tonne ? `<span class="text-xs font-700 text-emerald-600 ml-2 flex-shrink-0">$${s.price_per_tonne}/t</span>` : ''}
+        ${s.price_per_tonne?`<span style="font-size:12px;font-weight:700;color:#10B981;margin-left:8px;flex-shrink:0;">$${s.price_per_tonne}/t</span>`:''}
       </div>
-
-      ${tech ? `<span class="inline-block text-[10px] font-600 px-2.5 py-1 rounded-lg mb-3 ${tc}">${tech}</span>` : ''}
-
-      <div class="grid grid-cols-2 gap-2 mb-3 text-center">
-        <div class="bg-slate-50 rounded-xl py-2">
-          <div class="text-sm font-800 text-slate-700">${fmtM(s.total_tonnes_committed||0)}</div>
-          <div class="text-[9px] text-slate-400 uppercase tracking-wide">Committed</div>
+      ${tech?`<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;margin-bottom:10px;${ts}">${tech.length>35?tech.slice(0,35)+'…':tech}</span>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;text-align:center;">
+        <div style="background:#F9FAFB;border-radius:8px;padding:8px;">
+          <div style="font-size:13px;font-weight:700;color:#111827;">${fmtM(s.total_tonnes_committed||0)}</div>
+          <div style="font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-top:1px;">Committed</div>
         </div>
-        <div class="bg-slate-50 rounded-xl py-2">
-          <div class="text-sm font-800 text-cyan-600">${fmtM(s.total_tonnes_delivered||0)}</div>
-          <div class="text-[9px] text-slate-400 uppercase tracking-wide">Delivered</div>
+        <div style="background:#F9FAFB;border-radius:8px;padding:8px;">
+          <div style="font-size:13px;font-weight:700;color:#06B6D4;">${fmtM(s.total_tonnes_delivered||0)}</div>
+          <div style="font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-top:1px;">Delivered</div>
         </div>
       </div>
-
-      <div class="mb-3">
-        <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-          <span>Delivery Rate</span><span class="font-600 ${dr>10?'text-emerald-500':'text-slate-500'}">${dr.toFixed(1)}%</span>
+      <div style="margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF;margin-bottom:4px;">
+          <span>Delivery Rate</span>
+          <span style="font-weight:600;color:${dr>10?'#10B981':'#9CA3AF'};">${dr.toFixed(1)}%</span>
         </div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${dr}%"></div></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${dr}%;"></div></div>
       </div>
-
-      <div class="flex items-center justify-between text-[10px] text-slate-400">
-        <span><i class="fas fa-file-contract mr-1"></i>${s.transaction_count||0} transactions</span>
-        ${s.certification ? `<span class="truncate ml-2 text-right text-slate-400" title="${s.certification}">${s.certification.slice(0,20)}${s.certification.length>20?'…':''}</span>` : ''}
+      <div style="font-size:11px;color:#9CA3AF;display:flex;align-items:center;justify-content:space-between;">
+        <span><i class="fas fa-file-contract" style="margin-right:4px;"></i>${s.transaction_count||0} transactions</span>
+        ${s.certification?`<span style="font-size:10px;color:#9CA3AF;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;" title="${s.certification}">${s.certification}</span>`:''}
       </div>
     </div>`;
   }).join('');
 }
 
-// ─── Upload ───────────────────────────────────────────────────────────────────
-function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
-function handleDragLeave()  { document.getElementById('drop-zone').classList.remove('drag-over'); }
-function handleDrop(e)      { e.preventDefault(); handleDragLeave(); setFile(e.dataTransfer.files[0]); }
-function handleFileSelect(e){ setFile(e.target.files[0]); }
-
-function setFile(f) {
-  if (!f) return;
-  selectedFile = f;
-  document.getElementById('file-name').textContent = f.name;
-  document.getElementById('file-size').textContent = (f.size/1024).toFixed(1) + ' KB';
-  document.getElementById('file-info').classList.remove('hidden');
-  document.getElementById('import-btn').disabled = false;
-  document.getElementById('upload-result').classList.add('hidden');
+// ─── Upload ──────────────────────────────────────────────────────────────────
+function handleDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
+function handleDragLeave(){document.getElementById('drop-zone').classList.remove('drag-over');}
+function handleDrop(e){e.preventDefault();handleDragLeave();setFile(e.dataTransfer.files[0]);}
+function handleFileSelect(e){setFile(e.target.files[0]);}
+function setFile(f){
+  if(!f) return;
+  selectedFile=f;
+  document.getElementById('file-name').textContent=f.name;
+  document.getElementById('file-size').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('file-info').style.display='flex';
+  const btn=document.getElementById('import-btn');
+  btn.style.opacity='1';btn.style.pointerEvents='auto';
+  document.getElementById('upload-result').style.display='none';
 }
-
-function clearFile() {
-  selectedFile = null;
-  document.getElementById('file-info').classList.add('hidden');
-  document.getElementById('import-btn').disabled = true;
-  document.getElementById('file-inp').value = '';
+function clearFile(){
+  selectedFile=null;
+  document.getElementById('file-info').style.display='none';
+  const btn=document.getElementById('import-btn');
+  btn.style.opacity='.4';btn.style.pointerEvents='none';
+  document.getElementById('file-inp').value='';
 }
-
-async function uploadFile() {
-  if (!selectedFile) return;
-  const btn = document.getElementById('import-btn');
-  const prog = document.getElementById('upload-progress');
-  const res  = document.getElementById('upload-result');
-  btn.disabled = true;
-  prog.classList.remove('hidden');
-  res.classList.add('hidden');
-  try {
-    const fd = new FormData();
-    fd.append('file', selectedFile);
-    const r = await fetch('/api/ingest/upload', { method:'POST', body:fd });
-    const d = await r.json();
-    res.classList.remove('hidden');
-    if (r.ok) {
-      res.className = 'mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200';
-      res.querySelector('#upload-result-text').innerHTML =
-        `<i class="fas fa-check-circle text-emerald-500 mr-2"></i><span class="text-emerald-700 font-600">Import successful!</span>
-         <div class="text-xs text-emerald-600 mt-1">Inserted: ${d.inserted||0} · Updated: ${d.updated||0} · Skipped: ${d.skipped||0}</div>`;
+async function uploadFile(){
+  if(!selectedFile) return;
+  const btn=document.getElementById('import-btn');
+  const prog=document.getElementById('upload-progress');
+  const res=document.getElementById('upload-result');
+  btn.style.opacity='.4';btn.style.pointerEvents='none';
+  prog.style.display='block';res.style.display='none';
+  try{
+    const fd=new FormData();fd.append('file',selectedFile);
+    const r=await fetch('/api/ingest/upload',{method:'POST',body:fd});
+    const d=await r.json();
+    res.style.display='block';
+    if(r.ok){
+      res.style.background='#D1FAE5';res.style.border='1px solid #A7F3D0';res.style.borderRadius='10px';
+      document.getElementById('upload-result-text').innerHTML=
+        `<i class="fas fa-check-circle" style="color:#10B981;margin-right:6px;"></i><span style="color:#065F46;font-weight:600;">Import successful!</span>
+         <div style="font-size:11px;color:#047857;margin-top:4px;">Inserted: ${d.inserted||0} · Updated: ${d.updated||0} · Skipped: ${d.skipped||0}</div>`;
     } else {
-      res.className = 'mt-4 p-4 rounded-xl bg-red-50 border border-red-200';
-      res.querySelector('#upload-result-text').innerHTML =
-        `<i class="fas fa-exclamation-circle text-red-400 mr-2"></i><span class="text-red-700">${d.detail||'Import failed'}</span>`;
+      res.style.background='#FEE2E2';res.style.border='1px solid #FECACA';res.style.borderRadius='10px';
+      document.getElementById('upload-result-text').innerHTML=
+        `<i class="fas fa-exclamation-circle" style="color:#EF4444;margin-right:6px;"></i><span style="color:#991B1B;">${d.detail||'Import failed'}</span>`;
     }
-  } catch(e) {
-    res.classList.remove('hidden');
-    res.className = 'mt-4 p-4 rounded-xl bg-red-50 border border-red-200';
-    res.querySelector('#upload-result-text').innerHTML =
-      `<i class="fas fa-exclamation-circle text-red-400 mr-2"></i><span class="text-red-700">Network error</span>`;
-  } finally {
-    prog.classList.add('hidden');
-    btn.disabled = false;
-  }
+  }catch(e){
+    res.style.display='block';res.style.background='#FEE2E2';res.style.border='1px solid #FECACA';res.style.borderRadius='10px';
+    document.getElementById('upload-result-text').innerHTML='<span style="color:#991B1B;">Network error</span>';
+  }finally{prog.style.display='none';btn.style.opacity='1';btn.style.pointerEvents='auto';}
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
-loadDashboard();
+// ─── Init ────────────────────────────────────────────────────────────────────
+// Fix section display
+document.getElementById('sec-insights').style.display='block';
+['sec-explorer','sec-suppliers','sec-upload'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.style.display='none';
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+loadInsights();
 </script>
 </body>
 </html>
