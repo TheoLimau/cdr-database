@@ -253,8 +253,8 @@
     .chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
     .chart-title{font-size:11.5px;font-weight:700;color:#F1F5F9}
     .chart-sub{font-size:10px;color:#475569;margin-top:2px}
-    canvas{max-height:200px}
-    canvas.tall{max-height:260px}
+    .chart-wrap{display:block;width:100%;height:220px;position:relative}
+    .chart-wrap.tall{height:280px}
 
     /* ─── STATUS PILLS ─── */
     .status-pills{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -535,11 +535,11 @@
         <div class="chart-head">
           <div><div class="chart-title">Annual Volume — Committed vs Delivered</div><div class="chart-sub">tCO₂ per year</div></div>
         </div>
-        <canvas id="yearChart" class="tall"></canvas>
+        <div class="chart-wrap tall"><canvas id="yearChart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Order Status</div><div class="chart-sub">by transaction count</div></div></div>
-        <canvas id="statusChart"></canvas>
+        <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
       </div>
     </div>
 
@@ -547,15 +547,15 @@
     <div class="charts-grid">
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Method Distribution</div><div class="chart-sub">tCO₂ committed</div></div></div>
-        <canvas id="methodChart"></canvas>
+        <div class="chart-wrap"><canvas id="methodChart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Top 10 Buyers</div><div class="chart-sub">by committed volume</div></div></div>
-        <canvas id="buyersChart"></canvas>
+        <div class="chart-wrap"><canvas id="buyersChart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Top 10 Suppliers</div><div class="chart-sub">by delivered volume</div></div></div>
-        <canvas id="suppliersChart"></canvas>
+        <div class="chart-wrap"><canvas id="suppliersChart"></canvas></div>
       </div>
     </div>
 
@@ -739,11 +739,11 @@
     <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Committed tCO₂ by Method</div></div></div>
-        <canvas id="meth-vol-chart" class="tall"></canvas>
+        <div class="chart-wrap tall"><canvas id="meth-vol-chart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Delivery Rate by Method</div></div></div>
-        <canvas id="meth-rate-chart" class="tall"></canvas>
+        <div class="chart-wrap tall"><canvas id="meth-rate-chart"></canvas></div>
       </div>
     </div>
     <div class="xl-wrap">
@@ -1075,9 +1075,12 @@ function destroyChart(id){
 }
 function mkChart(id,cfg){
   destroyChart(id);
-  const ctx = document.getElementById(id);
-  if(!ctx) return;
-  chartInstances[id] = new Chart(ctx, cfg);
+  const canvas = document.getElementById(id);
+  if(!canvas) return;
+  if(!cfg.options) cfg.options = {};
+  cfg.options.responsive = true;
+  cfg.options.maintainAspectRatio = false;
+  chartInstances[id] = new Chart(canvas, cfg);
   return chartInstances[id];
 }
 
@@ -1147,8 +1150,8 @@ async function loadDashboard(){
       data:{
         labels:years,
         datasets:[
-          {label:'Committed',data:yr.map(r=>r.total_committed),backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3B82F6',borderWidth:1},
-          {label:'Delivered',data:yr.map(r=>r.total_delivered),backgroundColor:'rgba(34,197,94,.55)',borderColor:'#22C55E',borderWidth:1},
+          {label:'Committed',data:yr.map(r=>r.committed),backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3B82F6',borderWidth:1},
+          {label:'Delivered',data:yr.map(r=>r.delivered),backgroundColor:'rgba(34,197,94,.55)',borderColor:'#22C55E',borderWidth:1},
         ]
       },
       options:{
@@ -1178,7 +1181,7 @@ async function loadDashboard(){
       type:'doughnut',
       data:{
         labels:me.map(r=>r.method),
-        datasets:[{data:me.map(r=>r.total_committed),backgroundColor:me.map(r=>methodColor(r.method)),borderWidth:0}]
+        datasets:[{data:me.map(r=>r.committed),backgroundColor:me.map(r=>methodColor(r.method)),borderWidth:0}]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
     });
