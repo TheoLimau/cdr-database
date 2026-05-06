@@ -148,6 +148,7 @@ class TransactionService:
                 func.count(Transaction.id).label("count"),
                 func.sum(Transaction.tonnes).label("committed"),
                 func.sum(Transaction.tonnes_delivered).label("delivered"),
+                func.count(distinct(Transaction.supplier_id)).label("unique_suppliers"),
             )
             .filter(Transaction.method.isnot(None))
             .group_by(Transaction.method)
@@ -156,10 +157,11 @@ class TransactionService:
         )
         return [
             {
-                "method":    r.method,
-                "count":     r.count,
-                "committed": round(r.committed or 0, 2),
-                "delivered": round(r.delivered or 0, 2),
+                "method":           r.method,
+                "count":            r.count,
+                "committed":        round(r.committed or 0, 2),
+                "delivered":        round(r.delivered or 0, 2),
+                "unique_suppliers": r.unique_suppliers or 0,
             }
             for r in rows
         ]

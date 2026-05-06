@@ -3,12 +3,10 @@ module.exports = {
   apps: [
     {
       name: 'carbon-db',
-      script: 'uvicorn',
-      args: 'main:app --host 0.0.0.0 --port 8000 --reload',
+      script: '/usr/local/bin/uvicorn',
+      args: 'main:app --host 0.0.0.0 --port 8000',
       cwd: '/home/user/webapp/backend',
-      interpreter: 'python3',
-      interpreter_args: '-m',
-      // Trick: usa python -m uvicorn invece di chiamare uvicorn direttamente
+      interpreter: 'none',
       watch: false,
       instances: 1,
       exec_mode: 'fork',

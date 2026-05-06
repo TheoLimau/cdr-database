@@ -3,781 +3,1077 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CDR Database — Carbon Dioxide Removal Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>CDR.db — Carbon Removal Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    *{font-family:'Inter',system-ui,sans-serif;box-sizing:border-box;}
-    body{background:#F7F8FA;min-height:100vh;}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #F7F8FA;
+      color: #1A1D23;
+      min-height: 100vh;
+      display: flex;
+    }
 
     /* ── Sidebar ── */
-    .sidebar{width:220px;min-height:100vh;background:#fff;border-right:1px solid #EAECF0;
-             display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:40;}
-    .nav-section{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.08em;
-                 text-transform:uppercase;padding:16px 16px 6px;}
-    .nav-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-radius:7px;
-              font-size:13px;font-weight:500;cursor:pointer;color:#6B7280;margin:1px 6px;
-              transition:all .15s;}
-    .nav-item:hover{background:#F3F4F6;color:#111827;}
-    .nav-item.active{background:#F3F4F6;color:#111827;font-weight:600;}
-    .nav-item .ni{width:15px;text-align:center;font-size:13px;}
+    #sidebar {
+      width: 220px;
+      min-height: 100vh;
+      background: #fff;
+      border-right: 1px solid #EAECF0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+    }
+    .logo {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid #EAECF0;
+    }
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #3B5BDB, #6B8FF5);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon i { color: #fff; font-size: 14px; }
+    .logo-text { font-size: 16px; font-weight: 800; color: #1A1D23; letter-spacing: -0.4px; }
+    .logo-text span { color: #3B5BDB; }
+    .logo-sub { font-size: 10px; color: #9CA3AF; margin-top: 3px; letter-spacing: 0.02em; }
 
-    /* ── Main content ── */
-    .main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column;}
-    .topbar{background:#fff;border-bottom:1px solid #EAECF0;padding:14px 28px;
-            display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;}
+    nav { flex: 1; padding: 10px 10px; overflow-y: auto; }
+    .nav-label {
+      font-size: 9px; font-weight: 700; color: #C1C6D0;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 14px 10px 5px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 7px;
+      font-size: 12.5px; font-weight: 500; color: #6B7280;
+      cursor: pointer; margin-bottom: 1px; transition: all 0.12s;
+    }
+    .nav-item:hover { background: #F7F8FA; color: #1A1D23; }
+    .nav-item.active { background: #EEF2FF; color: #3B5BDB; font-weight: 600; }
+    .nav-item i { width: 15px; text-align: center; font-size: 12px; opacity: .8; }
+    .nav-item.active i { opacity: 1; }
 
-    /* ── KPI cards ── */
-    .kpi-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:20px 24px;
-              box-shadow:0 1px 3px rgba(0,0,0,.04);}
-    .kpi-value{font-size:2rem;font-weight:700;color:#111827;line-height:1.1;}
-    .kpi-label{font-size:12px;color:#6B7280;margin-bottom:6px;font-weight:500;}
-    .kpi-trend{font-size:11px;font-weight:600;margin-top:6px;}
-    .trend-up{color:#10B981;}
-    .trend-neutral{color:#9CA3AF;}
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid #EAECF0;
+    }
+    .db-status {
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .status-dot {
+      width: 7px; height: 7px; background: #22C55E; border-radius: 50%;
+      flex-shrink: 0; box-shadow: 0 0 0 2px rgba(34,197,94,.25);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 2px rgba(34,197,94,.25);} 50%{box-shadow:0 0 0 4px rgba(34,197,94,.1);} }
+    .status-text { font-size: 11px; color: #15803D; }
+    .status-count { font-size: 11px; font-weight: 700; color: #166534; }
 
-    /* ── Chart cards ── */
-    .chart-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:22px 24px;
-                box-shadow:0 1px 3px rgba(0,0,0,.04);}
-    .chart-heading{font-size:14px;font-weight:600;color:#111827;margin-bottom:3px;}
-    .chart-sub{font-size:12px;color:#9CA3AF;margin-bottom:18px;}
+    /* ── Main ── */
+    #main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #EAECF0;
+      padding: 0 26px;
+      height: 54px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 40;
+    }
+    .topbar-left h1 { font-size: 14.5px; font-weight: 700; color: #1A1D23; }
+    .topbar-left p { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .btn-ghost {
+      border: 1px solid #EAECF0; background: #fff; border-radius: 7px;
+      padding: 6px 12px; font-size: 12px; font-weight: 500; color: #6B7280;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: all 0.12s; font-family: inherit;
+    }
+    .btn-ghost:hover { background: #F7F8FA; color: #1A1D23; border-color: #D1D5DB; }
+    #last-update { font-size: 10.5px; color: #C1C6D0; }
+
+    .page { flex: 1; overflow: auto; padding: 22px 26px; }
+
+    /* ── KPI Grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .kpi {
+      background: #fff; border: 1px solid #EAECF0;
+      border-radius: 10px; padding: 14px 16px;
+      position: relative; overflow: hidden;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--kpi-color, #3B5BDB), transparent);
+    }
+    .kpi-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px; font-size: 11px;
+    }
+    .kpi-label { font-size: 10.5px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .kpi-value { font-size: 1.55rem; font-weight: 800; color: #1A1D23; line-height: 1; letter-spacing: -0.5px; }
+    .kpi-sub { font-size: 10.5px; color: #9CA3AF; margin-top: 5px; }
+    .kpi-sub .good { color: #22C55E; font-weight: 600; }
+    .kpi-sub .warn { color: #F59E0B; font-weight: 600; }
+
+    /* ── Cards & Layout ── */
+    .card {
+      background: #fff; border: 1px solid #EAECF0;
+      border-radius: 10px; padding: 18px 20px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .card-title { font-size: 13px; font-weight: 700; color: #1A1D23; }
+    .card-sub { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+    .grid-2-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .grid-3   { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .grid-2   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .grid-4   { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 12px; }
+    canvas { display: block; }
+
+    /* ── Section title ── */
+    .section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 11px; font-weight: 700; color: #9CA3AF;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
 
     /* ── Table ── */
-    .data-table{width:100%;border-collapse:collapse;}
-    .data-table th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;
-                   color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;
-                   border-bottom:1px solid #EAECF0;white-space:nowrap;cursor:pointer;
-                   background:#fff;}
-    .data-table th:hover{color:#111827;}
-    .data-table td{padding:11px 14px;font-size:13px;color:#374151;
-                   border-bottom:1px solid #F3F4F6;white-space:nowrap;max-width:180px;
-                   overflow:hidden;text-overflow:ellipsis;}
-    .data-table tbody tr{transition:background .1s;cursor:pointer;}
-    .data-table tbody tr:hover{background:#F9FAFB;}
+    .table-wrap {
+      background: #fff; border: 1px solid #EAECF0;
+      border-radius: 10px; overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 9px 13px;
+      font-size: 10px; font-weight: 700; color: #9CA3AF;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      background: #FAFBFC; border-bottom: 1px solid #EAECF0;
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:hover { color: #374151; }
+    thead th.sort-asc::after  { content: ' ↑'; color: #3B5BDB; }
+    thead th.sort-desc::after { content: ' ↓'; color: #3B5BDB; }
+    tbody td {
+      padding: 9px 13px; font-size: 12.5px; color: #374151;
+      border-bottom: 1px solid #F4F5F7;
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { cursor: pointer; transition: background 0.08s; }
+    tbody tr:hover td { background: #F9FAFB; }
 
     /* ── Badges ── */
-    .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;
-           font-size:11px;font-weight:600;}
-    .b-delivered {background:#D1FAE5;color:#065F46;}
-    .b-contracted{background:#DBEAFE;color:#1E40AF;}
-    .b-retired   {background:#EDE9FE;color:#5B21B6;}
-    .b-partial   {background:#FEF3C7;color:#92400E;}
-    .b-default   {background:#F3F4F6;color:#6B7280;}
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 10.5px; font-weight: 600; white-space: nowrap;
+    }
+    .b-delivered  { background: #DCFCE7; color: #15803D; }
+    .b-contracted { background: #DBEAFE; color: #1D4ED8; }
+    .b-retired    { background: #EDE9FE; color: #6D28D9; }
+    .b-partial    { background: #FEF3C7; color: #B45309; }
+    .b-default    { background: #F3F4F6; color: #6B7280; }
 
-    .method-tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;
-                font-weight:500;background:#EFF6FF;color:#1D4ED8;
-                max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .tech-tag {
+      display: inline-block; padding: 2px 7px; border-radius: 4px;
+      font-size: 10px; font-weight: 600;
+      background: #EEF2FF; color: #3B5BDB;
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .method-tag {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      font-size: 10px; font-weight: 600; white-space: nowrap;
+    }
 
-    /* ── Filters / selects ── */
-    .fsel{font-size:12.5px;border:1px solid #E5E7EB;border-radius:8px;
-          padding:7px 10px;background:#fff;cursor:pointer;color:#374151;
-          transition:border-color .15s;}
-    .fsel:focus{outline:none;border-color:#6366F1;}
-    .search-box{border:1px solid #E5E7EB;border-radius:8px;padding:7px 12px 7px 34px;
-                font-size:13px;color:#374151;background:#fff;width:280px;
-                transition:border-color .15s;}
-    .search-box:focus{outline:none;border-color:#6366F1;}
-
-    /* ── Tabs ── */
-    .tab-group{display:flex;gap:2px;background:#F3F4F6;border-radius:8px;padding:3px;}
-    .tab-btn{padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:500;
-             cursor:pointer;border:none;background:transparent;color:#6B7280;transition:all .15s;}
-    .tab-btn.active{background:#fff;color:#111827;font-weight:600;
-                    box-shadow:0 1px 3px rgba(0,0,0,.08);}
+    /* ── Filters bar ── */
+    .filters-bar {
+      background: #fff; border-bottom: 1px solid #EAECF0;
+      padding: 10px 22px; display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+    }
+    .search-wrap { position: relative; }
+    .search-wrap i { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #D1D5DB; font-size: 11px; pointer-events: none; }
+    .search-inp {
+      border: 1px solid #EAECF0; border-radius: 7px;
+      padding: 6px 9px 6px 28px; font-size: 12px; color: #374151;
+      background: #fff; font-family: inherit; width: 230px; transition: border-color 0.12s;
+    }
+    .search-inp:focus { outline: none; border-color: #3B5BDB; box-shadow: 0 0 0 2px rgba(59,91,219,.08); }
+    .fsel {
+      border: 1px solid #EAECF0; border-radius: 7px; padding: 6px 9px;
+      font-size: 12px; color: #374151; background: #fff;
+      font-family: inherit; cursor: pointer; transition: border-color 0.12s;
+    }
+    .fsel:focus { outline: none; border-color: #3B5BDB; }
+    .res-count { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+    .btn-reset {
+      margin-left: auto; border: 1px solid #EAECF0; background: #fff;
+      border-radius: 7px; padding: 6px 11px; font-size: 11.5px;
+      color: #6B7280; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 4px; transition: all 0.12s;
+    }
+    .btn-reset:hover { background: #F7F8FA; color: #1A1D23; }
 
     /* ── Pagination ── */
-    .pgbtn{padding:5px 11px;border-radius:7px;font-size:12.5px;font-weight:500;
-           border:1px solid #E5E7EB;background:#fff;color:#374151;transition:all .15s;cursor:pointer;}
-    .pgbtn:hover:not(:disabled){background:#F9FAFB;border-color:#D1D5DB;}
-    .pgbtn.active{background:#6366F1;color:#fff;border-color:#6366F1;}
-    .pgbtn:disabled{opacity:.35;cursor:not-allowed;}
+    .pg-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-top: 1px solid #F4F5F7;
+      background: #FAFBFC; border-radius: 0 0 10px 10px;
+    }
+    .pg-info { font-size: 11px; color: #9CA3AF; }
+    .pg-btns { display: flex; gap: 2px; }
+    .pgbtn {
+      padding: 4px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 500;
+      border: 1px solid #EAECF0; background: #fff; color: #374151;
+      cursor: pointer; font-family: inherit; transition: all 0.1s;
+    }
+    .pgbtn:hover:not(:disabled) { background: #F7F8FA; }
+    .pgbtn.active { background: #3B5BDB; color: #fff; border-color: #3B5BDB; }
+    .pgbtn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-    /* ── Supplier card ── */
-    .sup-card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:18px;
-              box-shadow:0 1px 3px rgba(0,0,0,.04);transition:box-shadow .2s,transform .15s;}
-    .sup-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px);}
+    /* ── Supplier cards ── */
+    .sup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .sup-card {
+      background: #fff; border: 1px solid #EAECF0; border-radius: 10px;
+      padding: 16px 18px; transition: box-shadow 0.2s, transform 0.15s;
+      cursor: pointer;
+    }
+    .sup-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.08); transform: translateY(-1px); border-color: #C7D2FE; }
+    .sup-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .sup-name { font-size: 13.5px; font-weight: 700; color: #1A1D23; }
+    .sup-loc  { font-size: 10.5px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+    .sup-price { font-size: 13px; font-weight: 800; color: #22C55E; white-space: nowrap; margin-left: 8px; flex-shrink: 0; }
+    .sup-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 10px 0; }
+    .sup-stat { background: #FAFBFC; border-radius: 7px; padding: 7px 8px; text-align: center; }
+    .sup-stat-v { font-size: 13px; font-weight: 700; color: #1A1D23; }
+    .sup-stat-l { font-size: 9px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+    .prog-wrap { margin: 8px 0 6px; }
+    .prog-label { display: flex; justify-content: space-between; font-size: 10px; color: #9CA3AF; margin-bottom: 3px; }
+    .prog-bar { height: 4px; background: #F3F4F6; border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 2px; }
+    .sup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .sup-tag {
+      font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px;
+      background: #F4F5F7; color: #6B7280; display: flex; align-items: center; gap: 3px;
+    }
+    .sup-tag i { font-size: 8px; opacity: .7; }
+    .sup-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid #F4F5F7; display: flex; justify-content: space-between; align-items: center; }
+    .sup-footer-l { font-size: 10.5px; color: #9CA3AF; }
+    .sup-footer-r { font-size: 10.5px; color: #9CA3AF; text-align: right; }
 
-    /* ── Progress bar ── */
-    .prog-bar{height:5px;border-radius:3px;background:#F3F4F6;overflow:hidden;}
-    .prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#6366F1,#8B5CF6);}
+    /* ── Rank list (top buyers/suppliers in Insights) ── */
+    .rank-list { list-style: none; }
+    .rank-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0; border-bottom: 1px solid #F4F5F7;
+    }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-n { font-size: 11px; font-weight: 700; color: #D1D5DB; width: 18px; text-align: right; flex-shrink: 0; }
+    .rank-name { font-size: 12px; font-weight: 600; color: #374151; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank-bar-wrap { width: 80px; flex-shrink: 0; }
+    .rank-bar { height: 5px; border-radius: 3px; background: #3B5BDB; opacity: .7; }
+    .rank-val { font-size: 11px; font-weight: 700; color: #1A1D23; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Spinner ── */
-    .spin{width:26px;height:26px;border:2.5px solid #E5E7EB;border-top-color:#6366F1;
-          border-radius:50%;animation:spin .7s linear infinite;}
-    @keyframes spin{to{transform:rotate(360deg);}}
+    /* ── Method summary list ── */
+    .method-row {
+      display: flex; align-items: center; padding: 8px 0;
+      border-bottom: 1px solid #F4F5F7; gap: 10px;
+    }
+    .method-row:last-child { border-bottom: none; }
+    .method-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .method-name { font-size: 12px; font-weight: 600; color: #374151; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .method-bar-outer { width: 70px; height: 5px; background: #F3F4F6; border-radius: 3px; flex-shrink: 0; overflow: hidden; }
+    .method-bar-inner { height: 100%; border-radius: 3px; }
+    .method-pct { font-size: 10.5px; color: #9CA3AF; width: 32px; text-align: right; flex-shrink: 0; }
 
-    /* ── Drop zone ── */
-    #drop-zone{border:1.5px dashed #C7D2FE;border-radius:12px;transition:all .2s;}
-    #drop-zone.drag-over{border-color:#6366F1;background:#EEF2FF;}
+    /* ── Geographic / Status mini-cards ── */
+    .stat-row { display: flex; gap: 8px; }
+    .stat-pill {
+      flex: 1; background: #FAFBFC; border: 1px solid #EAECF0;
+      border-radius: 8px; padding: 10px 12px; text-align: center;
+    }
+    .stat-pill-v { font-size: 18px; font-weight: 800; color: #1A1D23; }
+    .stat-pill-l { font-size: 9.5px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+
+    /* ── Tabs ── */
+    .tab-group { display: flex; gap: 2px; background: #F3F4F6; border-radius: 6px; padding: 2px; }
+    .tab-btn {
+      padding: 4px 11px; border-radius: 5px; font-size: 11.5px; font-weight: 500;
+      cursor: pointer; border: none; background: transparent; color: #6B7280;
+      font-family: inherit; transition: all 0.12s;
+    }
+    .tab-btn.active { background: #fff; color: #1A1D23; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+
+    /* ── Upload ── */
+    .spin { width: 18px; height: 18px; border: 2px solid #E8EAF0; border-top-color: #3B5BDB; border-radius: 50%; animation: spin .6s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #drop-zone { border: 1.5px dashed #C7D2FE; border-radius: 10px; transition: all 0.2s; }
+    #drop-zone.drag-over { border-color: #3B5BDB; background: #EEF2FF; }
 
     /* ── Modal ── */
-    #modal-overlay{transition:opacity .2s;}
+    #modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.35); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-box {
+      background: #fff; border-radius: 12px; width: 100%; max-width: 580px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,.18);
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 20px; border-bottom: 1px solid #EAECF0;
+      position: sticky; top: 0; background: #fff; z-index: 1;
+    }
+    .modal-head-title { font-size: 14px; font-weight: 700; color: #1A1D23; }
+    .modal-head-sub   { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+    .modal-close { border: none; background: none; color: #9CA3AF; cursor: pointer; font-size: 16px; line-height: 1; padding: 4px; border-radius: 4px; }
+    .modal-close:hover { color: #374151; background: #F3F4F6; }
+    .modal-body { padding: 18px 20px; }
+    .modal-section { margin-bottom: 16px; }
+    .modal-section-title { font-size: 9.5px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .modal-field { background: #FAFBFC; border-radius: 7px; padding: 9px 11px; }
+    .modal-field.full { grid-column: 1 / -1; }
+    .modal-field-label { font-size: 9.5px; color: #9CA3AF; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+    .modal-field-value { font-size: 12.5px; font-weight: 600; color: #374151; word-break: break-word; }
+    .modal-divider { height: 1px; background: #F4F5F7; margin: 14px 0; }
+
+    /* ── Supplier detail modal ── */
+    .sup-modal-kpi { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .sup-modal-kpi-item { background: #F7F8FA; border-radius: 8px; padding: 10px 12px; text-align: center; }
+    .sup-modal-kpi-v { font-size: 18px; font-weight: 800; color: #1A1D23; }
+    .sup-modal-kpi-l { font-size: 10px; color: #9CA3AF; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar{width:5px;height:5px;}
-    ::-webkit-scrollbar-track{background:transparent;}
-    ::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:3px;}
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #E0E3EB; border-radius: 3px; }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; padding: 56px 24px; color: #9CA3AF; }
+    .empty-state i { font-size: 28px; opacity: .3; display: block; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── Method page table ── */
+    .meth-tbl th, .meth-tbl td { padding: 9px 13px; }
+    .meth-share-bar { height: 5px; border-radius: 3px; background: linear-gradient(90deg, #3B5BDB, #6B8FF5); min-width: 3px; display: inline-block; }
+
+    /* color accent for method tags */
+    .mc-biochar   { background: #FEF3C7; color: #B45309; }
+    .mc-beccs     { background: #DCFCE7; color: #15803D; }
+    .mc-daccs     { background: #DBEAFE; color: #1D4ED8; }
+    .mc-weathering{ background: #FCE7F3; color: #9D174D; }
+    .mc-ocean     { background: #E0F2FE; color: #0369A1; }
+    .mc-mineral   { background: #F3E8FF; color: #7C3AED; }
+    .mc-biomass   { background: #ECFDF5; color: #065F46; }
+    .mc-default   { background: #F3F4F6; color: #6B7280; }
+
+    /* ── Tooltip ── */
+    [data-tip] { position: relative; cursor: default; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%);
+      background: #1A1D23; color: #fff; font-size: 10.5px; font-weight: 500;
+      padding: 4px 8px; border-radius: 5px; white-space: nowrap; z-index: 200;
+      pointer-events: none;
+    }
   </style>
 </head>
-
 <body>
 
-<!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ -->
-<aside class="sidebar">
-  <!-- Logo -->
-  <div style="padding:20px 16px 12px;border-bottom:1px solid #EAECF0;">
-    <div style="font-size:19px;font-weight:800;color:#111827;letter-spacing:-.5px;">CDR<span style="color:#6366F1;">.db</span></div>
-    <div style="font-size:10.5px;color:#9CA3AF;margin-top:1px;">Carbon Removal Intelligence</div>
-  </div>
-
-  <!-- Nav -->
-  <nav style="flex:1;padding:8px 0;overflow-y:auto;">
-    <div class="nav-section">Analytics</div>
-    <div class="nav-item active" id="nav-insights" onclick="goto('insights')">
-      <i class="fas fa-chart-line ni"></i> Order Insights
-    </div>
-    <div class="nav-item" id="nav-explorer" onclick="goto('explorer')">
-      <i class="fas fa-table ni"></i> Order Explorer
-    </div>
-    <div class="nav-section">Market</div>
-    <div class="nav-item" id="nav-suppliers" onclick="goto('suppliers')">
-      <i class="fas fa-industry ni"></i> Market Actors
-    </div>
-    <div class="nav-section">Data</div>
-    <div class="nav-item" id="nav-upload" onclick="goto('upload')">
-      <i class="fas fa-cloud-upload-alt ni"></i> Data Submission
-    </div>
-    <div class="nav-item" onclick="window.open('/api/docs','_blank')">
-      <i class="fas fa-code ni"></i> API
-    </div>
-  </nav>
-
-  <!-- Bottom -->
-  <div style="padding:12px 16px;border-top:1px solid #EAECF0;">
-    <div style="background:#EEF2FF;border-radius:8px;padding:10px 12px;">
-      <div style="font-size:11px;font-weight:600;color:#4F46E5;margin-bottom:2px;">
-        <i class="fas fa-circle" style="font-size:7px;color:#10B981;margin-right:5px;"></i>Live Data
+<!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+      <div>
+        <div class="logo-text">CDR<span>.db</span></div>
+        <div class="logo-sub">Carbon Removal Intelligence</div>
       </div>
-      <div id="sidebar-counts" style="font-size:11px;color:#6B7280;">Loading...</div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-label">Analytics</div>
+    <div class="nav-item active" id="nav-insights"  onclick="goto('insights')"><i class="fas fa-chart-line"></i> Dashboard</div>
+    <div class="nav-item"        id="nav-explorer"  onclick="goto('explorer')"><i class="fas fa-table"></i> Order Explorer</div>
+
+    <div class="nav-label">Market</div>
+    <div class="nav-item"        id="nav-suppliers" onclick="goto('suppliers')"><i class="fas fa-industry"></i> Suppliers</div>
+    <div class="nav-item"        id="nav-methods"   onclick="goto('methods')"><i class="fas fa-seedling"></i> CDR Methods</div>
+    <div class="nav-item"        id="nav-buyers"    onclick="goto('buyers')"><i class="fas fa-building"></i> Buyers</div>
+
+    <div class="nav-label">Data</div>
+    <div class="nav-item"        id="nav-upload"    onclick="goto('upload')"><i class="fas fa-upload"></i> Import Data</div>
+    <div class="nav-item"        onclick="window.open('/api/docs','_blank')"><i class="fas fa-code"></i> API Docs</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="db-status">
+      <div class="status-dot"></div>
+      <div>
+        <div class="status-count" id="sidebar-tx">— transactions</div>
+        <div class="status-text" id="sidebar-sup">— suppliers active</div>
+      </div>
     </div>
   </div>
 </aside>
 
-<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
-<div class="main">
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════════ -->
+<div id="main">
 
-  <!-- Topbar -->
   <div class="topbar">
-    <div>
-      <h1 id="page-title" style="font-size:18px;font-weight:700;color:#111827;margin:0;">Order Insights</h1>
-      <p id="page-sub" style="font-size:12px;color:#9CA3AF;margin:2px 0 0;">Comprehensive analysis of the carbon removal market</p>
+    <div class="topbar-left">
+      <h1 id="page-title">Dashboard</h1>
+      <p id="page-sub">Global CDR market analytics</p>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button onclick="refreshCurrent()"
-        style="border:1px solid #E5E7EB;background:#fff;border-radius:8px;padding:6px 14px;
-               font-size:12.5px;font-weight:500;color:#374151;cursor:pointer;display:flex;align-items:center;gap:6px;">
-        <i class="fas fa-sync-alt" style="font-size:11px;"></i> Refresh
-      </button>
-      <span id="last-refresh" style="font-size:11px;color:#9CA3AF;"></span>
+    <div class="topbar-right">
+      <span id="last-update"></span>
+      <button class="btn-ghost" onclick="refreshCurrent()"><i class="fas fa-sync-alt"></i> Refresh</button>
     </div>
   </div>
 
-  <!-- ════ INSIGHTS (Dashboard) ════════════════════════════════════════ -->
-  <section id="sec-insights" style="flex:1;overflow:auto;padding:24px 28px;">
+  <!-- ════ INSIGHTS / DASHBOARD ══════════════════════════════════════════════ -->
+  <section id="sec-insights" class="page">
 
     <!-- KPI row -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
-      <div class="kpi-card">
-        <div class="kpi-label">Cumulative Tonnes Contracted</div>
+    <div class="kpi-grid">
+      <div class="kpi" style="--kpi-color:#3B5BDB;">
+        <div class="kpi-label">Total Contracted</div>
         <div class="kpi-value" id="k-committed">—</div>
-        <div class="kpi-trend trend-neutral" id="k-committed-sub">—</div>
+        <div class="kpi-sub">tCO₂e committed</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Cumulative Tonnes Delivered</div>
+      <div class="kpi" style="--kpi-color:#22C55E;">
+        <div class="kpi-label">Total Delivered</div>
         <div class="kpi-value" id="k-delivered">—</div>
-        <div class="kpi-trend trend-up" id="k-delivered-sub">—</div>
+        <div class="kpi-sub">tCO₂e removed</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Total Transactions</div>
+      <div class="kpi" style="--kpi-color:#F59E0B;">
+        <div class="kpi-label">Delivery Rate</div>
+        <div class="kpi-value" id="k-dr">—</div>
+        <div class="kpi-sub">of contracted volume</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#8B5CF6;">
+        <div class="kpi-label">Transactions</div>
         <div class="kpi-value" id="k-tx">—</div>
-        <div class="kpi-trend trend-neutral" id="k-tx-sub">—</div>
+        <div class="kpi-sub">total orders</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#06B6D4;">
+        <div class="kpi-label">Buyers</div>
+        <div class="kpi-value" id="k-buyers">—</div>
+        <div class="kpi-sub">unique purchasers</div>
+      </div>
+      <div class="kpi" style="--kpi-color:#EC4899;">
+        <div class="kpi-label">Suppliers</div>
+        <div class="kpi-value" id="k-suppliers">—</div>
+        <div class="kpi-sub">active providers</div>
       </div>
     </div>
 
-    <!-- Row 2: secondary KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
-      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
-        <div style="width:40px;height:40px;background:#EEF2FF;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="fas fa-percent" style="color:#6366F1;font-size:15px;"></i>
-        </div>
-        <div>
-          <div class="kpi-label" style="margin-bottom:2px;">Delivery Rate</div>
-          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-dr">—</div>
-        </div>
-      </div>
-      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
-        <div style="width:40px;height:40px;background:#F0FDF4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="fas fa-building" style="color:#10B981;font-size:15px;"></i>
-        </div>
-        <div>
-          <div class="kpi-label" style="margin-bottom:2px;">Unique Buyers</div>
-          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-buyers">—</div>
-        </div>
-      </div>
-      <div class="kpi-card" style="display:flex;align-items:center;gap:16px;">
-        <div style="width:40px;height:40px;background:#FFF7ED;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="fas fa-industry" style="color:#F59E0B;font-size:15px;"></i>
-        </div>
-        <div>
-          <div class="kpi-label" style="margin-bottom:2px;">Suppliers</div>
-          <div style="font-size:1.4rem;font-weight:700;color:#111827;" id="k-suppliers">—</div>
-        </div>
-      </div>
+    <!-- Status mini row -->
+    <div class="stat-row" style="margin-bottom:14px;">
+      <div class="stat-pill"><div class="stat-pill-v" style="color:#15803D;" id="s-delivered">—</div><div class="stat-pill-l">Delivered</div></div>
+      <div class="stat-pill"><div class="stat-pill-v" style="color:#1D4ED8;" id="s-contracted">—</div><div class="stat-pill-l">Contracted</div></div>
+      <div class="stat-pill"><div class="stat-pill-v" style="color:#6D28D9;" id="s-retired">—</div><div class="stat-pill-l">Retired</div></div>
+      <div class="stat-pill"><div class="stat-pill-v" style="color:#B45309;" id="s-partial">—</div><div class="stat-pill-l">Partial</div></div>
     </div>
 
-    <!-- Row 3: Line chart + Donut -->
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;">
-      <div class="chart-card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
-          <div>
-            <div class="chart-heading">Cumulative Tonnes vs Quarterly Tonnes</div>
-            <div class="chart-sub">Track cumulative and quarterly tonnes purchased and delivered</div>
-          </div>
-          <div class="tab-group" id="year-tabs">
+    <!-- Row 1: main chart + method breakdown -->
+    <div class="grid-2-3" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Volume over Time</div><div class="card-sub">tCO₂e contracted &amp; delivered by year</div></div>
+          <div class="tab-group" id="ytabs">
             <button class="tab-btn active" onclick="setYearTab('cumulative',this)">Cumulative</button>
-            <button class="tab-btn" onclick="setYearTab('quarterly',this)">Quarterly</button>
+            <button class="tab-btn" onclick="setYearTab('annual',this)">Annual</button>
           </div>
         </div>
-        <div style="height:230px;"><canvas id="c-year"></canvas></div>
+        <div style="height:200px;"><canvas id="c-year"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-heading">Method Distribution</div>
-        <div class="chart-sub">Breakdown of carbon removal methods by tonnes purchased</div>
-        <div style="height:230px;"><canvas id="c-method"></canvas></div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Method Share</div><div class="card-sub">By contracted volume</div></div></div>
+        <div id="method-list"></div>
       </div>
     </div>
 
-    <!-- Row 4: Top Purchasers -->
-    <div class="chart-card" style="margin-bottom:20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div>
-          <div class="chart-heading">Top Purchasers by Removal Method</div>
-          <div class="chart-sub" style="margin-bottom:0;">Top 5 purchasers by tonnes contracted for each removal method</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <div class="tab-group" id="actor-tabs">
-            <button class="tab-btn active" onclick="setActorTab('purchasers',this)">Purchasers</button>
+    <!-- Row 2: top buyers + top suppliers + annual bar -->
+    <div class="grid-3" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title" id="actor-title">Top 10 Buyers</div><div class="card-sub">By tCO₂e contracted</div></div>
+          <div class="tab-group">
+            <button class="tab-btn active" onclick="setActorTab('buyers',this)">Buyers</button>
             <button class="tab-btn" onclick="setActorTab('suppliers',this)">Suppliers</button>
           </div>
-          <select class="fsel" id="method-filter-chart" onchange="updateActorChart()">
-            <option value="">All Methods</option>
-          </select>
         </div>
+        <ul class="rank-list" id="rank-actors"></ul>
       </div>
-      <div style="height:220px;"><canvas id="c-actors"></canvas></div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Top Suppliers by Delivery</div><div class="card-sub">tCO₂e actually delivered</div></div></div>
+        <ul class="rank-list" id="rank-delivered"></ul>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Annual Volume</div><div class="card-sub">Contracted vs Delivered per year</div></div></div>
+        <div style="height:220px;"><canvas id="c-annual"></canvas></div>
+      </div>
     </div>
 
-    <!-- Row 5: Recent activity -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div class="chart-card">
-        <div class="chart-heading">CDR Contracted by Year</div>
-        <div class="chart-sub">Volume contracted and number of orders per year</div>
-        <div style="height:200px;"><canvas id="c-contracted"></canvas></div>
+    <!-- Row 3: marketplace + registry -->
+    <div class="grid-2" style="margin-bottom:0;">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Top Marketplaces</div><div class="card-sub">By number of transactions</div></div></div>
+        <ul class="rank-list" id="rank-markets"></ul>
       </div>
-      <div class="chart-card">
-        <div class="chart-heading">CDR Delivered by Year</div>
-        <div class="chart-sub">Volume of carbon removal actually delivered</div>
-        <div style="height:200px;"><canvas id="c-delivered"></canvas></div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Order Status Distribution</div><div class="card-sub">Count of orders by status</div></div></div>
+        <div style="height:200px;"><canvas id="c-status"></canvas></div>
       </div>
     </div>
 
   </section>
 
-  <!-- ════ EXPLORER (Transactions) ════════════════════════════════════ -->
+  <!-- ════ EXPLORER ══════════════════════════════════════════════════════════ -->
   <section id="sec-explorer" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-    <!-- Toolbar -->
-    <div style="background:#fff;border-bottom:1px solid #EAECF0;padding:12px 24px;display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="position:relative;">
-          <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#D1D5DB;font-size:12px;"></i>
-          <input class="search-box" id="search-inp" type="text"
-            placeholder="Search orders…" oninput="onSearch(this.value)"/>
-          <button id="clr-search" onclick="clearSearch()"
-            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
-                   border:none;background:none;color:#D1D5DB;cursor:pointer;display:none;font-size:11px;">✕</button>
-        </div>
-        <span id="res-count" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
-        <button onclick="resetFilters()"
-          style="margin-left:auto;border:1px solid #E5E7EB;background:#fff;border-radius:7px;
-                 padding:6px 12px;font-size:12px;color:#6B7280;cursor:pointer;">
-          <i class="fas fa-times" style="margin-right:4px;"></i>Reset
-        </button>
+    <div class="filters-bar">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input class="search-inp" id="search-inp" type="text" placeholder="Search buyer, supplier, method…" oninput="onSearch(this.value)"/>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <select id="f-method"      class="fsel" onchange="applyFilters()"><option value="">Method</option></select>
-        <select id="f-status"      class="fsel" onchange="applyFilters()"><option value="">Status</option></select>
-        <select id="f-marketplace" class="fsel" onchange="applyFilters()"><option value="">Marketplace</option></select>
-        <select id="f-registry"    class="fsel" onchange="applyFilters()"><option value="">Registry</option></select>
-        <select id="f-continent"   class="fsel" onchange="applyFilters()"><option value="">Continent</option></select>
-        <select id="f-year"        class="fsel" onchange="applyFilters()"><option value="">Year</option></select>
-      </div>
+      <select id="f-method"      class="fsel" onchange="applyFilters()"><option value="">All Methods</option></select>
+      <select id="f-status"      class="fsel" onchange="applyFilters()"><option value="">All Statuses</option></select>
+      <select id="f-marketplace" class="fsel" onchange="applyFilters()"><option value="">All Marketplaces</option></select>
+      <select id="f-continent"   class="fsel" onchange="applyFilters()"><option value="">All Continents</option></select>
+      <select id="f-year"        class="fsel" onchange="applyFilters()"><option value="">All Years</option></select>
+      <span class="res-count" id="res-count"></span>
+      <button class="btn-reset" onclick="resetFilters()"><i class="fas fa-times"></i> Reset</button>
     </div>
-
-    <!-- Table -->
-    <div style="flex:1;overflow:auto;padding:20px 24px;">
-      <div id="tx-loading" style="display:none;justify-content:center;padding:60px 0;"><div class="spin"></div></div>
-      <div style="background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-        <table class="data-table" id="tx-table">
+    <div style="flex:1;overflow:auto;padding:18px 22px;">
+      <div id="tx-loading" style="display:none;justify-content:center;padding:56px;"><div class="spin" style="width:24px;height:24px;"></div></div>
+      <div class="table-wrap">
+        <table id="tx-table">
           <thead>
             <tr>
-              <th onclick="sortBy('announcement')">Contract Date <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('method')">Method <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('supplier_name')">Supplier <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('purchaser')">Purchaser <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('marketplace')">Marketplace <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('tonnes')" style="text-align:right;">Purchased (t) <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('tonnes_delivered')" style="text-align:right;">Delivered (t) <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('status')">Status <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
-              <th onclick="sortBy('continent')">Continent <i class="fas fa-sort" style="color:#D1D5DB;margin-left:4px;font-size:9px;"></i></th>
+              <th id="th-announcement" onclick="sortBy('announcement')">Date</th>
+              <th id="th-method"       onclick="sortBy('method')">Method</th>
+              <th id="th-supplier"     onclick="sortBy('supplier_name')">Supplier</th>
+              <th id="th-purchaser"    onclick="sortBy('purchaser')">Buyer</th>
+              <th id="th-marketplace"  onclick="sortBy('marketplace')">Marketplace</th>
+              <th id="th-registry"     onclick="sortBy('registry_name')">Registry</th>
+              <th id="th-tonnes"       onclick="sortBy('tonnes')" style="text-align:right;">Contracted (t)</th>
+              <th id="th-delivered"    onclick="sortBy('tonnes_delivered')" style="text-align:right;">Delivered (t)</th>
+              <th id="th-status"       onclick="sortBy('status')">Status</th>
             </tr>
           </thead>
           <tbody id="tx-body"></tbody>
         </table>
-        <div id="tx-empty" style="display:none;padding:60px;text-align:center;color:#9CA3AF;">
-          <i class="fas fa-search" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>
-          No orders found
-        </div>
+        <div id="tx-empty" style="display:none;" class="empty-state"><i class="fas fa-search"></i><p>No orders match your filters</p></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
-        <span id="pg-info" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
-        <div id="pg-btns" style="display:flex;gap:4px;"></div>
+      <div class="pg-bar" style="background:transparent;border:none;padding:10px 0 0;">
+        <span class="pg-info" id="pg-info"></span>
+        <div class="pg-btns" id="pg-btns"></div>
       </div>
     </div>
   </section>
 
-  <!-- ════ SUPPLIERS ════════════════════════════════════════════════ -->
-  <section id="sec-suppliers" style="display:none;flex:1;overflow:auto;padding:24px 28px;">
-    <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;">
-      <div style="position:relative;">
-        <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#D1D5DB;font-size:12px;"></i>
-        <input class="search-box" id="sup-search" type="text"
-          placeholder="Search suppliers…" oninput="filterSuppliers(this.value)"/>
+  <!-- ════ SUPPLIERS ══════════════════════════════════════════════════════════ -->
+  <section id="sec-suppliers" style="display:none;flex:1;overflow:auto;padding:22px 26px;">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input class="search-inp" id="sup-search" type="text" placeholder="Search suppliers…" oninput="filterSuppliers(this.value)"/>
       </div>
-      <select id="sup-tech" class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)">
-        <option value="">All Technologies</option>
-      </select>
-      <select id="sup-continent" class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)">
-        <option value="">All Continents</option>
-      </select>
-      <span id="sup-count" style="font-size:12px;color:#9CA3AF;font-weight:500;"></span>
+      <select id="sup-tech"      class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)"><option value="">All Technologies</option></select>
+      <select id="sup-continent" class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)"><option value="">All Continents</option></select>
+      <select id="sup-country"   class="fsel" onchange="filterSuppliers(document.getElementById('sup-search').value)"><option value="">All Countries</option></select>
+      <span class="res-count" id="sup-count"></span>
     </div>
-    <div id="sup-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
-    <div id="sup-loading" style="display:flex;justify-content:center;padding:60px;"><div class="spin"></div></div>
+    <div id="sup-grid" class="sup-grid"></div>
+    <div id="sup-loading" style="display:flex;justify-content:center;padding:60px;"><div class="spin" style="width:24px;height:24px;"></div></div>
   </section>
 
-  <!-- ════ UPLOAD ══════════════════════════════════════════════════ -->
-  <section id="sec-upload" style="display:none;flex:1;overflow:auto;padding:24px 28px;">
-    <div style="max-width:720px;">
-
-      <!-- Header -->
-      <div style="margin-bottom:20px;">
-        <h2 style="font-size:18px;font-weight:700;color:#111827;margin:0 0 4px;">Data Submission</h2>
-        <p style="font-size:13px;color:#6B7280;margin:0;">Import new transactions and suppliers into the database. Duplicates are automatically skipped.</p>
+  <!-- ════ CDR METHODS ════════════════════════════════════════════════════════ -->
+  <section id="sec-methods" style="display:none;flex:1;overflow:auto;padding:22px 26px;">
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Contracted Volume by Method</div><div class="card-sub">Total tCO₂e committed per CDR pathway</div></div></div>
+        <div style="height:260px;"><canvas id="c-meth-bar"></canvas></div>
       </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Delivery Rate by Method</div><div class="card-sub">% of contracted volume actually delivered</div></div></div>
+        <div style="height:260px;"><canvas id="c-meth-delivery"></canvas></div>
+      </div>
+    </div>
+    <div class="section-hd"><div class="section-title">All CDR Pathways</div></div>
+    <div class="table-wrap">
+      <table class="meth-tbl">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th style="text-align:right;">Contracted (t)</th>
+            <th style="text-align:right;">Delivered (t)</th>
+            <th style="text-align:right;">Delivery Rate</th>
+            <th style="text-align:right;">Transactions</th>
+            <th style="text-align:right;">Suppliers</th>
+            <th>Market Share</th>
+          </tr>
+        </thead>
+        <tbody id="meth-body"></tbody>
+      </table>
+    </div>
+  </section>
 
-      <!-- Format badges -->
-      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-          <div style="width:28px;height:28px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-globe" style="color:#065F46;font-size:12px;"></i>
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:700;color:#111827;">CDR.fyi Portal Export</div>
-            <div style="font-size:10px;color:#9CA3AF;">.csv — auto-detected</div>
-          </div>
-          <span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:4px;">NEW</span>
+  <!-- ════ BUYERS ══════════════════════════════════════════════════════════════ -->
+  <section id="sec-buyers" style="display:none;flex:1;overflow:auto;padding:22px 26px;">
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Top 10 Buyers by Volume Contracted</div><div class="card-sub">tCO₂e purchased</div></div></div>
+        <div style="height:260px;"><canvas id="c-buyers-bar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Top 10 Buyers by Volume Delivered</div><div class="card-sub">tCO₂e actually removed</div></div></div>
+        <div style="height:260px;"><canvas id="c-buyers-del"></canvas></div>
+      </div>
+    </div>
+    <div class="section-hd"><div class="section-title">All Purchasers</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Buyer</th>
+            <th style="text-align:right;">Contracted (t)</th>
+            <th style="text-align:right;">Delivered (t)</th>
+            <th style="text-align:right;">Transactions</th>
+            <th style="text-align:right;">Delivery Rate</th>
+          </tr>
+        </thead>
+        <tbody id="buyers-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════ UPLOAD ══════════════════════════════════════════════════════════════ -->
+  <section id="sec-upload" style="display:none;flex:1;overflow:auto;padding:22px 26px;">
+    <div style="max-width:640px;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:700;color:#1A1D23;margin-bottom:3px;">Import Data</div>
+        <div style="font-size:12px;color:#9CA3AF;">Upload CDR.fyi portal exports or Excel files. Duplicates are automatically skipped.</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:8px;">
+          <div style="width:28px;height:28px;background:#DCFCE7;border-radius:7px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-globe" style="color:#15803D;font-size:12px;"></i></div>
+          <div><div style="font-size:12px;font-weight:700;color:#1A1D23;">CDR.fyi Portal CSV</div><div style="font-size:10px;color:#9CA3AF;">auto-detected format</div></div>
+          <span style="background:#DCFCE7;color:#15803D;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;">AUTO</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);">
-          <div style="width:28px;height:28px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-file-excel" style="color:#4F46E5;font-size:12px;"></i>
-          </div>
-          <div>
-            <div style="font-size:12px;font-weight:700;color:#111827;">Structured Excel</div>
-            <div style="font-size:10px;color:#9CA3AF;">.xlsx — transactions + suppliers</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:1px solid #EAECF0;border-radius:8px;">
+          <div style="width:28px;height:28px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-file-excel" style="color:#3B5BDB;font-size:12px;"></i></div>
+          <div><div style="font-size:12px;font-weight:700;color:#1A1D23;">Excel Format (.xlsx)</div><div style="font-size:10px;color:#9CA3AF;">transactions + suppliers</div></div>
         </div>
       </div>
-
-      <!-- Drop zone card -->
-      <div class="chart-card">
-
-        <div id="drop-zone" style="text-align:center;padding:44px 24px;cursor:pointer;border-radius:10px;"
+      <div class="card">
+        <div id="drop-zone" style="text-align:center;padding:36px 20px;cursor:pointer;border-radius:8px;"
           onclick="document.getElementById('file-inp').click()"
           ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-          <div id="dz-icon" style="width:60px;height:60px;background:#EEF2FF;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;transition:background .2s;">
-            <i class="fas fa-cloud-upload-alt" style="color:#6366F1;font-size:24px;"></i>
+          <div style="width:48px;height:48px;background:#EEF2FF;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i class="fas fa-cloud-upload-alt" style="color:#3B5BDB;font-size:20px;"></i>
           </div>
-          <p style="font-weight:700;color:#111827;margin:0 0 5px;font-size:14px;">Drag & drop your file here</p>
-          <p style="font-size:12px;color:#9CA3AF;margin:0 0 14px;">or click to browse · <strong>.csv</strong> (portal) and <strong>.xlsx</strong> (excel) supported</p>
-          <span style="display:inline-block;background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px;">Max 50 MB</span>
+          <p style="font-weight:700;color:#1A1D23;margin-bottom:4px;font-size:13px;">Drag &amp; drop your file here</p>
+          <p style="font-size:11.5px;color:#9CA3AF;">.csv (CDR.fyi) or .xlsx · max 50 MB</p>
           <input type="file" id="file-inp" accept=".xlsx,.csv,.xls" style="display:none;" onchange="handleFileSelect(event)"/>
         </div>
-
-        <!-- File selected info -->
-        <div id="file-info" style="display:none;margin-top:14px;padding:12px 16px;background:#F9FAFB;
-             border:1px solid #E5E7EB;border-radius:10px;">
+        <div id="file-info" style="display:none;margin-top:10px;padding:10px 13px;background:#FAFBFC;border:1px solid #EAECF0;border-radius:8px;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div id="file-icon-wrap" style="width:36px;height:36px;background:#EEF2FF;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i id="file-icon" class="fas fa-file-csv" style="color:#6366F1;font-size:15px;"></i>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div id="file-icon-wrap" style="width:32px;height:32px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i id="file-icon" class="fas fa-file-csv" style="color:#3B5BDB;font-size:13px;"></i>
               </div>
               <div>
-                <div id="file-name" style="font-size:13px;font-weight:600;color:#111827;"></div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
-                  <span id="file-size" style="font-size:11px;color:#9CA3AF;"></span>
-                  <span id="file-format-badge" style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:5px;"></span>
+                <div id="file-name" style="font-size:12.5px;font-weight:600;color:#1A1D23;"></div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+                  <span id="file-size" style="font-size:10.5px;color:#9CA3AF;"></span>
+                  <span id="file-fmt-badge" style="font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:3px;"></span>
                 </div>
               </div>
             </div>
-            <button onclick="clearFile()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:16px;padding:4px;">✕</button>
+            <button onclick="clearFile()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:14px;">✕</button>
           </div>
         </div>
-
-        <!-- Import button -->
         <button id="import-btn" onclick="uploadFile()"
-          style="width:100%;margin-top:14px;padding:12px;background:#6366F1;color:#fff;
-                 border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;
-                 display:flex;align-items:center;justify-content:center;gap:8px;
-                 opacity:.35;pointer-events:none;transition:opacity .2s;">
+          style="width:100%;margin-top:10px;padding:10px;background:#3B5BDB;color:#fff;border:none;border-radius:8px;
+                 font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;
+                 gap:7px;opacity:.35;pointer-events:none;transition:opacity .2s;font-family:inherit;">
           <i class="fas fa-database"></i> Import into Database
         </button>
-
-        <!-- Progress -->
-        <div id="upload-progress" style="display:none;margin-top:16px;">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-            <div class="spin" style="width:16px;height:16px;border-width:2px;"></div>
-            <span id="progress-label" style="font-size:13px;color:#6B7280;font-weight:500;">Importing data…</span>
+        <div id="upload-progress" style="display:none;margin-top:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+            <div class="spin"></div>
+            <span style="font-size:12px;color:#6B7280;font-weight:500;">Importing records…</span>
           </div>
-          <div class="prog-bar">
-            <div class="prog-fill" id="prog-fill-bar" style="width:0%;transition:width .4s ease;"></div>
+          <div class="prog-bar" style="height:5px;background:#F3F4F6;">
+            <div class="prog-fill" id="prog-fill-bar" style="width:0%;transition:width .4s ease;background:linear-gradient(90deg,#3B5BDB,#6B8FF5);"></div>
           </div>
         </div>
-
-        <!-- Result -->
-        <div id="upload-result" style="display:none;margin-top:14px;border-radius:10px;overflow:hidden;">
-          <div id="upload-result-inner" style="padding:14px 16px;">
-            <div id="upload-result-text" style="font-size:13px;font-weight:600;margin-bottom:8px;"></div>
-            <div id="upload-result-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+        <div id="upload-result" style="display:none;margin-top:10px;border-radius:8px;overflow:hidden;">
+          <div id="upload-result-inner" style="padding:13px 15px;">
+            <div id="upload-result-text" style="font-size:13px;font-weight:600;margin-bottom:9px;"></div>
+            <div id="upload-result-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;"></div>
           </div>
         </div>
       </div>
-
-      <!-- How to export from CDR.fyi -->
-      <div class="chart-card" style="margin-top:14px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-          <div style="width:28px;height:28px;background:#D1FAE5;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-globe" style="color:#065F46;font-size:11px;"></i>
-          </div>
-          <div style="font-size:13px;font-weight:700;color:#111827;">How to export from CDR.fyi</div>
-        </div>
-        <ol style="margin:0;padding-left:18px;font-size:12px;color:#6B7280;line-height:2;">
+      <div class="card" style="margin-top:10px;">
+        <div style="font-size:13px;font-weight:700;color:#1A1D23;margin-bottom:10px;display:flex;align-items:center;gap:7px;"><i class="fas fa-globe" style="color:#15803D;"></i> How to export from CDR.fyi</div>
+        <ol style="padding-left:17px;font-size:12px;color:#6B7280;line-height:2.2;">
           <li>Open <strong style="color:#374151;">cdr.fyi → Order Explorer</strong></li>
-          <li>Apply any filters you need (year, method, status…)</li>
-          <li>Click <strong style="color:#374151;">Export CSV</strong> (top-right of the table)</li>
-          <li>Upload the downloaded <strong style="color:#374151;">.csv</strong> file here — it will be auto-detected</li>
+          <li>Apply any filters (year, method, status…)</li>
+          <li>Click <strong style="color:#374151;">Export CSV</strong> (top-right button)</li>
+          <li>Drag the .csv file here — format auto-detected</li>
         </ol>
-        <div style="margin-top:12px;padding:10px 14px;background:#ECFDF5;border-radius:8px;font-size:12px;color:#065F46;">
-          <i class="fas fa-check-circle" style="margin-right:6px;"></i>
-          <strong>Smart deduplication:</strong> records already in the database are automatically skipped. Only new orders are added.
+        <div style="margin-top:9px;padding:8px 11px;background:#F0FDF4;border-radius:6px;font-size:11.5px;color:#15803D;">
+          <i class="fas fa-check-circle" style="margin-right:4px;"></i>
+          <strong>Smart deduplication</strong> — existing records are automatically skipped
         </div>
       </div>
-
-      <!-- Excel format reference -->
-      <div class="chart-card" style="margin-top:14px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-          <div style="width:28px;height:28px;background:#EEF2FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <i class="fas fa-file-excel" style="color:#4F46E5;font-size:11px;"></i>
-          </div>
-          <div style="font-size:13px;font-weight:700;color:#111827;">Excel Format — Recognized Columns</div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px;color:#6B7280;">
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Supplier</span>
-            supplier, seller, project name
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Method</span>
-            method, technology, cdr method
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Buyer</span>
-            purchaser, buyer, company
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Tonnes</span>
-            tonnes, volume, tco2e
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Date</span>
-            date, announcement, purchase date
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Status</span>
-            status, delivery status
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Price</span>
-            price, usd/tonne, price per tonne
-          </div>
-          <div style="padding:7px 10px;background:#F9FAFB;border-radius:7px;">
-            <span style="font-weight:600;color:#374151;display:block;margin-bottom:2px;">Registry</span>
-            registry, carbon registry
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
+
 </div>
 
-<!-- ═══ MODAL ════════════════════════════════════════════════════════════ -->
-<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);
-     z-index:50;align-items:center;justify-content:center;padding:16px;"
-  onclick="if(event.target===this)closeModal()">
-  <div style="background:#fff;border-radius:14px;width:100%;max-width:520px;
-              max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);">
-    <div style="display:flex;align-items:center;justify-content:space-between;
-                padding:16px 20px;border-bottom:1px solid #EAECF0;">
-      <span style="font-size:14px;font-weight:700;color:#111827;">Order Detail</span>
-      <button onclick="closeModal()" style="border:none;background:none;color:#9CA3AF;cursor:pointer;font-size:16px;">✕</button>
+<!-- ═══ TRANSACTION MODAL ════════════════════════════════════════════════════ -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title" id="modal-title">Order Detail</div>
+        <div class="modal-head-sub"   id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
     </div>
-    <div id="modal-content" style="padding:20px;"></div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
-<!-- ═══ JS ════════════════════════════════════════════════════════════════ -->
+<!-- ═══ SUPPLIER MODAL ════════════════════════════════════════════════════════ -->
+<div id="sup-modal-overlay" onclick="if(event.target===this)closeSupModal()">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title" id="sup-modal-title">Supplier Detail</div>
+        <div class="modal-head-sub"   id="sup-modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeSupModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="sup-modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══ JS ════════════════════════════════════════════════════════════════════ -->
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
-let currentSection = 'insights';
-let txData=[], txFiltered=[], txPage=1, txPerPage=50;
-let txSort={col:'announcement',dir:'desc'};
+// ─── State ────────────────────────────────────────────────────────────────────
+let cur = 'insights';
+let txData=[], txFiltered=[], txPage=1, txPer=50, txSort={col:'announcement',dir:'desc'};
 let supData=[], supFiltered=[];
-let charts={};
-let allYearData=[], actorMode='purchasers', selectedFile=null;
-let searchTimer=null;
+let methData=[], allYearData=[], actorMode='buyers', buyersData=[];
+let charts={}, selectedFile=null, searchTimer=null, _progTimer=null;
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const fmt  = n => n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:1});
-const fmtM = n => n==null?'—':(n>=1e9?(n/1e9).toFixed(1)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':Number(n).toFixed(0));
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmt  = n => n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:0});
+const fmtD = n => n==null?'—':Number(n).toLocaleString('en-US',{maximumFractionDigits:1});
+const fmtM = n => {
+  if(n==null) return '—';
+  n=Number(n);
+  if(n>=1e9)  return (n/1e9).toFixed(2)+'B';
+  if(n>=1e6)  return (n/1e6).toFixed(2)+'M';
+  if(n>=1e3)  return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(0);
+};
 const badgeCls = s => ({'delivered':'b-delivered','contracted':'b-contracted','retired':'b-retired','partial':'b-partial'}[(s||'').toLowerCase()]||'b-default');
+const methodColor = m => {
+  const ml=(m||'').toLowerCase();
+  if(ml.includes('biochar'))    return '#F59E0B';
+  if(ml.includes('beccs')||ml.includes('bioenergy')) return '#22C55E';
+  if(ml.includes('daccs')||ml.includes('direct air')) return '#3B5BDB';
+  if(ml.includes('weathering')) return '#EC4899';
+  if(ml.includes('ocean'))      return '#06B6D4';
+  if(ml.includes('mineral'))    return '#8B5CF6';
+  if(ml.includes('biomass'))    return '#10B981';
+  return '#9CA3AF';
+};
+const methodTagCls = m => {
+  const ml=(m||'').toLowerCase();
+  if(ml.includes('biochar'))    return 'mc-biochar';
+  if(ml.includes('beccs')||ml.includes('bioenergy')) return 'mc-beccs';
+  if(ml.includes('daccs')||ml.includes('direct air')) return 'mc-daccs';
+  if(ml.includes('weathering')) return 'mc-weathering';
+  if(ml.includes('ocean'))      return 'mc-ocean';
+  if(ml.includes('mineral'))    return 'mc-mineral';
+  if(ml.includes('biomass'))    return 'mc-biomass';
+  return 'mc-default';
+};
+const shortMethod = m => (m||'')
+  .replace(/Bioenergy With Carbon Capture And Sequestration BECCS?/i,'BECCS')
+  .replace(/BiCRS - Bioenergy with Carbon Capture and Sequestration \(BECCS\)/i,'BiCRS/BECCS')
+  .replace(/Direct Air Carbon Capture And Sequestration DACCS?/i,'DACCS')
+  .replace(/Marine Biomass Carbon Capture And Sequestration MBCCS?/i,'MBCCS')
+  .replace(/Biomass Geological Sequestration/i,'Biomass Geo. Seq.')
+  .replace(/Biochar Carbon Removal BCR/i,'Biochar (BCR)')
+  .replace(/Alkalinity Enhancement/i,'Alk. Enhancement');
 
-async function apiFetch(path){
-  const r=await fetch(path);
+async function api(path){
+  const r = await fetch(path);
   if(!r.ok) throw new Error('HTTP '+r.status);
   return r.json();
 }
+function ts(){ document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
-function setTS(){
-  document.getElementById('last-refresh').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-}
+const PAL = ['#3B5BDB','#22C55E','#F59E0B','#EF4444','#06B6D4','#8B5CF6','#EC4899','#84CC16','#F97316','#0EA5E9','#14B8A6','#6366F1'];
 
-// ─── Navigation ──────────────────────────────────────────────────────────────
-const SECTIONS={insights:'Order Insights',explorer:'Order Explorer',suppliers:'Market Actors',upload:'Data Submission'};
-const SUBS={insights:'Comprehensive analysis of the carbon removal market',explorer:'Browse and filter all CDR transactions',suppliers:'Suppliers and market participants',upload:'Submit new data to the database'};
-const NAV_IDS={insights:'nav-insights',explorer:'nav-explorer',suppliers:'nav-suppliers',upload:'nav-upload'};
+// ─── Navigation ───────────────────────────────────────────────────────────────
+const PAGES = {
+  insights:  {title:'Dashboard',     sub:'Global CDR market overview'},
+  explorer:  {title:'Order Explorer',sub:'Browse and filter all transactions'},
+  suppliers: {title:'Suppliers',     sub:'Supplier directory with detailed profiles'},
+  methods:   {title:'CDR Methods',   sub:'Analysis by carbon removal pathway'},
+  buyers:    {title:'Buyers',        sub:'Purchaser rankings and activity'},
+  upload:    {title:'Import Data',   sub:'Upload new transactions from CDR.fyi or Excel'},
+};
 
 function goto(sec){
-  currentSection=sec;
-  Object.keys(SECTIONS).forEach(s=>{
+  cur=sec;
+  const all=['insights','explorer','suppliers','methods','buyers','upload'];
+  all.forEach(s=>{
     const el=document.getElementById('sec-'+s);
-    if(el) el.style.display=s===sec?'block':'none';
-    const nav=document.getElementById(NAV_IDS[s]);
+    if(el) el.style.display='none';
+    const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===sec);
   });
-  document.getElementById('page-title').textContent=SECTIONS[sec]||sec;
-  document.getElementById('page-sub').textContent=SUBS[sec]||'';
-  if(sec==='insights') loadInsights();
-  if(sec==='explorer') loadExplorer();
+  const el=document.getElementById('sec-'+sec);
+  if(el){
+    el.style.display=(sec==='insights')?'block':'flex';
+    if(['explorer','suppliers','methods','buyers','upload'].includes(sec))
+      el.style.flexDirection='column';
+  }
+  const p=PAGES[sec]||{};
+  document.getElementById('page-title').textContent=p.title||sec;
+  document.getElementById('page-sub').textContent=p.sub||'';
+  if(sec==='insights')  loadInsights();
+  if(sec==='explorer')  loadExplorer();
   if(sec==='suppliers') loadSuppliers();
+  if(sec==='methods')   loadMethods();
+  if(sec==='buyers')    loadBuyers();
 }
+function refreshCurrent(){ goto(cur); }
 
-function refreshCurrent(){goto(currentSection);}
-
-// ─── INSIGHTS ────────────────────────────────────────────────────────────────
+// ─── INSIGHTS ─────────────────────────────────────────────────────────────────
 async function loadInsights(){
   try{
-    const [sum,byYear,byMethod,topBuyers,topSuppliers] = await Promise.all([
-      apiFetch('/api/transactions/stats/summary'),
-      apiFetch('/api/transactions/stats/by-year'),
-      apiFetch('/api/transactions/stats/by-method'),
-      apiFetch('/api/transactions/stats/top-purchasers?limit=10'),
-      apiFetch('/api/transactions/stats/top-suppliers?limit=10'),
+    const [sum,byYear,byMethod,byStatus,topBuyers,topSuppliers,topMarkets] = await Promise.all([
+      api('/api/transactions/stats/summary'),
+      api('/api/transactions/stats/by-year'),
+      api('/api/transactions/stats/by-method'),
+      api('/api/transactions/stats/by-status'),
+      api('/api/transactions/stats/top-purchasers?limit=10'),
+      api('/api/transactions/stats/top-suppliers?limit=10'),
+      api('/api/transactions/stats/by-marketplace'),
     ]);
 
     // KPIs
-    document.getElementById('k-committed').textContent   = fmtM(sum.total_tonnes_committed);
-    document.getElementById('k-delivered').textContent   = fmtM(sum.total_tonnes_delivered);
-    document.getElementById('k-tx').textContent          = fmt(sum.total_transactions);
-    document.getElementById('k-dr').textContent          = (sum.delivery_rate_pct||0).toFixed(2)+'%';
-    document.getElementById('k-buyers').textContent      = fmt(sum.unique_purchasers);
-    document.getElementById('k-suppliers').textContent   = fmt(sum.unique_suppliers);
+    document.getElementById('k-committed').textContent = fmtM(sum.total_tonnes_committed);
+    document.getElementById('k-delivered').textContent = fmtM(sum.total_tonnes_delivered);
+    document.getElementById('k-dr').textContent        = (sum.delivery_rate_pct||0).toFixed(2)+'%';
+    document.getElementById('k-tx').textContent        = fmt(sum.total_transactions);
+    document.getElementById('k-buyers').textContent    = fmt(sum.unique_purchasers);
+    document.getElementById('k-suppliers').textContent = fmt(sum.unique_suppliers);
 
-    document.getElementById('k-committed-sub').textContent  = `${fmt(sum.unique_suppliers)} active suppliers`;
-    document.getElementById('k-delivered-sub').textContent  = `${(sum.delivery_rate_pct||0).toFixed(2)}% delivery rate`;
-    document.getElementById('k-tx-sub').textContent         = `${fmt(sum.unique_purchasers)} unique buyers`;
+    // Status mini pills
+    const stMap={};
+    (byStatus||[]).forEach(r=>{stMap[(r.status||'').toLowerCase()]=r.count;});
+    document.getElementById('s-delivered').textContent  = fmt(stMap['delivered']||0);
+    document.getElementById('s-contracted').textContent = fmt(stMap['contracted']||0);
+    document.getElementById('s-retired').textContent    = fmt(stMap['retired']||0);
+    document.getElementById('s-partial').textContent    = fmt(stMap['partial']||0);
 
-    document.getElementById('sidebar-counts').textContent =
-      `${fmt(sum.total_transactions)} tx · ${fmt(sum.unique_suppliers)} suppliers`;
+    // Sidebar
+    document.getElementById('sidebar-tx').textContent  = fmt(sum.total_transactions)+' transactions';
+    document.getElementById('sidebar-sup').textContent = fmt(sum.unique_suppliers)+' suppliers active';
 
-    allYearData=byYear;
+    allYearData = byYear||[];
+    window._topBuyers    = topBuyers||[];
+    window._topSuppliers = topSuppliers||[];
 
-    // Method filter for chart
-    const methods=[...new Set((byMethod||[]).map(r=>r.method).filter(Boolean))];
-    document.getElementById('method-filter-chart').innerHTML=
-      '<option value="">All Methods</option>'+methods.map(m=>`<option>${m}</option>`).join('');
-
-    // Store for actor chart
-    window._topBuyers=topBuyers||[];
-    window._topSuppliers=topSuppliers||[];
-
-    buildInsightCharts(byYear,byMethod,topBuyers);
-    setTS();
-  }catch(e){console.error('Insights error:',e);}
+    buildYearChart(byYear, 'cumulative');
+    buildMethodList(byMethod);
+    buildActorRankList(topBuyers,'purchaser');
+    buildDeliveredRankList(topSuppliers);
+    buildAnnualBar(byYear);
+    buildMarketRankList(topMarkets);
+    buildStatusChart(byStatus);
+    ts();
+  }catch(e){ console.error('Insights error:',e); }
 }
 
-function buildInsightCharts(byYear,byMethod,topBuyers){
-  const destroy=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
-  const PAL=['#6366F1','#10B981','#F59E0B','#EF4444','#06B6D4','#8B5CF6','#EC4899','#84CC16','#F97316','#0EA5E9','#14B8A6'];
-  const GREEN='#10B981'; const TEAL='#06B6D4';
-
-  // Year chart (cumulative)
-  destroy('c-year');
+function buildYearChart(byYear, mode){
+  destroyChart('c-year');
   const yrs=(byYear||[]).map(r=>r.year);
-  let cumC=0,cumD=0;
-  const cumComm=(byYear||[]).map(r=>{cumC+=r.committed||0;return parseFloat(cumC.toFixed(1));});
-  const cumDelv=(byYear||[]).map(r=>{cumD+=r.delivered||0;return parseFloat(cumD.toFixed(1));});
+  let cc=0,cd=0;
+  const cumC=(byYear||[]).map(r=>{cc+=r.committed||0;return+cc.toFixed(1);});
+  const cumD=(byYear||[]).map(r=>{cd+=r.delivered||0;return+cd.toFixed(1);});
+  const annC=(byYear||[]).map(r=>r.committed||0);
+  const annD=(byYear||[]).map(r=>r.delivered||0);
+  const isCum=mode==='cumulative';
   charts['c-year']=new Chart(document.getElementById('c-year'),{
     type:'line',
     data:{labels:yrs,datasets:[
-      {label:'Cumulative Contracted',data:cumComm,borderColor:GREEN,backgroundColor:'rgba(16,185,129,.08)',
-       fill:true,tension:.4,pointRadius:3,borderWidth:2},
-      {label:'Cumulative Delivered',data:cumDelv,borderColor:TEAL,backgroundColor:'rgba(6,182,212,.05)',
-       fill:true,tension:.4,pointRadius:3,borderWidth:2,borderDash:[5,4]},
+      {label:'Contracted',data:isCum?cumC:annC,borderColor:'#3B5BDB',backgroundColor:'rgba(59,91,219,.07)',fill:true,tension:.35,pointRadius:3,borderWidth:2},
+      {label:'Delivered', data:isCum?cumD:annD,borderColor:'#22C55E',backgroundColor:'rgba(34,197,94,.05)',fill:true,tension:.35,pointRadius:3,borderWidth:2,borderDash:[5,4]},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12,padding:12}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
-              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
-  });
-
-  // Method donut
-  destroy('c-method');
-  const mKeys=(byMethod||[]).map(r=>r.method);
-  const mVals=(byMethod||[]).map(r=>r.committed||0);
-  const total=mVals.reduce((a,b)=>a+b,0);
-  charts['c-method']=new Chart(document.getElementById('c-method'),{
-    type:'doughnut',
-    data:{labels:mKeys,datasets:[{data:mVals,backgroundColor:PAL,borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:6,
-        generateLabels:(chart)=>{
-          const ds=chart.data.datasets[0];
-          return chart.data.labels.map((l,i)=>({
-            text:`${l.length>22?l.slice(0,22)+'…':l}  ${((ds.data[i]/total)*100).toFixed(1)}%`,
-            fillStyle:ds.backgroundColor[i],strokeStyle:'#fff',lineWidth:2,index:i
-          }));
-        }
-      }}}}
-  });
-
-  // Actor chart (top buyers by default)
-  buildActorChart(topBuyers,'purchaser');
-
-  // Contracted bar
-  destroy('c-contracted');
-  charts['c-contracted']=new Chart(document.getElementById('c-contracted'),{
-    type:'bar',
-    data:{labels:yrs,datasets:[
-      {label:'Volume (t)',data:(byYear||[]).map(r=>r.committed||0),backgroundColor:'rgba(99,102,241,.75)',borderRadius:5,borderSkipped:false,yAxisID:'y'},
-      {label:'# Orders',data:(byYear||[]).map(r=>r.count||0),backgroundColor:'rgba(167,139,250,.4)',borderRadius:5,borderSkipped:false,yAxisID:'y1'},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:9,padding:8}}},
       scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
-              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
-              y1:{position:'right',grid:{display:false},ticks:{font:{size:10}}}}}
-  });
-
-  // Delivered bar
-  destroy('c-delivered');
-  charts['c-delivered']=new Chart(document.getElementById('c-delivered'),{
-    type:'bar',
-    data:{labels:yrs,datasets:[
-      {label:'Delivered (t)',data:(byYear||[]).map(r=>r.delivered||0),backgroundColor:'rgba(6,182,212,.75)',borderRadius:5,borderSkipped:false},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
-              y:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
-  });
-}
-
-function buildActorChart(data,labelKey){
-  const destroy=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
-  destroy('c-actors');
-  const labels=(data||[]).map(r=>r[labelKey]||r.name||'—');
-  const vals=(data||[]).map(r=>r.committed||0);
-  charts['c-actors']=new Chart(document.getElementById('c-actors'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'tCO₂e Committed',data:vals,backgroundColor:'rgba(99,102,241,.75)',borderRadius:5,borderSkipped:false}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:'#F3F4F6'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
-              y:{grid:{display:false},ticks:{font:{size:11}}}}}
+              y:{grid:{color:'#F4F5F7'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
   });
 }
 
 function setYearTab(mode,btn){
-  document.querySelectorAll('#year-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#ytabs .tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  if(!charts['c-year']) return;
-  const c=charts['c-year'];
-  const byYear=allYearData;
+  buildYearChart(allYearData, mode);
+}
+
+function buildMethodList(byMethod){
+  const total=(byMethod||[]).reduce((a,r)=>a+(r.committed||0),0);
+  const top=(byMethod||[]).slice(0,8);
+  document.getElementById('method-list').innerHTML=top.map(r=>{
+    const pct=total>0?((r.committed||0)/total*100):0;
+    const col=methodColor(r.method);
+    return `<div class="method-row">
+      <div class="method-dot" style="background:${col};"></div>
+      <div class="method-name" title="${r.method||''}">${shortMethod(r.method)}</div>
+      <div class="method-bar-outer"><div class="method-bar-inner" style="width:${pct}%;background:${col};"></div></div>
+      <div class="method-pct">${pct.toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function buildActorRankList(data, key){
+  const max=Math.max(...(data||[]).map(r=>r.committed||0),1);
+  document.getElementById('rank-actors').innerHTML=(data||[]).slice(0,10).map((r,i)=>{
+    const name=r[key]||r.name||'—';
+    const v=r.committed||0;
+    const w=Math.round((v/max)*80);
+    return `<li class="rank-item">
+      <span class="rank-n">${i+1}</span>
+      <span class="rank-name" title="${name}">${name.length>26?name.slice(0,26)+'…':name}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${w}px;"></div></div>
+      <span class="rank-val">${fmtM(v)}</span>
+    </li>`;
+  }).join('');
+}
+
+function buildDeliveredRankList(data){
+  const max=Math.max(...(data||[]).map(r=>r.delivered||0),1);
+  document.getElementById('rank-delivered').innerHTML=(data||[]).slice(0,10).map((r,i)=>{
+    const v=r.delivered||0;
+    const w=Math.round((v/max)*80);
+    return `<li class="rank-item">
+      <span class="rank-n">${i+1}</span>
+      <span class="rank-name" title="${r.supplier||r.name||'—'}">${(r.supplier||r.name||'—').length>22?(r.supplier||r.name||'—').slice(0,22)+'…':(r.supplier||r.name||'—')}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${w}px;background:#22C55E;"></div></div>
+      <span class="rank-val" style="color:#22C55E;">${fmtM(v)}</span>
+    </li>`;
+  }).join('');
+}
+
+function buildAnnualBar(byYear){
+  destroyChart('c-annual');
   const yrs=(byYear||[]).map(r=>r.year);
-  if(mode==='cumulative'){
-    let cc=0,cd=0;
-    c.data.datasets[0].data=(byYear||[]).map(r=>{cc+=r.committed||0;return parseFloat(cc.toFixed(1));});
-    c.data.datasets[1].data=(byYear||[]).map(r=>{cd+=r.delivered||0;return parseFloat(cd.toFixed(1));});
-    c.data.datasets[0].label='Cumulative Contracted';
-    c.data.datasets[1].label='Cumulative Delivered';
-  } else {
-    c.data.datasets[0].data=(byYear||[]).map(r=>r.committed||0);
-    c.data.datasets[1].data=(byYear||[]).map(r=>r.delivered||0);
-    c.data.datasets[0].label='Quarterly Contracted';
-    c.data.datasets[1].label='Quarterly Delivered';
-  }
-  c.update();
+  charts['c-annual']=new Chart(document.getElementById('c-annual'),{
+    type:'bar',
+    data:{labels:yrs,datasets:[
+      {label:'Contracted',data:(byYear||[]).map(r=>r.committed||0),backgroundColor:'rgba(59,91,219,.75)',borderRadius:4,borderSkipped:false},
+      {label:'Delivered', data:(byYear||[]).map(r=>r.delivered||0),backgroundColor:'rgba(34,197,94,.75)',borderRadius:4,borderSkipped:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:9,padding:6}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},
+              y:{grid:{color:'#F4F5F7'},ticks:{callback:v=>fmtM(v),font:{size:10}}}}}
+  });
+}
+
+function buildMarketRankList(data){
+  const filtered=(data||[]).filter(r=>r.marketplace&&r.marketplace!=='—'&&r.marketplace!=='-');
+  const max=Math.max(...filtered.map(r=>r.count||0),1);
+  document.getElementById('rank-markets').innerHTML=filtered.slice(0,8).map((r,i)=>{
+    const w=Math.round(((r.count||0)/max)*80);
+    return `<li class="rank-item">
+      <span class="rank-n">${i+1}</span>
+      <span class="rank-name">${r.marketplace}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${w}px;background:#8B5CF6;"></div></div>
+      <span class="rank-val">${fmt(r.count)}</span>
+    </li>`;
+  }).join('');
+}
+
+function buildStatusChart(byStatus){
+  destroyChart('c-status');
+  const stMap={'Delivered':'#22C55E','Contracted':'#3B5BDB','Retired':'#8B5CF6','Partial':'#F59E0B'};
+  const labels=(byStatus||[]).map(r=>r.status||'Unknown');
+  const vals  =(byStatus||[]).map(r=>r.count||0);
+  charts['c-status']=new Chart(document.getElementById('c-status'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:labels.map(l=>stMap[l]||'#9CA3AF'),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:9,padding:8}}}}
+  });
 }
 
 function setActorTab(mode,btn){
-  document.querySelectorAll('#actor-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#sec-insights .tab-group:first-of-type .tab-btn').forEach(b=>{
+    if(b.textContent==='Buyers'||b.textContent==='Suppliers') b.classList.remove('active');
+  });
   btn.classList.add('active');
   actorMode=mode;
-  updateActorChart();
+  document.getElementById('actor-title').textContent=mode==='buyers'?'Top 10 Buyers':'Top 10 Suppliers';
+  if(mode==='buyers') buildActorRankList(window._topBuyers||[],'purchaser');
+  else buildActorRankList(window._topSuppliers||[],'supplier');
 }
 
-function updateActorChart(){
-  if(actorMode==='purchasers') buildActorChart(window._topBuyers||[],'purchaser');
-  else buildActorChart(window._topSuppliers||[],'name');
-}
-
-// ─── EXPLORER ────────────────────────────────────────────────────────────────
+// ─── EXPLORER ─────────────────────────────────────────────────────────────────
 async function loadExplorer(){
   document.getElementById('tx-loading').style.display='flex';
   try{
-    const opts=await apiFetch('/api/transactions/filters');
+    const opts=await api('/api/transactions/filters');
     populateFilters(opts);
     await fetchTransactions();
   }catch(e){console.error(e);}
@@ -788,44 +1084,52 @@ function populateFilters(opts){
   const fill=(id,arr,lbl)=>{
     const sel=document.getElementById(id);
     const cur=sel.value;
-    sel.innerHTML=`<option value="">${lbl}</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join('');
+    sel.innerHTML=`<option value="">${lbl}</option>`+(arr||[]).map(v=>`<option>${v}</option>`).join('');
     if(cur) sel.value=cur;
   };
-  fill('f-method',opts.methods,'Method');
-  fill('f-status',opts.statuses,'Status');
-  fill('f-marketplace',opts.marketplaces,'Marketplace');
-  fill('f-registry',opts.registries,'Registry');
-  fill('f-continent',opts.continents,'Continent');
-  fill('f-year',opts.years,'Year');
+  fill('f-method',opts.methods,'All Methods');
+  fill('f-status',opts.statuses,'All Statuses');
+  fill('f-marketplace',opts.marketplaces,'All Marketplaces');
+  fill('f-continent',opts.continents,'All Continents');
+  fill('f-year',opts.years,'All Years');
 }
 
 async function fetchTransactions(){
-  const q   =document.getElementById('search-inp').value.trim();
-  const m   =document.getElementById('f-method').value;
-  const st  =document.getElementById('f-status').value;
-  const mk  =document.getElementById('f-marketplace').value;
-  const reg =document.getElementById('f-registry').value;
-  const con =document.getElementById('f-continent').value;
-  const yr  =document.getElementById('f-year').value;
+  const q  =document.getElementById('search-inp').value.trim();
+  const m  =document.getElementById('f-method').value;
+  const st =document.getElementById('f-status').value;
+  const mk =document.getElementById('f-marketplace').value;
+  const con=document.getElementById('f-continent').value;
+  const yr =document.getElementById('f-year').value;
   let url='/api/transactions/?limit=5000';
   if(q)   url+=`&search=${encodeURIComponent(q)}`;
   if(m)   url+=`&method=${encodeURIComponent(m)}`;
   if(st)  url+=`&status=${encodeURIComponent(st)}`;
   if(mk)  url+=`&marketplace=${encodeURIComponent(mk)}`;
-  if(reg) url+=`&registry_name=${encodeURIComponent(reg)}`;
   if(con) url+=`&continent=${encodeURIComponent(con)}`;
   if(yr)  url+=`&year=${encodeURIComponent(yr)}`;
-  const data=await apiFetch(url);
+  const data=await api(url);
   txData=Array.isArray(data)?data:(data.data||data.items||[]);
   txFiltered=[...txData];
+  applyClientSort();
   txPage=1;
-  renderTxTable();
-  document.getElementById('res-count').textContent=`${fmt(txFiltered.length)} records`;
+  renderTx();
+  document.getElementById('res-count').textContent=fmt(txFiltered.length)+' results';
 }
 
-function renderTxTable(){
-  const start=(txPage-1)*txPerPage;
-  const rows=txFiltered.slice(start,start+txPerPage);
+function applyClientSort(){
+  txFiltered.sort((a,b)=>{
+    let av=a[txSort.col]??'', bv=b[txSort.col]??'';
+    if(!isNaN(Number(av))&&!isNaN(Number(bv))){ av=Number(av); bv=Number(bv); }
+    if(av<bv) return txSort.dir==='asc'?-1:1;
+    if(av>bv) return txSort.dir==='asc'?1:-1;
+    return 0;
+  });
+}
+
+function renderTx(){
+  const start=(txPage-1)*txPer;
+  const rows=txFiltered.slice(start,start+txPer);
   const tbody=document.getElementById('tx-body');
   if(!txFiltered.length){
     tbody.innerHTML='';
@@ -835,250 +1139,382 @@ function renderTxTable(){
     return;
   }
   document.getElementById('tx-empty').style.display='none';
-  tbody.innerHTML=rows.map((r,i)=>`
-    <tr onclick="openModal(${start+i})">
-      <td style="color:#6B7280;">${r.announcement?r.announcement.slice(0,10):'—'}</td>
-      <td><span class="method-tag" title="${r.method||''}">${r.method||'—'}</span></td>
-      <td style="font-weight:500;color:#111827;">${r.supplier_name||'—'}</td>
-      <td>${r.purchaser||'Not Disclosed'}</td>
-      <td style="color:#6B7280;font-size:12px;">${r.marketplace||'—'}</td>
-      <td style="text-align:right;font-weight:600;">${fmt(r.tonnes)}</td>
-      <td style="text-align:right;color:#6B7280;">${fmt(r.tonnes_delivered)||'—'}</td>
+  tbody.innerHTML=rows.map((r,i)=>{
+    const sm=shortMethod(r.method);
+    const tcls=methodTagCls(r.method);
+    return `<tr onclick="openModal(${start+i})">
+      <td style="color:#9CA3AF;font-size:11.5px;font-weight:500;">${r.announcement?r.announcement.slice(0,10):'—'}</td>
+      <td><span class="method-tag ${tcls}" title="${r.method||''}">${sm.length>24?sm.slice(0,24)+'…':sm}</span></td>
+      <td style="font-weight:600;color:#1A1D23;">${r.supplier_name||'—'}</td>
+      <td style="color:#6B7280;">${r.purchaser||'Not Disclosed'}</td>
+      <td style="color:#9CA3AF;font-size:11.5px;">${r.marketplace||'—'}</td>
+      <td style="color:#9CA3AF;font-size:11.5px;">${r.registry_name||'—'}</td>
+      <td style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums;">${fmt(r.tonnes)}</td>
+      <td style="text-align:right;color:#22C55E;font-weight:600;font-variant-numeric:tabular-nums;">${r.tonnes_delivered!=null&&r.tonnes_delivered>0?fmt(r.tonnes_delivered):'—'}</td>
       <td><span class="badge ${badgeCls(r.status)}">${r.status||'—'}</span></td>
-      <td style="color:#6B7280;font-size:12px;">${r.continent||'—'}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   const total=txFiltered.length;
-  const pages=Math.ceil(total/txPerPage);
-  document.getElementById('pg-info').textContent=`Showing ${start+1}–${Math.min(start+txPerPage,total)} of ${fmt(total)}`;
-
+  const pages=Math.ceil(total/txPer);
+  document.getElementById('pg-info').textContent=`Showing ${fmt(start+1)}–${fmt(Math.min(start+txPer,total))} of ${fmt(total)}`;
   let html=`<button class="pgbtn" onclick="changePage(${txPage-1})" ${txPage===1?'disabled':''}>‹</button>`;
-  let last=0;
-  const range=[];
-  for(let p=1;p<=pages;p++) if(p===1||p===pages||Math.abs(p-txPage)<=1) range.push(p);
+  let last=0; const range=[];
+  for(let p=1;p<=pages;p++) if(p===1||p===pages||Math.abs(p-txPage)<=2) range.push(p);
   range.forEach(p=>{
-    if(last&&p-last>1) html+=`<span style="color:#D1D5DB;padding:0 4px;">…</span>`;
+    if(last&&p-last>1) html+=`<span style="color:#D1D5DB;padding:0 3px;font-size:12px;">…</span>`;
     html+=`<button class="pgbtn ${p===txPage?'active':''}" onclick="changePage(${p})">${p}</button>`;
     last=p;
   });
   html+=`<button class="pgbtn" onclick="changePage(${txPage+1})" ${txPage===pages?'disabled':''}>›</button>`;
   document.getElementById('pg-btns').innerHTML=html;
+
+  // Update sort header classes
+  ['announcement','method','supplier','purchaser','marketplace','registry','tonnes','delivered','status'].forEach(k=>{
+    const th=document.getElementById('th-'+k);
+    if(th){ th.classList.remove('sort-asc','sort-desc'); }
+  });
+  const thMap={'announcement':'th-announcement','method':'th-method','supplier_name':'th-supplier','purchaser':'th-purchaser','marketplace':'th-marketplace','registry_name':'th-registry','tonnes':'th-tonnes','tonnes_delivered':'th-delivered','status':'th-status'};
+  const thel=document.getElementById(thMap[txSort.col]||'');
+  if(thel) thel.classList.add(txSort.dir==='asc'?'sort-asc':'sort-desc');
 }
 
-function changePage(p){
-  const pages=Math.ceil(txFiltered.length/txPerPage);
-  if(p<1||p>pages) return;
-  txPage=p;
-  renderTxTable();
-  document.querySelector('#sec-explorer').scrollTop=0;
-}
-
-function onSearch(v){
-  clearTimeout(searchTimer);
-  document.getElementById('clr-search').style.display=v?'block':'none';
-  searchTimer=setTimeout(()=>{txPage=1;fetchTransactions();},350);
-}
-function clearSearch(){document.getElementById('search-inp').value='';document.getElementById('clr-search').style.display='none';txPage=1;fetchTransactions();}
-function applyFilters(){txPage=1;fetchTransactions();}
-function resetFilters(){
-  ['f-method','f-status','f-marketplace','f-registry','f-continent','f-year'].forEach(id=>document.getElementById(id).value='');
-  clearSearch();
-}
-
+function changePage(p){ const pages=Math.ceil(txFiltered.length/txPer); if(p<1||p>pages)return; txPage=p; renderTx(); }
+function onSearch(v){ clearTimeout(searchTimer); searchTimer=setTimeout(()=>{txPage=1;fetchTransactions();},350); }
+function applyFilters(){ txPage=1; fetchTransactions(); }
+function resetFilters(){ ['f-method','f-status','f-marketplace','f-continent','f-year'].forEach(id=>document.getElementById(id).value=''); document.getElementById('search-inp').value=''; txPage=1; fetchTransactions(); }
 function sortBy(col){
   if(txSort.col===col) txSort.dir=txSort.dir==='asc'?'desc':'asc';
-  else{txSort.col=col;txSort.dir='asc';}
-  txFiltered.sort((a,b)=>{
-    let av=a[col]||'',bv=b[col]||'';
-    if(!isNaN(Number(av))){av=Number(av);bv=Number(bv);}
-    if(av<bv) return txSort.dir==='asc'?-1:1;
-    if(av>bv) return txSort.dir==='asc'?1:-1;
-    return 0;
-  });
-  txPage=1;renderTxTable();
+  else{ txSort.col=col; txSort.dir='desc'; }
+  applyClientSort(); txPage=1; renderTx();
 }
 
-// ─── Modal ───────────────────────────────────────────────────────────────────
+// ─── TRANSACTION MODAL ─────────────────────────────────────────────────────────
 function openModal(idx){
   const r=txFiltered[idx]; if(!r) return;
-  const fields=[
-    ['Contract Date',r.announcement?.slice(0,10)],
-    ['Buyer',r.purchaser],
-    ['Supplier',r.supplier_name],
-    ['Method',r.method],
-    ['Purchased (t)',fmt(r.tonnes)],
-    ['Delivered (t)',fmt(r.tonnes_delivered)],
-    ['Status',r.status],
-    ['Marketplace',r.marketplace],
-    ['Registry',r.registry_name],
-    ['Continent',r.continent],
-    ['Country',r.country||r.supplier_country],
-    ['Technology',r.technology||r.supplier_technology],
-    ['Certification',r.certification],
-    ['Price (USD/t)',r.price_per_tonne?'$'+r.price_per_tonne:null],
-  ].filter(([,v])=>v!=null&&v!=='—');
-  document.getElementById('modal-content').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      ${fields.map(([l,v])=>`
-        <div style="background:#F9FAFB;border-radius:9px;padding:12px 14px;">
-          <div style="font-size:10px;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">${l}</div>
-          <div style="font-size:13px;font-weight:600;color:#374151;">${v||'—'}</div>
-        </div>`).join('')}
+  document.getElementById('modal-title').textContent=`${r.supplier_name||'Order'} → ${r.purchaser||'Not Disclosed'}`;
+  document.getElementById('modal-sub').textContent=`${r.announcement?r.announcement.slice(0,10):''} · ${r.method||''}`;
+
+  const field=(l,v,full)=>v!=null&&v!==''&&v!=='—'?`<div class="modal-field${full?' full':''}"><div class="modal-field-label">${l}</div><div class="modal-field-value">${v}</div></div>`:'';
+
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-section">
+      <div class="modal-section-title">Transaction</div>
+      <div class="modal-grid">
+        ${field('Contract Date',   r.announcement?.slice(0,10))}
+        ${field('Status',          r.status?`<span class="badge ${badgeCls(r.status)}">${r.status}</span>`:null)}
+        ${field('Contracted (t)',  r.tonnes!=null?fmt(r.tonnes):null)}
+        ${field('Delivered (t)',   r.tonnes_delivered!=null?fmt(r.tonnes_delivered):null)}
+        ${field('Marketplace',     r.marketplace)}
+        ${field('Registry',        r.registry_name)}
+        ${field('Method',          r.method,true)}
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <div class="modal-section-title">Supplier Info</div>
+      <div class="modal-grid">
+        ${field('Supplier',        r.supplier_name)}
+        ${field('Buyer',           r.purchaser)}
+        ${field('Country',         r.supplier_country||r.country)}
+        ${field('Continent',       r.supplier_continent||r.continent)}
+        ${field('Technology',      r.supplier_technology||r.technology,true)}
+        ${field('Certification',   r.certification,true)}
+        ${field('Price (USD/t)',   r.supplier_price?'$'+Number(r.supplier_price).toLocaleString():null)}
+        ${field('Biomass Source',  r.biomass_source,true)}
+      </div>
     </div>`;
+
   const ov=document.getElementById('modal-overlay');
   ov.style.display='flex';
 }
-function closeModal(){document.getElementById('modal-overlay').style.display='none';}
+function closeModal(){ document.getElementById('modal-overlay').style.display='none'; }
 
-// ─── Suppliers ────────────────────────────────────────────────────────────────
+// ─── SUPPLIERS ─────────────────────────────────────────────────────────────────
 async function loadSuppliers(){
   document.getElementById('sup-loading').style.display='flex';
   document.getElementById('sup-grid').innerHTML='';
   try{
-    const data=await apiFetch('/api/suppliers/?limit=300');
+    const data=await api('/api/suppliers/?limit=500');
     supData=Array.isArray(data)?data:(data.data||data.items||[]);
+    // Sort by total delivered desc
+    supData.sort((a,b)=>(b.total_tonnes_delivered||0)-(a.total_tonnes_delivered||0));
     const techs=[...new Set(supData.map(s=>s.technology).filter(Boolean))].sort();
     const conts=[...new Set(supData.map(s=>s.continent).filter(Boolean))].sort();
+    const countries=[...new Set(supData.map(s=>s.country).filter(Boolean))].sort();
     document.getElementById('sup-tech').innerHTML='<option value="">All Technologies</option>'+techs.map(t=>`<option>${t}</option>`).join('');
     document.getElementById('sup-continent').innerHTML='<option value="">All Continents</option>'+conts.map(c=>`<option>${c}</option>`).join('');
+    document.getElementById('sup-country').innerHTML='<option value="">All Countries</option>'+countries.map(c=>`<option>${c}</option>`).join('');
     filterSuppliers('');
   }catch(e){console.error(e);}
   finally{document.getElementById('sup-loading').style.display='none';}
 }
 
-const TECH_COLORS={
-  'Biochar Carbon Removal BCR':'background:#FEF3C7;color:#92400E;',
-  'Direct Air Carbon Capture And Sequestration DACCS':'background:#DBEAFE;color:#1E40AF;',
-  'Bioenergy With Carbon Capture And Sequestration BECCS':'background:#D1FAE5;color:#065F46;',
-  'Enhanced Weathering':'background:#CFFAFE;color:#155E75;',
-  'Mineralization':'background:#EDE9FE;color:#5B21B6;',
-  'Alkalinity Enhancement':'background:#CCFBF1;color:#134E4A;',
-  'Biomass Geological Sequestration':'background:#FED7AA;color:#92400E;',
-  'Direct Ocean Removal':'background:#BAE6FD;color:#0C4A6E;',
-  'Marine Biomass Carbon Capture And Sequestration MBCCS':'background:#E0E7FF;color:#3730A3;',
-  'Biomass Direct Storage':'background:#DCFCE7;color:#14532D;',
-};
-const getTechStyle=t=>TECH_COLORS[t]||'background:#F3F4F6;color:#6B7280;';
-
 function filterSuppliers(q){
   const tech=document.getElementById('sup-tech').value;
   const cont=document.getElementById('sup-continent').value;
-  const qL=q.toLowerCase();
+  const country=document.getElementById('sup-country').value;
+  const ql=q.toLowerCase();
   supFiltered=supData.filter(s=>{
-    const ok=!q||(s.name||'').toLowerCase().includes(qL)||(s.technology||'').toLowerCase().includes(qL);
+    const okQ=!q||(s.name||'').toLowerCase().includes(ql)||(s.technology||'').toLowerCase().includes(ql)||(s.country||'').toLowerCase().includes(ql)||(s.biomass_source||'').toLowerCase().includes(ql);
     const okT=!tech||s.technology===tech;
     const okC=!cont||s.continent===cont;
-    return ok&&okT&&okC;
+    const okCo=!country||s.country===country;
+    return okQ&&okT&&okC&&okCo;
   });
-  document.getElementById('sup-count').textContent=`${fmt(supFiltered.length)} suppliers`;
+  document.getElementById('sup-count').textContent=fmt(supFiltered.length)+' suppliers';
   renderSuppliers();
 }
 
 function renderSuppliers(){
   const grid=document.getElementById('sup-grid');
   if(!supFiltered.length){
-    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:#9CA3AF;"><i class="fas fa-search" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>No suppliers found</div>';
+    grid.innerHTML='<div style="grid-column:1/-1;" class="empty-state"><i class="fas fa-industry"></i><p>No suppliers found</p></div>';
     return;
   }
-  grid.innerHTML=supFiltered.map(s=>{
+  grid.innerHTML=supFiltered.map((s,idx)=>{
     const dr=s.total_tonnes_committed>0?Math.min((s.total_tonnes_delivered||0)/s.total_tonnes_committed*100,100):0;
+    const drColor=dr>20?'#22C55E':dr>5?'#F59E0B':'#9CA3AF';
+    const drFill=dr>20?'linear-gradient(90deg,#22C55E,#86EFAC)':dr>5?'linear-gradient(90deg,#F59E0B,#FCD34D)':'linear-gradient(90deg,#9CA3AF,#D1D5DB)';
+    const loc=[s.city_region,s.country].filter(Boolean).join(', ')||'—';
     const tech=s.technology||'';
-    const ts=getTechStyle(tech);
-    const loc=[s.city_region,s.country,s.continent].filter(Boolean).join(' · ')||'—';
-    return `
-    <div class="sup-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+    const sm=shortMethod(tech);
+    const tcls=methodTagCls(tech);
+
+    // Build tags
+    const tags=[];
+    if(s.certification) tags.push({icon:'fa-certificate',v:s.certification.split(',')[0].trim()+(s.certification.includes(',')?' +more':'')});
+    if(s.industrial_units) tags.push({icon:'fa-industry',v:s.industrial_units+(Number(s.industrial_units)>1?' units':' unit')});
+    if(s.biomass_source) tags.push({icon:'fa-seedling',v:s.biomass_source.length>30?s.biomass_source.slice(0,30)+'…':s.biomass_source});
+
+    return `<div class="sup-card" onclick="openSupModal(${idx})">
+      <div class="sup-card-top">
         <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name||'—'}</div>
-          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${loc}</div>
+          <div class="sup-name">${s.name||'—'}</div>
+          <div class="sup-loc"><i class="fas fa-map-marker-alt" style="font-size:9px;"></i>${loc}</div>
         </div>
-        ${s.price_per_tonne?`<span style="font-size:12px;font-weight:700;color:#10B981;margin-left:8px;flex-shrink:0;">$${s.price_per_tonne}/t</span>`:''}
+        ${s.price_per_tonne?`<div class="sup-price">$${Number(s.price_per_tonne).toLocaleString()}/t</div>`:''}
       </div>
-      ${tech?`<span style="display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;margin-bottom:10px;${ts}">${tech.length>35?tech.slice(0,35)+'…':tech}</span>`:''}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;text-align:center;">
-        <div style="background:#F9FAFB;border-radius:8px;padding:8px;">
-          <div style="font-size:13px;font-weight:700;color:#111827;">${fmtM(s.total_tonnes_committed||0)}</div>
-          <div style="font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-top:1px;">Committed</div>
+      ${tech?`<span class="method-tag ${tcls}" style="margin-bottom:10px;display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;" title="${tech}">${sm}</span>`:''}
+      <div class="sup-stats">
+        <div class="sup-stat">
+          <div class="sup-stat-v">${fmtM(s.total_tonnes_committed||0)}</div>
+          <div class="sup-stat-l">Contracted</div>
         </div>
-        <div style="background:#F9FAFB;border-radius:8px;padding:8px;">
-          <div style="font-size:13px;font-weight:700;color:#06B6D4;">${fmtM(s.total_tonnes_delivered||0)}</div>
-          <div style="font-size:9px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-top:1px;">Delivered</div>
+        <div class="sup-stat">
+          <div class="sup-stat-v" style="color:#22C55E;">${fmtM(s.total_tonnes_delivered||0)}</div>
+          <div class="sup-stat-l">Delivered</div>
+        </div>
+        <div class="sup-stat">
+          <div class="sup-stat-v">${s.transaction_count||0}</div>
+          <div class="sup-stat-l">Orders</div>
         </div>
       </div>
-      <div style="margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:#9CA3AF;margin-bottom:4px;">
-          <span>Delivery Rate</span>
-          <span style="font-weight:600;color:${dr>10?'#10B981':'#9CA3AF'};">${dr.toFixed(1)}%</span>
-        </div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${dr}%;"></div></div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Delivery Rate</span><span style="font-weight:700;color:${drColor};">${dr.toFixed(1)}%</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${dr}%;background:${drFill};"></div></div>
       </div>
-      <div style="font-size:11px;color:#9CA3AF;display:flex;align-items:center;justify-content:space-between;">
-        <span><i class="fas fa-file-contract" style="margin-right:4px;"></i>${s.transaction_count||0} transactions</span>
-        ${s.certification?`<span style="font-size:10px;color:#9CA3AF;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;" title="${s.certification}">${s.certification}</span>`:''}
-      </div>
+      ${tags.length?`<div class="sup-tags">${tags.map(t=>`<span class="sup-tag"><i class="fas ${t.icon}"></i>${t.v}</span>`).join('')}</div>`:''}
+      ${(s.first_transaction||s.last_transaction)?`<div class="sup-footer">
+        <div class="sup-footer-l">${s.first_transaction?`<i class="fas fa-calendar-alt" style="margin-right:3px;font-size:9px;"></i>First: ${s.first_transaction}`:''}</div>
+        <div class="sup-footer-r">${s.last_transaction?`Last: ${s.last_transaction}`:''}</div>
+      </div>`:''}
     </div>`;
   }).join('');
 }
 
-// ─── Upload ──────────────────────────────────────────────────────────────────
+// ─── SUPPLIER MODAL ────────────────────────────────────────────────────────────
+function openSupModal(idx){
+  const s=supFiltered[idx]; if(!s) return;
+  const dr=s.total_tonnes_committed>0?Math.min((s.total_tonnes_delivered||0)/s.total_tonnes_committed*100,100):0;
+  const loc=[s.city_region,s.country,s.continent].filter(Boolean).join(' · ');
+  document.getElementById('sup-modal-title').textContent=s.name||'Supplier Detail';
+  document.getElementById('sup-modal-sub').textContent=loc||'';
 
-// Rileva il formato del file lato client (preview)
-function detectFormat(f){
-  if(!f) return null;
-  const ext=(f.name||'').split('.').pop().toLowerCase();
-  if(ext==='xlsx'||ext==='xls') return 'excel';
-  if(ext==='csv') return 'csv';
-  return null;
+  const field=(l,v,full)=>v!=null&&v!==''&&v!=='—'&&v!=='N/A'?`<div class="modal-field${full?' full':''}"><div class="modal-field-label">${l}</div><div class="modal-field-value">${v}</div></div>`:'';
+
+  document.getElementById('sup-modal-body').innerHTML=`
+    <div class="sup-modal-kpi">
+      <div class="sup-modal-kpi-item">
+        <div class="sup-modal-kpi-v">${fmtM(s.total_tonnes_committed||0)}</div>
+        <div class="sup-modal-kpi-l">Contracted (t)</div>
+      </div>
+      <div class="sup-modal-kpi-item">
+        <div class="sup-modal-kpi-v" style="color:#22C55E;">${fmtM(s.total_tonnes_delivered||0)}</div>
+        <div class="sup-modal-kpi-l">Delivered (t)</div>
+      </div>
+      <div class="sup-modal-kpi-item">
+        <div class="sup-modal-kpi-v" style="color:${dr>10?'#22C55E':dr>2?'#F59E0B':'#9CA3AF'};">${dr.toFixed(1)}%</div>
+        <div class="sup-modal-kpi-l">Delivery Rate</div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Technology &amp; Certification</div>
+      <div class="modal-grid">
+        ${field('Technology',      s.technology, true)}
+        ${field('Certification',   s.certification, true)}
+        ${field('Biomass Source',  s.biomass_source, true)}
+        ${field('Industrial Units',s.industrial_units)}
+        ${field('Price (USD/t)',   s.price_per_tonne?'$'+Number(s.price_per_tonne).toLocaleString():null)}
+        ${field('Transactions',    s.transaction_count)}
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <div class="modal-section-title">Location</div>
+      <div class="modal-grid">
+        ${field('Country',         s.country)}
+        ${field('Continent',       s.continent)}
+        ${field('City / Region',   s.city_region)}
+        ${field('Additional Sites',s.additional_locations, true)}
+        ${field('Coordinates',     s.geolocation_raw)}
+      </div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-section">
+      <div class="modal-section-title">Activity</div>
+      <div class="modal-grid">
+        ${field('First Transaction', s.first_transaction)}
+        ${field('Last Transaction',  s.last_transaction)}
+      </div>
+    </div>`;
+
+  document.getElementById('sup-modal-overlay').style.display='flex';
+}
+function closeSupModal(){ document.getElementById('sup-modal-overlay').style.display='none'; }
+
+// ─── METHODS ──────────────────────────────────────────────────────────────────
+async function loadMethods(){
+  try{
+    const data=await api('/api/transactions/stats/by-method');
+    methData=data||[];
+    buildMethodCharts();
+    renderMethodTable();
+  }catch(e){console.error(e);}
 }
 
-function handleDragOver(e){
-  e.preventDefault();
-  const dz=document.getElementById('drop-zone');
-  dz.classList.add('drag-over');
-  document.getElementById('dz-icon').style.background='#C7D2FE';
+function buildMethodCharts(){
+  const colors=methData.map(r=>methodColor(r.method));
+  const labels=methData.map(r=>shortMethod(r.method));
+  const committed=methData.map(r=>r.committed||0);
+  const delivered=methData.map(r=>r.delivered||0);
+  const drRates=methData.map(r=>r.committed>0?+((r.delivered||0)/r.committed*100).toFixed(2):0);
+
+  destroyChart('c-meth-bar');
+  charts['c-meth-bar']=new Chart(document.getElementById('c-meth-bar'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Contracted (t)',data:committed,backgroundColor:colors.map(c=>c+'BB'),borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#F4F5F7'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
+              y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  destroyChart('c-meth-delivery');
+  charts['c-meth-delivery']=new Chart(document.getElementById('c-meth-delivery'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Delivery Rate %',data:drRates,backgroundColor:drRates.map(v=>v>10?'#22C55E':v>2?'#F59E0B':'rgba(59,91,219,.55)'),borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#F4F5F7'},ticks:{callback:v=>v+'%',font:{size:10}}},
+              y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
 }
-function handleDragLeave(){
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  document.getElementById('dz-icon').style.background='#EEF2FF';
+
+function renderMethodTable(){
+  const totalC=methData.reduce((a,r)=>a+(r.committed||0),0);
+  document.getElementById('meth-body').innerHTML=methData.map(r=>{
+    const dr=r.committed>0?((r.delivered||0)/r.committed*100):0;
+    const share=totalC>0?((r.committed||0)/totalC*100):0;
+    const drColor=dr>10?'#22C55E':dr>2?'#F59E0B':'#9CA3AF';
+    const barW=Math.max(Math.round(share*3),2);
+    return `<tr>
+      <td><span class="method-tag ${methodTagCls(r.method)}" title="${r.method||''}">${shortMethod(r.method)}</span></td>
+      <td style="text-align:right;font-weight:600;">${fmt(r.committed)}</td>
+      <td style="text-align:right;color:#22C55E;font-weight:600;">${fmt(r.delivered)}</td>
+      <td style="text-align:right;font-weight:700;color:${drColor};">${dr.toFixed(2)}%</td>
+      <td style="text-align:right;">${fmt(r.count)}</td>
+      <td style="text-align:right;">${fmt(r.unique_suppliers)}</td>
+      <td><div style="display:flex;align-items:center;gap:7px;"><div class="meth-share-bar" style="width:${barW}px;background:${methodColor(r.method)};opacity:.7;"></div><span style="font-size:11px;color:#9CA3AF;">${share.toFixed(1)}%</span></div></td>
+    </tr>`;
+  }).join('');
 }
-function handleDrop(e){e.preventDefault();handleDragLeave();setFile(e.dataTransfer.files[0]);}
-function handleFileSelect(e){setFile(e.target.files[0]);}
+
+// ─── BUYERS ───────────────────────────────────────────────────────────────────
+async function loadBuyers(){
+  try{
+    const data=await api('/api/transactions/stats/top-purchasers?limit=50');
+    buyersData=data||[];
+    buildBuyerCharts(data);
+    renderBuyersTable(data);
+  }catch(e){console.error(e);}
+}
+
+function buildBuyerCharts(data){
+  const top10=data.slice(0,10);
+  const labels=top10.map(r=>(r.purchaser||'').length>20?(r.purchaser||'').slice(0,20)+'…':(r.purchaser||''));
+
+  destroyChart('c-buyers-bar');
+  charts['c-buyers-bar']=new Chart(document.getElementById('c-buyers-bar'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Contracted (t)',data:top10.map(r=>r.committed||0),backgroundColor:'rgba(59,91,219,.75)',borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#F4F5F7'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
+              y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  destroyChart('c-buyers-del');
+  charts['c-buyers-del']=new Chart(document.getElementById('c-buyers-del'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Delivered (t)',data:top10.map(r=>r.delivered||0),backgroundColor:'rgba(34,197,94,.75)',borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#F4F5F7'},ticks:{callback:v=>fmtM(v),font:{size:10}}},
+              y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+}
+
+function renderBuyersTable(data){
+  document.getElementById('buyers-body').innerHTML=data.map((r,i)=>{
+    const dr=r.committed>0?((r.delivered||0)/r.committed*100):0;
+    const drColor=dr>10?'#22C55E':dr>2?'#F59E0B':'#9CA3AF';
+    return `<tr>
+      <td style="color:#9CA3AF;font-weight:700;">${i+1}</td>
+      <td style="font-weight:600;color:#1A1D23;">${r.purchaser||'—'}</td>
+      <td style="text-align:right;font-weight:600;">${fmt(r.committed)}</td>
+      <td style="text-align:right;color:#22C55E;font-weight:600;">${fmt(r.delivered)}</td>
+      <td style="text-align:right;">${fmt(r.count)}</td>
+      <td style="text-align:right;font-weight:700;color:${drColor};">${dr.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── UPLOAD ───────────────────────────────────────────────────────────────────
+function detectFmt(f){ const e=(f.name||'').split('.').pop().toLowerCase(); return e==='xlsx'||e==='xls'?'excel':'csv'; }
+function handleDragOver(e){ e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave(){ document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e){ e.preventDefault(); handleDragLeave(); setFile(e.dataTransfer.files[0]); }
+function handleFileSelect(e){ setFile(e.target.files[0]); }
 
 function setFile(f){
-  if(!f) return;
-  selectedFile=f;
-  const fmt=detectFormat(f);
-  const sizeKB=f.size/1024;
-  const sizeTxt=sizeKB>=1024?(sizeKB/1024).toFixed(1)+' MB':sizeKB.toFixed(1)+' KB';
-
+  if(!f) return; selectedFile=f;
+  const fmt_=detectFmt(f);
   document.getElementById('file-name').textContent=f.name;
-  document.getElementById('file-size').textContent=sizeTxt;
-
-  // Icona e badge per tipo file
-  const icon=document.getElementById('file-icon');
-  const badge=document.getElementById('file-format-badge');
-  const wrap=document.getElementById('file-icon-wrap');
-  if(fmt==='excel'){
-    icon.className='fas fa-file-excel';
-    icon.style.color='#16A34A';
-    wrap.style.background='#DCFCE7';
-    badge.textContent='Excel';
-    badge.style.background='#DCFCE7';
-    badge.style.color='#15803D';
+  const kb=f.size/1024;
+  document.getElementById('file-size').textContent=kb>=1024?(kb/1024).toFixed(1)+' MB':kb.toFixed(1)+' KB';
+  const icon=document.getElementById('file-icon'), badge=document.getElementById('file-fmt-badge'), wrap=document.getElementById('file-icon-wrap');
+  if(fmt_==='excel'){
+    icon.className='fas fa-file-excel'; icon.style.color='#16A34A'; wrap.style.background='#DCFCE7';
+    badge.textContent='Excel'; badge.style.cssText='background:#DCFCE7;color:#15803D;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:3px;';
   } else {
-    icon.className='fas fa-file-csv';
-    icon.style.color='#4F46E5';
-    wrap.style.background='#EEF2FF';
-    badge.textContent='CSV — portal auto-detect';
-    badge.style.background='#EEF2FF';
-    badge.style.color='#4338CA';
+    icon.className='fas fa-file-csv'; icon.style.color='#3B5BDB'; wrap.style.background='#EEF2FF';
+    badge.textContent='CSV · portal'; badge.style.cssText='background:#EEF2FF;color:#3B5BDB;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:3px;';
   }
-
   document.getElementById('file-info').style.display='block';
   document.getElementById('upload-result').style.display='none';
   const btn=document.getElementById('import-btn');
-  btn.style.opacity='1';
-  btn.style.pointerEvents='auto';
+  btn.style.opacity='1'; btn.style.pointerEvents='auto';
 }
 
 function clearFile(){
@@ -1087,119 +1523,60 @@ function clearFile(){
   document.getElementById('upload-result').style.display='none';
   document.getElementById('file-inp').value='';
   const btn=document.getElementById('import-btn');
-  btn.style.opacity='.35';
-  btn.style.pointerEvents='none';
+  btn.style.opacity='.35'; btn.style.pointerEvents='none';
 }
 
-// Animazione progress bar fasulla (dà feedback visivo durante upload)
-let _progTimer=null;
-function startProgress(label){
-  const prog=document.getElementById('upload-progress');
-  const bar=document.getElementById('prog-fill-bar');
-  const lbl=document.getElementById('progress-label');
-  prog.style.display='block';
-  if(lbl) lbl.textContent=label||'Importing data…';
-  bar.style.width='0%';
+function startProg(){
+  document.getElementById('upload-progress').style.display='block';
+  document.getElementById('prog-fill-bar').style.width='0%';
   let pct=0;
-  _progTimer=setInterval(()=>{
-    // Sale veloce fino a 80%, poi rallenta (aspetta risposta server)
-    const step=pct<40?4:pct<70?2:pct<85?.5:.1;
-    pct=Math.min(pct+step,88);
-    bar.style.width=pct+'%';
-  },120);
+  _progTimer=setInterval(()=>{ pct=Math.min(pct+(pct<40?4:pct<75?1.5:.3),88); document.getElementById('prog-fill-bar').style.width=pct+'%'; },120);
 }
-function stopProgress(){
-  clearInterval(_progTimer);
-  const bar=document.getElementById('prog-fill-bar');
-  bar.style.width='100%';
-  setTimeout(()=>{document.getElementById('upload-progress').style.display='none';},400);
-}
+function stopProg(){ clearInterval(_progTimer); document.getElementById('prog-fill-bar').style.width='100%'; setTimeout(()=>document.getElementById('upload-progress').style.display='none',400); }
 
 async function uploadFile(){
   if(!selectedFile) return;
   const btn=document.getElementById('import-btn');
-  const res=document.getElementById('upload-result');
-  btn.style.opacity='.4';
-  btn.style.pointerEvents='none';
-  res.style.display='none';
-
-  const isCsv=detectFormat(selectedFile)==='csv';
-  startProgress(isCsv?'Detecting format and importing…':'Importing Excel file…');
-
+  btn.style.opacity='.4'; btn.style.pointerEvents='none';
+  document.getElementById('upload-result').style.display='none';
+  startProg();
   try{
-    const fd=new FormData();
-    fd.append('file',selectedFile);
+    const fd=new FormData(); fd.append('file',selectedFile);
     const r=await fetch('/api/ingest/upload',{method:'POST',body:fd});
-    const d=await r.json();
-    stopProgress();
+    const d=await r.json(); stopProg();
+    const res=document.getElementById('upload-result'), inner=document.getElementById('upload-result-inner'), txt=document.getElementById('upload-result-text'), stats=document.getElementById('upload-result-stats');
     res.style.display='block';
-
-    const inner=document.getElementById('upload-result-inner');
-    const txt=document.getElementById('upload-result-text');
-    const stats=document.getElementById('upload-result-stats');
-
     if(r.ok){
-      const isPortal=d.format==='portal_csv';
-      inner.style.background='#D1FAE5';
-      inner.style.borderTop='3px solid #10B981';
-      txt.innerHTML=`
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <i class="fas fa-check-circle" style="color:#10B981;font-size:16px;"></i>
-          <span style="color:#065F46;font-size:14px;font-weight:700;">Import successful!</span>
-          ${isPortal?'<span style="background:#065F46;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">CDR.fyi Portal</span>':'<span style="background:#1D4ED8;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">Excel</span>'}
-        </div>`;
+      inner.style.cssText='padding:13px 15px;background:#F0FDF4;border-top:3px solid #22C55E;';
+      txt.innerHTML=`<div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;"><i class="fas fa-check-circle" style="color:#22C55E;font-size:14px;"></i><span style="color:#15803D;font-size:13px;font-weight:700;">Import successful!</span><span style="background:${d.format==='portal_csv'?'#15803D':'#3B5BDB'};color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;">${d.format==='portal_csv'?'CDR.fyi':'Excel'}</span></div>`;
       stats.innerHTML=`
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:800;color:#065F46;">${(d.inserted||0).toLocaleString()}</div>
-          <div style="font-size:10px;color:#047857;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">New records</div>
-        </div>
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:800;color:#1D4ED8;">${(d.updated||0).toLocaleString()}</div>
-          <div style="font-size:10px;color:#1E40AF;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Updated</div>
-        </div>
-        <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:18px;font-weight:800;color:#9CA3AF;">${(d.skipped||0).toLocaleString()}</div>
-          <div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Duplicates skipped</div>
-        </div>`;
-      // Ricarica il dashboard con i nuovi dati
+        <div style="background:rgba(255,255,255,.7);border-radius:6px;padding:9px;text-align:center;"><div style="font-size:17px;font-weight:800;color:#15803D;">${(d.inserted||0).toLocaleString()}</div><div style="font-size:9.5px;color:#166534;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">New records</div></div>
+        <div style="background:rgba(255,255,255,.7);border-radius:6px;padding:9px;text-align:center;"><div style="font-size:17px;font-weight:800;color:#1D4ED8;">${(d.updated||0).toLocaleString()}</div><div style="font-size:9.5px;color:#1E40AF;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Updated</div></div>
+        <div style="background:rgba(255,255,255,.7);border-radius:6px;padding:9px;text-align:center;"><div style="font-size:17px;font-weight:800;color:#9CA3AF;">${(d.skipped||0).toLocaleString()}</div><div style="font-size:9.5px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Duplicates</div></div>`;
       if((d.inserted||0)>0) setTimeout(()=>loadInsights(),800);
     } else {
-      inner.style.background='#FEF2F2';
-      inner.style.borderTop='3px solid #EF4444';
-      txt.innerHTML=`
-        <div style="display:flex;align-items:center;gap:8px;">
-          <i class="fas fa-exclamation-circle" style="color:#EF4444;font-size:16px;"></i>
-          <span style="color:#991B1B;font-size:13px;font-weight:600;">${d.detail||'Import failed. Check the file format and try again.'}</span>
-        </div>`;
+      inner.style.cssText='padding:13px 15px;background:#FEF2F2;border-top:3px solid #EF4444;';
+      txt.innerHTML=`<div style="display:flex;align-items:center;gap:7px;"><i class="fas fa-exclamation-circle" style="color:#EF4444;font-size:14px;"></i><span style="color:#991B1B;font-size:13px;font-weight:600;">${d.detail||'Import failed'}</span></div>`;
       stats.innerHTML='';
     }
   }catch(err){
-    stopProgress();
-    res.style.display='block';
-    const inner=document.getElementById('upload-result-inner');
-    const txt=document.getElementById('upload-result-text');
-    inner.style.background='#FEF2F2';
-    inner.style.borderTop='3px solid #EF4444';
-    txt.innerHTML=`
-      <div style="display:flex;align-items:center;gap:8px;">
-        <i class="fas fa-wifi" style="color:#EF4444;font-size:16px;"></i>
-        <span style="color:#991B1B;font-size:13px;font-weight:600;">Network error — check your connection and retry.</span>
-      </div>`;
+    stopProg();
+    document.getElementById('upload-result').style.display='block';
+    document.getElementById('upload-result-inner').style.cssText='padding:13px 15px;background:#FEF2F2;border-top:3px solid #EF4444;';
+    document.getElementById('upload-result-text').innerHTML=`<span style="color:#991B1B;font-size:13px;">Network error — check connection and retry.</span>`;
     document.getElementById('upload-result-stats').innerHTML='';
   }finally{
-    btn.style.opacity='1';
-    btn.style.pointerEvents='auto';
+    btn.style.opacity='1'; btn.style.pointerEvents='auto';
   }
 }
 
 // ─── Init ────────────────────────────────────────────────────────────────────
-// Fix section display
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSupModal(); } });
 document.getElementById('sec-insights').style.display='block';
-['sec-explorer','sec-suppliers','sec-upload'].forEach(id=>{
+['sec-explorer','sec-suppliers','sec-methods','sec-buyers','sec-upload'].forEach(id=>{
   const el=document.getElementById(id);
   if(el) el.style.display='none';
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
 loadInsights();
 </script>
 </body>
