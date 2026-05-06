@@ -1704,15 +1704,25 @@ async function loadDashboard(){
 async function loadBuyers(){
   try{
     const data = await fetch(BASE+'/api/transactions/stats/top-purchasers?limit=200').then(r=>r.json());
-    allBuyers = data.map((r,i)=>({...r, rank:i+1,
-      total_committed: r.committed||r.total_committed||0,
-      total_delivered: r.delivered||r.total_delivered||0,
-      transactions:    r.count||r.transactions||0,
-      rate: pctN(r.delivered||r.total_delivered||0, r.committed||r.total_committed||1)
+    if(!Array.isArray(data)){
+      console.error('loadBuyers: risposta API non è un array', data);
+      document.getElementById('buyers-tbody').innerHTML = '<tr><td colspan="7" class="txt-c c-gray">Errore caricamento dati</td></tr>';
+      return;
+    }
+    allBuyers = data.map((r,i)=>({
+      rank: i+1,
+      purchaser: r.purchaser || '—',
+      total_committed: r.committed || 0,
+      total_delivered: r.delivered || 0,
+      transactions:    r.count    || 0,
+      rate: pctN(r.delivered||0, r.committed||1)
     }));
     filteredBuyers = [...allBuyers];
     renderBuyers();
-  } catch(e){ console.error(e); }
+  } catch(e){
+    console.error('loadBuyers error:', e);
+    document.getElementById('buyers-tbody').innerHTML = '<tr><td colspan="7" class="txt-c c-gray">Errore caricamento dati</td></tr>';
+  }
 }
 function filterBuyers(){
   const q = document.getElementById('buyers-search').value.trim().toLowerCase();
