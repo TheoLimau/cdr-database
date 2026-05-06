@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
     /* ═══════════════════════════════════════════
        RESET & BASE
@@ -113,13 +112,13 @@
     .sb-group{
       font-size:9px;font-weight:600;color:var(--text3);
       letter-spacing:.12em;text-transform:uppercase;
-      padding:18px 8px 6px;
+      padding:16px 8px 6px;
     }
     .sb-item{
       display:flex;align-items:center;gap:9px;
-      padding:8px 10px;border-radius:var(--radius-sm);
+      padding:7px 10px;border-radius:var(--radius-sm);
       font-size:12px;font-weight:500;color:var(--text2);
-      cursor:pointer;margin-bottom:2px;
+      cursor:pointer;margin-bottom:1px;
       transition:background .12s,color .12s;
       position:relative;
     }
@@ -169,14 +168,14 @@
     .topbar{
       background:var(--bg1);
       border-bottom:1px solid var(--border);
-      padding:0 32px;
-      height:56px;
+      padding:0 24px;
+      height:54px;
       display:flex;align-items:center;justify-content:space-between;
       position:sticky;top:0;z-index:40;
     }
     .topbar-l{display:flex;align-items:center;gap:12px}
-    .topbar-title{font-size:14px;font-weight:700;color:var(--white);letter-spacing:-.3px}
-    .topbar-sub{font-size:10.5px;color:var(--text3);margin-top:2px}
+    .topbar-title{font-size:14px;font-weight:700;color:var(--white)}
+    .topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
     .topbar-r{display:flex;align-items:center;gap:10px}
     .badge-live{
       display:flex;align-items:center;gap:5px;
@@ -209,7 +208,7 @@
     /* ═══════════════════════════════════════════
        PAGES
     ═══════════════════════════════════════════ */
-    .page{flex:1;padding:28px 32px;display:none}
+    .page{flex:1;padding:24px 28px;display:none}
     .page.active{display:block;animation:fadeIn .2s ease}
 
     /* ═══════════════════════════════════════════
@@ -217,10 +216,10 @@
     ═══════════════════════════════════════════ */
     .sec-head{
       display:flex;align-items:flex-end;justify-content:space-between;
-      margin-bottom:24px;
+      margin-bottom:20px;
     }
     .sec-head h2{
-      font-size:19px;font-weight:700;
+      font-size:18px;font-weight:700;
       color:var(--white);
       display:flex;align-items:center;gap:10px;
     }
@@ -233,19 +232,18 @@
     .kpi-strip{
       display:grid;
       grid-template-columns:repeat(6,1fr);
-      gap:12px;
-      margin-bottom:24px;
+      gap:10px;
+      margin-bottom:20px;
     }
     .kpi{
       background:var(--bg2);
       border:1px solid var(--border);
       border-radius:var(--radius);
-      padding:18px 20px;
+      padding:16px 18px;
       position:relative;
       overflow:hidden;
-      transition:border-color .15s,transform .12s;
+      transition:border-color .15s;
     }
-    .kpi:hover{transform:translateY(-1px)}
     .kpi:hover{border-color:var(--border2)}
     .kpi::after{
       content:'';
@@ -259,12 +257,12 @@
       font-size:10px;font-weight:600;
       color:var(--text3);
       text-transform:uppercase;letter-spacing:.08em;
+      margin-bottom:8px;
     }
     .kpi-v{
-      font-size:1.65rem;font-weight:800;
+      font-size:1.6rem;font-weight:800;
       color:var(--white);
       line-height:1;letter-spacing:-.5px;
-      margin:8px 0 6px;
     }
     .kpi-s{font-size:10.5px;color:var(--text2);margin-top:6px}
 
@@ -272,8 +270,8 @@
        STATUS PILLS  (all‑time breakdown)
     ═══════════════════════════════════════════ */
     .status-pills{
-      display:flex;gap:12px;
-      margin-bottom:24px;
+      display:flex;gap:10px;
+      margin-bottom:20px;
       flex-wrap:wrap;
     }
     .status-pill{
@@ -281,11 +279,10 @@
       background:var(--bg2);
       border:1px solid var(--border);
       border-radius:var(--radius);
-      padding:16px 18px;
-      display:flex;align-items:center;gap:14px;
-      transition:border-color .15s,transform .12s;
+      padding:14px 16px;
+      display:flex;align-items:center;gap:12px;
+      transition:border-color .15s;
     }
-    .status-pill:hover{transform:translateY(-1px)}
     .status-pill:hover{border-color:var(--border2)}
     .pill-icon{
       width:34px;height:34px;
@@ -299,8 +296,8 @@
       color:var(--text3);
       text-transform:uppercase;letter-spacing:.08em;
     }
-    .pill-val{font-size:16px;font-weight:800;color:var(--white);margin-top:4px;letter-spacing:-.3px}
-    .pill-sub{font-size:10px;color:var(--text2);margin-top:3px}
+    .pill-val{font-size:15px;font-weight:800;color:var(--white);margin-top:3px}
+    .pill-sub{font-size:10px;color:var(--text2);margin-top:2px}
 
     /* ═══════════════════════════════════════════
        CHARTS
@@ -308,29 +305,26 @@
     .charts-grid{
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      gap:16px;
-      margin-bottom:24px;
+      gap:12px;
+      margin-bottom:20px;
     }
     .chart-box{
       background:var(--bg2);
       border:1px solid var(--border);
       border-radius:var(--radius);
-      padding:20px 20px 18px;
-      transition:border-color .15s;
+      padding:18px 18px 16px;
     }
-    .chart-box:hover{border-color:var(--border2)}
     .chart-box.wide{grid-column:span 2}
     .chart-box.full{grid-column:1/-1}
     .chart-head{
       display:flex;align-items:flex-start;
       justify-content:space-between;
-      margin-bottom:16px;
+      margin-bottom:14px;
     }
-    .chart-title{font-size:12.5px;font-weight:700;color:var(--white);letter-spacing:-.2px}
-    .chart-sub{font-size:10.5px;color:var(--text3);margin-top:4px}
-    .chart-wrap{display:block;width:100%;height:230px;position:relative}
-    .chart-wrap.tall{height:290px}
-    .chart-wrap.donut{height:240px}
+    .chart-title{font-size:12.5px;font-weight:700;color:var(--white)}
+    .chart-sub{font-size:10.5px;color:var(--text3);margin-top:3px}
+    .chart-wrap{display:block;width:100%;height:220px;position:relative}
+    .chart-wrap.tall{height:280px}
 
     /* ═══════════════════════════════════════════
        TABLE WRAPPER
@@ -340,13 +334,11 @@
       border:1px solid var(--border);
       border-radius:var(--radius);
       overflow:hidden;
-      margin-bottom:24px;
-      transition:border-color .15s;
+      margin-bottom:20px;
     }
-    .xl-wrap:hover{border-color:var(--border2)}
     .xl-toolbar{
       display:flex;align-items:center;gap:8px;
-      padding:14px 18px;
+      padding:12px 16px;
       border-bottom:1px solid var(--border);
       flex-wrap:wrap;
       background:var(--bg1);
@@ -399,7 +391,7 @@
     table.xl thead th{
       background:var(--bg1);
       border-bottom:1px solid var(--border2);
-      padding:11px 12px;
+      padding:10px 12px;
       font-size:9.5px;font-weight:700;
       color:var(--text3);
       text-transform:uppercase;letter-spacing:.08em;
@@ -423,7 +415,7 @@
     table.xl tbody tr:nth-child(even):hover{background:#0A1628}
     table.xl tbody td{
       border-bottom:1px solid var(--border);
-      padding:10px 12px;color:var(--text);white-space:nowrap;
+      padding:9px 12px;color:var(--text);white-space:nowrap;
     }
     table.xl tbody td:last-child{border-right:none}
     table.xl tfoot td{
@@ -574,7 +566,7 @@
     /* ═══════════════════════════════════════════
        PAGINATION
     ═══════════════════════════════════════════ */
-    .filters-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+    .filters-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
     .pager{
       display:flex;align-items:center;gap:6px;
       padding:11px 16px;border-top:1px solid var(--border);
@@ -658,8 +650,8 @@
       background:linear-gradient(135deg,rgba(17,30,56,.9),rgba(15,28,60,.6));
       border:1px solid rgba(79,142,247,.18);
       border-radius:var(--radius);
-      padding:20px 24px;
-      margin-bottom:24px;
+      padding:18px 20px;
+      margin-bottom:20px;
     }
     .panel-year-head{
       display:flex;align-items:center;
@@ -861,54 +853,54 @@
      PAGE: DASHBOARD
 ════════════════════════════════════════════════ -->
 <div class="page active" id="page-dashboard">
-  <div>
+  <div style="padding:18px 22px">
 
     <!-- ══ PANNELLO 2026 ══ -->
-    <div id="panel-2026" style="margin-bottom:24px;background:linear-gradient(135deg,#0A1628,#0F2040);border:1px solid rgba(59,130,246,.2);border-radius:12px;padding:20px 24px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <div id="panel-2026" style="margin-bottom:14px;background:linear-gradient(135deg,#0A1628,#0F2040);border:1px solid #1E3A5F;border-radius:10px;padding:14px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:8px;height:8px;background:#22C55E;border-radius:50%;animation:pulse 2s infinite"></div>
-          <span style="font-size:13px;font-weight:800;color:#F1F5F9;letter-spacing:-.3px">2026 — Anno in corso</span>
-          <span id="p26-lastdate" style="font-size:10px;color:#475569;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:5px;padding:2px 9px">aggiornato al —</span>
+          <span style="font-size:13px;font-weight:800;color:#F1F5F9">2026 — Anno in corso</span>
+          <span id="p26-lastdate" style="font-size:10.5px;color:#475569;background:#0A0C10;border:1px solid #1E2D3D;border-radius:4px;padding:2px 8px">aggiornato al —</span>
         </div>
-        <button onclick="goto2026()" style="border:1px solid rgba(59,130,246,.35);background:rgba(59,130,246,.08);border-radius:6px;padding:5px 14px;font-size:11.5px;font-weight:600;color:#60A5FA;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s" onmouseover="this.style.background='rgba(59,130,246,.18)'" onmouseout="this.style.background='rgba(59,130,246,.08)'">
+        <button onclick="goto2026()" style="border:1px solid #3B82F6;background:#0F1E35;border-radius:6px;padding:5px 13px;font-size:11.5px;font-weight:600;color:#60A5FA;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s" onmouseover="this.style.background='#1E3A5F'" onmouseout="this.style.background='#0F1E35'">
           <i class="fas fa-table"></i> Vedi tutte le transazioni 2026
         </button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px">
-        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
-          <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Transazioni</div>
-          <div id="p26-tx" style="font-size:1.5rem;font-weight:800;color:#60A5FA;line-height:1;letter-spacing:-.5px">—</div>
-          <div style="font-size:9.5px;color:#3D4A5C;margin-top:4px">ordini 2026</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px">
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Transazioni</div>
+          <div id="p26-tx" style="font-size:1.4rem;font-weight:800;color:#60A5FA;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">ordini registrati</div>
         </div>
-        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
-          <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Committed tCO₂</div>
-          <div id="p26-committed" style="font-size:1.5rem;font-weight:800;color:#F1F5F9;line-height:1;letter-spacing:-.5px">—</div>
-          <div style="font-size:9.5px;color:#3D4A5C;margin-top:4px">volume ordinato</div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Committed tCO₂</div>
+          <div id="p26-committed" style="font-size:1.4rem;font-weight:800;color:#F1F5F9;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">volume ordinato</div>
         </div>
-        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
-          <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Delivered tCO₂</div>
-          <div id="p26-delivered" style="font-size:1.5rem;font-weight:800;color:#4ADE80;line-height:1;letter-spacing:-.5px">—</div>
-          <div style="font-size:9.5px;color:#3D4A5C;margin-top:4px">rimosso confermato</div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Delivered tCO₂</div>
+          <div id="p26-delivered" style="font-size:1.4rem;font-weight:800;color:#4ADE80;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">rimosso confermato</div>
         </div>
-        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
-          <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Delivery Rate</div>
-          <div id="p26-rate" style="font-size:1.5rem;font-weight:800;color:#A78BFA;line-height:1;letter-spacing:-.5px">—</div>
-          <div style="font-size:9.5px;color:#3D4A5C;margin-top:4px">delivered / committed</div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Delivery Rate</div>
+          <div id="p26-rate" style="font-size:1.4rem;font-weight:800;color:#A78BFA;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">delivered / committed</div>
         </div>
-        <div style="background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px">
-          <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px">Buyer Unici</div>
-          <div id="p26-buyers" style="font-size:1.5rem;font-weight:800;color:#FB923C;line-height:1;letter-spacing:-.5px">—</div>
-          <div style="font-size:9.5px;color:#3D4A5C;margin-top:4px">acquirenti attivi</div>
+        <div style="background:#090C13;border:1px solid #1E2D3D;border-radius:7px;padding:10px 13px">
+          <div style="font-size:8.5px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.09em;margin-bottom:5px">Buyer Unici</div>
+          <div id="p26-buyers" style="font-size:1.4rem;font-weight:800;color:#FB923C;line-height:1">—</div>
+          <div style="font-size:9.5px;color:#475569;margin-top:3px">acquirenti attivi</div>
         </div>
       </div>
       <!-- Metodi 2026 bar chart orizzontale -->
-      <div style="font-size:9px;font-weight:600;color:#3D4A5C;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Volume per metodo (2026)</div>
-      <div id="p26-methods" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div style="font-size:9px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Volume per metodo (2026)</div>
+      <div id="p26-methods" style="display:flex;flex-direction:column;gap:5px"></div>
     </div>
 
     <!-- ══ ULTIME TRANSAZIONI ══ -->
-    <div class="xl-wrap" style="margin-bottom:20px">
+    <div class="xl-wrap" style="margin-bottom:14px">
       <div class="xl-toolbar">
         <span class="xl-title">Ultime Transazioni</span>
         <span class="xl-count" id="recent-count">—</span>
@@ -951,10 +943,10 @@
 
     <!-- Status pills -->
     <div class="status-pills" id="status-pills">
-      <div class="status-pill"><div class="pill-icon" style="background:#1E3A8A20;"><i class="fas fa-file-signature c-blue"></i></div><div><div class="pill-label">Contracted</div><div class="pill-val" id="pill-contracted">—</div><div class="pill-sub" id="pill-contracted-t">— tCO₂</div></div></div>
-      <div class="status-pill"><div class="pill-icon" style="background:#16653420;"><i class="fas fa-check-circle c-green"></i></div><div><div class="pill-label">Delivered</div><div class="pill-val" id="pill-delivered">—</div><div class="pill-sub" id="pill-delivered-t">— tCO₂</div></div></div>
-      <div class="status-pill"><div class="pill-icon" style="background:#7C2D1220;"><i class="fas fa-hourglass-half c-orange"></i></div><div><div class="pill-label">Partial</div><div class="pill-val" id="pill-partial">—</div><div class="pill-sub" id="pill-partial-t">— tCO₂</div></div></div>
-      <div class="status-pill"><div class="pill-icon" style="background:#7F1D1D20;"><i class="fas fa-archive c-red"></i></div><div><div class="pill-label">Retired</div><div class="pill-val" id="pill-retired">—</div><div class="pill-sub" id="pill-retired-t">— tCO₂</div></div></div>
+      <div class="status-pill"><div class="pill-icon" style="background:#1E3A8A1A;"><i class="fas fa-file-signature c-blue"></i></div><div><div class="pill-label">Contracted</div><div class="pill-val" id="pill-contracted">—</div><div class="pill-sub" id="pill-contracted-t">— tCO₂</div></div></div>
+      <div class="status-pill"><div class="pill-icon" style="background:#166534 1A;"><i class="fas fa-check-circle c-green"></i></div><div><div class="pill-label">Delivered</div><div class="pill-val" id="pill-delivered">—</div><div class="pill-sub" id="pill-delivered-t">— tCO₂</div></div></div>
+      <div class="status-pill"><div class="pill-icon" style="background:#7C2D121A;"><i class="fas fa-hourglass-half c-orange"></i></div><div><div class="pill-label">Partial</div><div class="pill-val" id="pill-partial">—</div><div class="pill-sub" id="pill-partial-t">— tCO₂</div></div></div>
+      <div class="status-pill"><div class="pill-icon" style="background:#7F1D1D1A;"><i class="fas fa-archive c-red"></i></div><div><div class="pill-label">Retired</div><div class="pill-val" id="pill-retired">—</div><div class="pill-sub" id="pill-retired-t">— tCO₂</div></div></div>
     </div>
 
     <!-- Charts row 1 -->
@@ -967,22 +959,22 @@
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Order Status</div><div class="chart-sub">by transaction count</div></div></div>
-        <div class="chart-wrap donut"><canvas id="statusChart"></canvas></div>
+        <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
       </div>
     </div>
 
     <!-- Charts row 2 -->
     <div class="charts-grid">
       <div class="chart-box">
-        <div class="chart-head"><div><div class="chart-title">Method Distribution</div><div class="chart-sub">tCO₂ committed — top 6 + other</div></div></div>
-        <div class="chart-wrap donut"><canvas id="methodChart"></canvas></div>
+        <div class="chart-head"><div><div class="chart-title">Method Distribution</div><div class="chart-sub">tCO₂ committed</div></div></div>
+        <div class="chart-wrap"><canvas id="methodChart"></canvas></div>
       </div>
       <div class="chart-box">
         <div class="chart-head"><div><div class="chart-title">Top 10 Buyers</div><div class="chart-sub">by committed volume</div></div></div>
         <div class="chart-wrap"><canvas id="buyersChart"></canvas></div>
       </div>
       <div class="chart-box">
-        <div class="chart-head"><div><div class="chart-title">Top 10 Suppliers</div><div class="chart-sub">by committed volume</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Top 10 Suppliers</div><div class="chart-sub">by delivered volume</div></div></div>
         <div class="chart-wrap"><canvas id="suppliersChart"></canvas></div>
       </div>
     </div>
@@ -1036,8 +1028,8 @@
             <th onclick="sortBuyers('rank')">#</th>
             <th onclick="sortBuyers('purchaser')">Purchaser</th>
             <th onclick="sortBuyers('transactions')" class="txt-r">Orders</th>
-            <th onclick="sortBuyers('total_committed')" class="txt-r">Committed tCO₂</th>
-            <th onclick="sortBuyers('total_delivered')" class="txt-r">Delivered tCO₂</th>
+            <th onclick="sortBuyers('committed')" class="txt-r">Committed tCO₂</th>
+            <th onclick="sortBuyers('delivered')" class="txt-r">Delivered tCO₂</th>
             <th onclick="sortBuyers('rate')" class="txt-r">Del. Rate</th>
             <th>Delivery Progress</th>
           </tr></thead>
@@ -1410,7 +1402,7 @@ let txSort = 'date';
 let txDir = 'desc';
 let supSort = 'total_tonnes_committed';
 let supDir = 'desc';
-let buyersSort = 'total_committed';
+let buyersSort = 'committed';
 let buyersDir = 'desc';
 let txDebounceTimer = null;
 let chartInstances = {};
@@ -1434,25 +1426,19 @@ const dateStr = s => {
 };
 
 const METHOD_COLORS = {
-  'Biochar':             '#4ADE80',
-  'Bioenergy':           '#A78BFA',
-  'BECCS':               '#A78BFA',
-  'BiCRS':               '#E879F9',
-  'Direct Air':          '#60A5FA',
-  'DACCS':               '#60A5FA',
-  'Enhanced Weathering': '#FB923C',
-  'Biomass Geological':  '#2DD4BF',
-  'Mineralization':      '#FACC15',
-  'Alkalinity':          '#38BDF8',
-  'Direct Ocean':        '#06B6D4',
-  'Soil Carbon':         '#84CC16',
-  'Forests':             '#22C55E',
+  'Biochar Carbon Removal BCR':          '#4ADE80',
+  'Biochar Carbon Removal (BCR)':        '#4ADE80',
+  'Bioenergy With Carbon Capture And Sequestration (BECCS)': '#A78BFA',
+  'Bioenergy With Carbon Capture And Seques': '#A78BFA',
+  'Direct Air Carbon Capture And Sequestration (DACCS)': '#60A5FA',
+  'Direct Air Carbon Capture And Sequestration': '#60A5FA',
+  'Enhanced Weathering':                 '#FB923C',
+  'Biomass Geological Sequestration':    '#2DD4BF',
+  'BiCRS - Bioenergy with Carbon Capture': '#E879F9',
+  'Mineralization':                      '#FACC15',
 };
 const methodColor = m => {
-  if(!m) return '#94A3B8';
-  for(const [k,v] of Object.entries(METHOD_COLORS)){
-    if(m.toLowerCase().includes(k.toLowerCase())) return v;
-  }
+  for(const [k,v] of Object.entries(METHOD_COLORS)) if(m && m.includes(k.split(' ')[0])) return v;
   return '#94A3B8';
 };
 const methodChip = m => {
@@ -1541,7 +1527,7 @@ async function loadDashboard(){
       if(el2) el2.textContent = fmt(row.committed)+' tCO₂';
     });
 
-    // Year chart — Committed vs Delivered per anno
+    // Year chart
     const yr = await fetch(BASE+'/api/transactions/stats/by-year').then(r=>r.json());
     const years = yr.map(r=>r.year);
     mkChart('yearChart',{
@@ -1549,131 +1535,69 @@ async function loadDashboard(){
       data:{
         labels:years,
         datasets:[
-          {label:'Committed',data:yr.map(r=>r.committed),backgroundColor:'rgba(59,130,246,.5)',borderColor:'#3B82F6',borderWidth:1,borderRadius:3},
-          {label:'Delivered',data:yr.map(r=>r.delivered),backgroundColor:'rgba(34,197,94,.5)',borderColor:'#22C55E',borderWidth:1,borderRadius:3},
+          {label:'Committed',data:yr.map(r=>r.committed),backgroundColor:'rgba(59,130,246,.55)',borderColor:'#3B82F6',borderWidth:1},
+          {label:'Delivered',data:yr.map(r=>r.delivered),backgroundColor:'rgba(34,197,94,.55)',borderColor:'#22C55E',borderWidth:1},
         ]
       },
       options:{
         responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{labels:{color:'#94A3B8',font:{size:11},usePointStyle:true,pointStyleWidth:10,padding:16}},
-          datalabels:{display:false}
-        },
+        plugins:{legend:{labels:{color:'#64748B',font:{size:11}}}},
         scales:{
-          x:{ticks:{color:'#64748B',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},
-          y:{ticks:{color:'#64748B',callback:v=>fmt(v),font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+          x:{ticks:{color:'#475569'},grid:{color:'#1A2035'}},
+          y:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},
         }
       }
     });
 
-    // Status donut — con percentuali
+    // Status donut
     const stData = (Array.isArray(st)?st:st.data||[]);
-    const stTotal = stData.reduce((a,r)=>a+(r.count||0),0);
     mkChart('statusChart',{
       type:'doughnut',
       data:{
         labels:stData.map(r=>r.status),
-        datasets:[{data:stData.map(r=>r.count),backgroundColor:['#3B82F6','#22C55E','#FB923C','#F87171'],borderWidth:2,borderColor:'#111520',hoverOffset:6}]
+        datasets:[{data:stData.map(r=>r.count),backgroundColor:['#3B82F6','#22C55E','#FB923C','#F87171'],borderWidth:0}]
       },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        cutout:'62%',
-        plugins:{
-          legend:{position:'bottom',labels:{color:'#64748B',font:{size:10},padding:10,usePointStyle:true,pointStyleWidth:8}},
-          datalabels:{
-            color:'#fff',
-            font:{size:10,weight:'700'},
-            formatter:(value)=>{
-              const pct = stTotal>0 ? ((value/stTotal)*100) : 0;
-              return pct >= 5 ? pct.toFixed(0)+'%' : '';
-            },
-            anchor:'center',align:'center',
-          }
-        }
-      },
-      plugins:[ChartDataLabels]
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748B',font:{size:10}}}}}
     });
 
-    // Method donut — con percentuali e legenda abbreviata
+    // Method donut
     const me = await fetch(BASE+'/api/transactions/stats/by-method').then(r=>r.json());
-    const meTotal = me.reduce((a,r)=>a+(r.committed||0),0);
-    // Raggruppa metodi minori in "Other" per leggibilità
-    const meTop = me.slice(0,6);
-    const meOther = me.slice(6);
-    const meOtherSum = meOther.reduce((a,r)=>a+(r.committed||0),0);
-    const meLabels = meTop.map(r=>{
-      const s = r.method;
-      if(s.includes('Biochar')) return 'BCR';
-      if(s.includes('BECCS')||s.includes('Bioenergy')) return 'BECCS';
-      if(s.includes('DACCS')||s.includes('Direct Air')) return 'DACCS';
-      if(s.includes('Enhanced W')) return 'Enh. Weathering';
-      if(s.includes('Biomass Geo')) return 'Bio. Geo.';
-      if(s.includes('BiCRS')) return 'BiCRS';
-      if(s.includes('Mineral')) return 'Mineralization';
-      if(s.includes('Alkalinity')) return 'Alkalinity';
-      return s.length>20 ? s.substring(0,18)+'…' : s;
-    });
-    const meColors = meTop.map(r=>methodColor(r.method));
-    if(meOtherSum>0){ meLabels.push('Other'); meColors.push('#4B5563'); }
-    const meData = [...meTop.map(r=>r.committed), ...(meOtherSum>0?[meOtherSum]:[])];
     mkChart('methodChart',{
       type:'doughnut',
       data:{
-        labels:meLabels,
-        datasets:[{data:meData,backgroundColor:meColors,borderWidth:2,borderColor:'#111520',hoverOffset:6}]
+        labels:me.map(r=>r.method),
+        datasets:[{data:me.map(r=>r.committed),backgroundColor:me.map(r=>methodColor(r.method)),borderWidth:0}]
       },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        cutout:'58%',
-        plugins:{
-          legend:{position:'bottom',labels:{color:'#64748B',font:{size:10},padding:8,usePointStyle:true,pointStyleWidth:8}},
-          datalabels:{
-            color:'#fff',
-            font:{size:9,weight:'700'},
-            formatter:(value)=>{
-              const pct = meTotal>0 ? ((value/meTotal)*100) : 0;
-              return pct >= 6 ? pct.toFixed(0)+'%' : '';
-            },
-            anchor:'center',align:'center',
-          }
-        }
-      },
-      plugins:[ChartDataLabels]
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
     });
 
-    // Top buyers — committed volume
+    // Top buyers
     const bp = await fetch(BASE+'/api/transactions/stats/top-purchasers?limit=10').then(r=>r.json());
     mkChart('buyersChart',{
       type:'bar',
       data:{
         labels:bp.map(r=>r.purchaser.length>18?r.purchaser.substring(0,16)+'…':r.purchaser),
-        datasets:[{label:'Committed tCO₂',data:bp.map(r=>r.committed),backgroundColor:'rgba(59,130,246,.6)',borderColor:'#3B82F6',borderWidth:1,borderRadius:3}]
+        datasets:[{label:'Committed tCO₂',data:bp.map(r=>r.committed),backgroundColor:'rgba(59,130,246,.6)',borderColor:'#3B82F6',borderWidth:1}]
       },
       options:{
         indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},datalabels:{display:false}},
-        scales:{
-          x:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},
-          y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}}
-        }
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}}}
       }
     });
 
-    // Top suppliers — per committed volume (più significativo, delivered è quasi sempre 0)
+    // Top suppliers
     const sp = await fetch(BASE+'/api/transactions/stats/top-suppliers?limit=10').then(r=>r.json());
     mkChart('suppliersChart',{
       type:'bar',
       data:{
         labels:sp.map(r=>(r.supplier||r.name||'?').length>18?(r.supplier||r.name||'?').substring(0,16)+'…':(r.supplier||r.name||'?')),
-        datasets:[{label:'Committed tCO₂',data:sp.map(r=>r.committed||0),backgroundColor:'rgba(167,139,250,.6)',borderColor:'#A78BFA',borderWidth:1,borderRadius:3}]
+        datasets:[{label:'Delivered tCO₂',data:sp.map(r=>r.delivered||0),backgroundColor:'rgba(34,197,94,.6)',borderColor:'#22C55E',borderWidth:1}]
       },
       options:{
         indexAxis:'y',responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},datalabels:{display:false}},
-        scales:{
-          x:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},
-          y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}}
-        }
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#475569',callback:v=>fmt(v)},grid:{color:'#1A2035'}},y:{ticks:{color:'#CBD5E1',font:{size:10}},grid:{display:false}}}
       }
     });
 
@@ -1708,7 +1632,7 @@ async function loadBuyers(){
     allBuyers = data.map((r,i)=>({...r, rank:i+1,
       total_committed: r.committed||r.total_committed||0,
       total_delivered: r.delivered||r.total_delivered||0,
-      transactions:    r.count||r.transactions||0,
+      transactions: r.count||r.transactions||0,
       rate: pctN(r.delivered||r.total_delivered||0, r.committed||r.total_committed||1)
     }));
     filteredBuyers = [...allBuyers];
@@ -2373,10 +2297,6 @@ async function removeToken(){
 }
 
 (async function init(){
-  // Registra ChartDataLabels globalmente
-  if(typeof ChartDataLabels !== 'undefined'){
-    Chart.register(ChartDataLabels);
-  }
   await loadTxFilters();
   await Promise.all([loadDashboard(), load2026Panel(), loadRecent()]);
 })();
