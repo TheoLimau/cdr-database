@@ -1146,16 +1146,17 @@ async function fetchTx(){
 
     let html = '';
     (Array.isArray(items)?items:[]).forEach(t=>{
+      const txDate = t.announcement ? new Date(t.announcement).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : (t.year||'—');
       html += `<tr onclick='openTxModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
-        <td class="fw7 c-gray">${t.date ? new Date(t.date).toLocaleDateString('en-GB') : '—'}</td>
+        <td class="fw7" style="color:#94A3B8;white-space:nowrap">${txDate}</td>
         <td>${esc(t.purchaser)}</td>
-        <td>${esc(t.supplier_name||t.supplier)}</td>
+        <td>${esc(t.supplier_name||t.supplier||'—')}</td>
         <td>${methodChip(t.method)}</td>
-        <td class="txt-r c-blue">${fmt(t.tonnes_committed)}</td>
+        <td class="txt-r c-blue">${fmt(t.tonnes)}</td>
         <td class="txt-r c-green">${fmt(t.tonnes_delivered)}</td>
         <td>${statusChip(t.status)}</td>
         <td class="c-gray">${esc(t.marketplace||'—')}</td>
-        <td class="c-gray">${esc(t.continent||'—')}</td>
+        <td class="c-gray">${esc(t.supplier_continent||t.continent||'—')}</td>
       </tr>`;
     });
     tbody.innerHTML = html || '<tr><td colspan="9" style="text-align:center;padding:30px;color:#334155">No transactions found</td></tr>';
@@ -1326,17 +1327,17 @@ function closeSupModal(e){
 function openTxModal(t){
   if(typeof t==='string') t=JSON.parse(t);
   document.getElementById('tx-modal-sub').textContent   = (t.purchaser||'—')+' → '+(t.supplier_name||t.supplier||'—');
-  document.getElementById('txm-date').textContent       = t.date ? new Date(t.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  document.getElementById('txm-date').textContent       = t.announcement ? new Date(t.announcement).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : (t.year ? String(t.year) : '—');
   document.getElementById('txm-status').innerHTML       = statusChip(t.status);
   document.getElementById('txm-purchaser').textContent  = t.purchaser||'—';
   document.getElementById('txm-supplier').textContent   = t.supplier_name||t.supplier||'—';
   document.getElementById('txm-method').innerHTML       = methodChip(t.method);
   document.getElementById('txm-market').textContent     = t.marketplace||'—';
-  document.getElementById('txm-committed').textContent  = fmtFull(t.tonnes_committed)+' tCO₂';
+  document.getElementById('txm-committed').textContent  = fmtFull(t.tonnes)+' tCO₂';
   document.getElementById('txm-delivered').textContent  = fmtFull(t.tonnes_delivered||0)+' tCO₂';
-  document.getElementById('txm-registry').textContent   = t.registry||'—';
-  document.getElementById('txm-continent').textContent  = t.continent||'—';
-  const rN = pctN(t.tonnes_delivered||0, t.tonnes_committed||1);
+  document.getElementById('txm-registry').textContent   = t.registry_name||t.registry||'—';
+  document.getElementById('txm-continent').textContent  = t.supplier_continent||t.continent||'—';
+  const rN = pctN(t.tonnes_delivered||0, t.tonnes||1);
   document.getElementById('txm-bar').style.width = Math.min(100,rN)+'%';
   document.getElementById('tx-modal').classList.add('open');
 }
