@@ -342,15 +342,13 @@
       display:flex !important;
       flex-direction:column;
       animation:fadeIn .2s ease;
-      /* Override .page padding — let mpage-inner handle centering */
-      padding:28px 24px;
+      padding:28px 32px;
     }
 
-    /* ── Inner centered column ── */
+    /* ── Inner column — full width, no artificial centering ── */
     .mpage-inner{
       width:100%;
-      max-width:1100px;
-      margin:0 auto;
+      max-width:100%;
       display:flex;
       flex-direction:column;
       gap:24px;
@@ -1012,7 +1010,7 @@
       display:flex !important; flex-direction:column;
       padding:28px 24px; animation:fadeIn .2s ease;
     }
-    .crcf-inner{ width:100%; max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:24px; }
+    .crcf-inner{ width:100%; max-width:100%; display:flex; flex-direction:column; gap:24px; }
 
     /* Phase tabs */
     .crcf-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -1182,9 +1180,9 @@
     <div class="sb-item" onclick="showPage('orders')"><i class="fas fa-table"></i> Order Explorer</div>
     <div class="sb-item" onclick="showPage('suppliers')"><i class="fas fa-industry"></i> Suppliers</div>
     <div class="sb-item" onclick="showPage('methods')"><i class="fas fa-flask"></i> CDR Methods</div>
-    <div class="sb-item" onclick="showPage('crcf')"><i class="fas fa-microscope"></i> CRCF Analysis</div>
 
     <div class="sb-group">Tools</div>
+    <div class="sb-item" onclick="showPage('crcf')"><i class="fas fa-microscope"></i> CRCF Analysis</div>
     <div class="sb-item" onclick="showPage('import')"><i class="fas fa-file-import"></i> Import Data</div>
     <div class="sb-item" onclick="showPage('sync')"><i class="fas fa-sync-alt"></i> Auto-Sync <span id="sync-badge" style="display:none;margin-left:auto;width:7px;height:7px;border-radius:50%;background:#4ADE80"></span></div>
     <div class="sb-item" onclick="window.open('/api/docs','_blank')"><i class="fas fa-code"></i> API Docs</div>
