@@ -2794,9 +2794,6 @@ const ORG_COLORS = {
   'Government':  '#F87171'
 };
 
-function fmt(n){ if(!n && n!==0) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(0)+'K'; return n.toFixed(0); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
 function sntColor(v){
   if(v>=2)  return {bg:'rgba(74,222,128,.2)',  c:'#4ADE80'};
   if(v>=1)  return {bg:'rgba(74,222,128,.1)',  c:'#86EFAC'};
