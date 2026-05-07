@@ -1003,6 +1003,159 @@
     .link-blue{color:var(--blue);text-decoration:none}
     .link-blue:hover{text-decoration:underline}
     .c-yellow{color:var(--yellow)}
+
+    /* ═══════════════════════════════════════════
+       CRCF ANALYSIS PAGE
+    ═══════════════════════════════════════════ */
+    #page-crcf{ display:none !important; }
+    #page-crcf.active{
+      display:flex !important; flex-direction:column;
+      padding:28px 24px; animation:fadeIn .2s ease;
+    }
+    .crcf-inner{ width:100%; max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:24px; }
+
+    /* Phase tabs */
+    .crcf-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+    .crcf-tab{
+      padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600;
+      border:1px solid var(--border); background:var(--bg1); color:var(--text2);
+      cursor:pointer; transition:all .15s;
+    }
+    .crcf-tab:hover{ border-color:var(--border2); color:var(--text); }
+    .crcf-tab.active{ background:rgba(79,142,247,.15); border-color:rgba(79,142,247,.4); color:var(--blue); }
+
+    /* Phase panels */
+    .crcf-panel{ display:none; flex-direction:column; gap:20px; }
+    .crcf-panel.active{ display:flex; }
+
+    /* Section card */
+    .crcf-card{
+      background:var(--bg1); border:1px solid var(--border); border-radius:10px;
+      overflow:hidden; transition:border-color .15s;
+    }
+    .crcf-card:hover{ border-color:var(--border2); }
+    .crcf-card-head{
+      padding:14px 20px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .crcf-card-title{ font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .crcf-card-meta{ font-size:11px; color:var(--text3); }
+    .crcf-card-body{ padding:16px 20px; }
+
+    /* KPI strip */
+    .crcf-kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+    .crcf-kpi{
+      background:var(--bg1); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; display:flex; align-items:center; gap:12px;
+    }
+    .crcf-kpi-icon{ font-size:18px; width:36px; text-align:center; flex-shrink:0; }
+    .crcf-kpi-v{ font-size:20px; font-weight:700; color:var(--text); line-height:1; }
+    .crcf-kpi-l{ font-size:10.5px; color:var(--text3); margin-top:3px; }
+
+    /* Master table */
+    .crcf-tbl-wrap{ overflow-x:auto; }
+    .crcf-tbl{ width:100%; border-collapse:collapse; font-size:12px; }
+    .crcf-tbl th{
+      padding:9px 12px; text-align:left; font-size:10.5px; font-weight:600;
+      color:var(--text3); text-transform:uppercase; letter-spacing:.04em;
+      border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0;
+      background:var(--bg1); z-index:1;
+    }
+    .crcf-tbl td{ padding:9px 12px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+    .crcf-tbl tr:hover td{ background:rgba(255,255,255,.02); }
+    .crcf-tbl tr:last-child td{ border-bottom:none; }
+
+    /* Score badges */
+    .score-bar{ display:flex; align-items:center; gap:6px; }
+    .score-pip{
+      width:10px; height:10px; border-radius:2px; flex-shrink:0;
+    }
+    .sbar-track{ flex:1; height:5px; background:rgba(255,255,255,.07); border-radius:3px; overflow:hidden; }
+    .sbar-fill{ height:100%; border-radius:3px; transition:width .3s; }
+
+    /* Hashtag pills */
+    .ht-list{ display:flex; flex-wrap:wrap; gap:4px; }
+    .ht{ font-size:10px; padding:2px 7px; border-radius:4px;
+         background:rgba(79,142,247,.1); color:var(--blue);
+         border:1px solid rgba(79,142,247,.2); white-space:nowrap; }
+
+    /* Org type badge */
+    .org-badge{
+      font-size:9.5px; padding:2px 8px; border-radius:4px; font-weight:600;
+      white-space:nowrap; display:inline-block;
+    }
+
+    /* Sentiment cell */
+    .snt-cell{ display:flex; gap:3px; }
+    .snt-dot{
+      width:18px; height:18px; border-radius:3px; font-size:9px; font-weight:700;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+
+    /* Thematic themes table */
+    .tier-badge{
+      font-size:10px; padding:3px 9px; border-radius:4px; font-weight:700;
+    }
+    .tier-1{ background:rgba(248,113,113,.15); color:#F87171; border:1px solid rgba(248,113,113,.3); }
+    .tier-2{ background:rgba(251,146,60,.12); color:#FB923C; border:1px solid rgba(251,146,60,.25); }
+    .tier-3{ background:rgba(100,116,139,.12); color:#94A3B8; border:1px solid rgba(100,116,139,.25); }
+
+    /* Category label */
+    .cat-label{
+      font-size:9.5px; padding:2px 8px; border-radius:4px; font-weight:600;
+      background:rgba(45,212,191,.1); color:var(--teal);
+      border:1px solid rgba(45,212,191,.2);
+    }
+
+    /* Sentiment avg bar */
+    .snt-avg{ display:flex; align-items:center; gap:8px; }
+    .snt-avg-bar{
+      flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,.07);
+      overflow:hidden; position:relative;
+    }
+    .snt-avg-fill{ position:absolute; top:0; height:100%; border-radius:3px; }
+
+    /* Heatmap */
+    .heatmap-wrap{ overflow-x:auto; }
+    .heatmap{ border-collapse:collapse; font-size:11px; min-width:700px; }
+    .heatmap th{
+      padding:8px 10px; font-size:10px; font-weight:600; color:var(--text3);
+      text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;
+      border-bottom:1px solid var(--border);
+    }
+    .heatmap th.row-header{ text-align:left; min-width:160px; }
+    .heatmap td.row-label{
+      padding:8px 10px; font-size:11px; color:var(--text2); font-weight:600;
+      border-bottom:1px solid rgba(255,255,255,.04); white-space:nowrap; min-width:160px;
+    }
+    .heatmap td.hm-cell{
+      padding:0; width:70px; height:36px; border-bottom:1px solid rgba(255,255,255,.03);
+      text-align:center;
+    }
+    .hm-val{
+      width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:700;
+    }
+
+    /* Bubble chart canvas */
+    #crcf-bubble-chart{ max-height:420px; }
+
+    /* Impact factor badge */
+    .impact-badge{
+      display:inline-flex; align-items:center; gap:4px;
+      font-size:12px; font-weight:700;
+      padding:3px 10px; border-radius:5px;
+    }
+
+    /* Summary stats row */
+    .crcf-summary-row{ display:flex; gap:16px; flex-wrap:wrap; }
+    .crcf-summary-stat{ 
+      flex:1; min-width:120px;
+      background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+      padding:12px 14px; text-align:center;
+    }
+    .css-v{ font-size:22px; font-weight:800; color:var(--text); }
+    .css-l{ font-size:10.5px; color:var(--text3); margin-top:3px; }
   </style>
 </head>
 <body>
@@ -1029,6 +1182,7 @@
     <div class="sb-item" onclick="showPage('orders')"><i class="fas fa-table"></i> Order Explorer</div>
     <div class="sb-item" onclick="showPage('suppliers')"><i class="fas fa-industry"></i> Suppliers</div>
     <div class="sb-item" onclick="showPage('methods')"><i class="fas fa-flask"></i> CDR Methods</div>
+    <div class="sb-item" onclick="showPage('crcf')"><i class="fas fa-microscope"></i> CRCF Analysis</div>
 
     <div class="sb-group">Tools</div>
     <div class="sb-item" onclick="showPage('import')"><i class="fas fa-file-import"></i> Import Data</div>
@@ -1433,6 +1587,149 @@
 </div><!-- /mpage-inner -->
 </div>
 
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: CRCF ANALYSIS
+════════════════════════════════════════════════ -->
+<div class="page" id="page-crcf">
+<div class="crcf-inner">
+
+  <!-- Tab navigation -->
+  <div class="crcf-tabs">
+    <div class="crcf-tab active" onclick="crcfTab('ph1')"><i class="fas fa-users"></i> Phase 1 — Stakeholder Scoring</div>
+    <div class="crcf-tab" onclick="crcfTab('ph2')"><i class="fas fa-tags"></i> Phase 2 — Thematic Analysis</div>
+    <div class="crcf-tab" onclick="crcfTab('ph3')"><i class="fas fa-th"></i> Phase 3 — Heatmap &amp; Sentiment</div>
+    <div class="crcf-tab" onclick="crcfTab('ph4')"><i class="fas fa-chart-bubble"></i> Phase 4 — Visualisation</div>
+  </div>
+
+  <!-- ══════════ PHASE 1 ══════════ -->
+  <div class="crcf-panel active" id="crcf-ph1">
+
+    <!-- KPI strip -->
+    <div class="crcf-kpis" id="crcf-kpis"></div>
+
+    <!-- Master table -->
+    <div class="crcf-card">
+      <div class="crcf-card-head">
+        <div class="crcf-card-title"><i class="fas fa-table" style="color:var(--blue)"></i> Stakeholder Master Table — Scoring &amp; Profiling</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="crcf-search" type="text" placeholder="Search stakeholder…"
+            style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+            padding:5px 10px;font-size:11.5px;color:var(--text);outline:none;width:180px"
+            oninput="crcfFilter()">
+          <select id="crcf-filter-type" onchange="crcfFilter()"
+            style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+            padding:5px 10px;font-size:11.5px;color:var(--text);outline:none">
+            <option value="">All Types</option>
+            <option>Large Corp</option><option>Mid Corp</option><option>SME/Startup</option>
+            <option>NGO</option><option>Academia</option><option>Association</option>
+          </select>
+        </div>
+      </div>
+      <div class="crcf-tbl-wrap" style="max-height:520px;overflow-y:auto">
+        <table class="crcf-tbl">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Organisation</th>
+              <th>Type</th>
+              <th>Country</th>
+              <th>Hashtags</th>
+              <th style="cursor:pointer" onclick="crcfSort('prestige')">Prestige ▾</th>
+              <th style="cursor:pointer" onclick="crcfSort('quality')">Quality ▾</th>
+              <th style="cursor:pointer" onclick="crcfSort('impact')">Impact Factor ▾</th>
+              <th>Technology</th>
+              <th>Committed tCO₂</th>
+              <th>Del. Rate</th>
+              <th>Certification</th>
+            </tr>
+          </thead>
+          <tbody id="crcf-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ PHASE 2 ══════════ -->
+  <div class="crcf-panel" id="crcf-ph2">
+    <div class="crcf-card">
+      <div class="crcf-card-head">
+        <div class="crcf-card-title"><i class="fas fa-layer-group" style="color:var(--teal)"></i> Thematic Analysis — 7 Critical Topics by Category</div>
+        <div class="crcf-card-meta">Tier 1 = Critical · Tier 2 = Important · Tier 3 = Supplementary</div>
+      </div>
+      <div class="crcf-card-body">
+        <table class="crcf-tbl">
+          <thead>
+            <tr>
+              <th>#</th><th>Theme</th><th>Category</th><th>Tier</th>
+              <th>Frequency</th><th>Avg Sentiment</th><th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="crcf-themes-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Thematic summary cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="crcf-theme-cards"></div>
+  </div>
+
+  <!-- ══════════ PHASE 3 ══════════ -->
+  <div class="crcf-panel" id="crcf-ph3">
+    <div class="crcf-card">
+      <div class="crcf-card-head">
+        <div class="crcf-card-title"><i class="fas fa-th" style="color:var(--purple)"></i> Sentiment Heatmap — Stakeholders × Themes</div>
+        <div class="crcf-card-meta">+2 Very Favourable · +1 Favourable · 0 Neutral · −1 Critical · −2 Opposed</div>
+      </div>
+      <div class="crcf-card-body">
+        <div class="heatmap-wrap">
+          <table class="heatmap" id="crcf-heatmap"></table>
+        </div>
+      </div>
+    </div>
+    <!-- Sentiment summary -->
+    <div class="crcf-card">
+      <div class="crcf-card-head">
+        <div class="crcf-card-title"><i class="fas fa-chart-bar" style="color:var(--green)"></i> Per-Theme Sentiment Summary</div>
+      </div>
+      <div class="crcf-card-body" id="crcf-snt-summary"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ PHASE 4 ══════════ -->
+  <div class="crcf-panel" id="crcf-ph4">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- Bubble chart -->
+      <div class="crcf-card" style="grid-column:1/-1">
+        <div class="crcf-card-head">
+          <div class="crcf-card-title"><i class="fas fa-circle" style="color:var(--orange)"></i> Bubble Chart — Sentiment vs Impact Factor (size = Prestige)</div>
+          <div class="crcf-card-meta">X-axis: avg sentiment · Y-axis: Impact Factor · Bubble size: Prestige Factor</div>
+        </div>
+        <div class="crcf-card-body">
+          <canvas id="crcf-bubble-chart" height="380"></canvas>
+        </div>
+      </div>
+      <!-- Impact ranking -->
+      <div class="crcf-card">
+        <div class="crcf-card-head">
+          <div class="crcf-card-title"><i class="fas fa-trophy" style="color:var(--yellow)"></i> Top 15 by Impact Factor</div>
+        </div>
+        <div class="crcf-card-body" id="crcf-impact-rank"></div>
+      </div>
+      <!-- Org type breakdown -->
+      <div class="crcf-card">
+        <div class="crcf-card-head">
+          <div class="crcf-card-title"><i class="fas fa-chart-pie" style="color:var(--purple)"></i> Organisation Type Distribution</div>
+        </div>
+        <div class="crcf-card-body">
+          <canvas id="crcf-org-chart" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
 <!-- ═══════════════════════════════════════════════
      PAGE: AUTO-SYNC
 ════════════════════════════════════════════════ -->
@@ -1737,6 +2034,7 @@ const PAGE_TITLES = {
   orders:    ['Order Explorer','Full transaction database — all CDR purchases'],
   suppliers: ['Suppliers','All fields always visible — click any card for the full detail modal'],
   methods:   ['CDR Methods',''],
+  crcf:      ['CRCF Methodology Analysis','Stakeholder Assessment & Impact Analysis — CRCF Methodology'],
   import:    ['Import Data','Upload .csv or .xlsx to add new transactions'],
   sync:      ['Auto-Sync','Sincronizzazione automatica con CDR.fyi — settimanale ogni lunedì ore 04:00'],
 };
@@ -1754,6 +2052,7 @@ function showPage(id){
   if(id==='buyers' && allBuyers.length===0) loadBuyers();
   if(id==='suppliers' && allSuppliers.length===0) loadSuppliers();
   if(id==='methods') loadMethods();
+  if(id==='crcf') loadCrcf();
   if(id==='sync') loadSyncStatus();
 }
 
@@ -2428,6 +2727,463 @@ async function loadMethods(){
        <td style="color:#94A3B8;font-size:10px;padding-left:8px">100%</td>`;
 
   } catch(e){ console.error('loadMethods error:', e); }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   CRCF ANALYSIS
+═══════════════════════════════════════════════════════════════ */
+
+const CRCF_DATA = [{"id": 149, "name": "AtmosClear", "org_type": "Large Corp", "country": "United States", "continent": "North America", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2, CDM", "committed": 6750000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": 185.0, "hashtags": ["#BECCS", "#MRV", "#MultiRegistry", "#WasteCircularity", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [1, 2, 0, 0, 0, 1, 2], "first_tx": "15/04/2025", "last_tx": "15/04/2025"}, {"id": 81, "name": "Stockholm Exergi", "org_type": "Large Corp", "country": "Sweden", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2, CDM", "committed": 5301634, "delivered": 0, "delivery_rate": 0.0, "tx_count": 4, "method_count": 1, "price_per_tonne": 180.0, "hashtags": ["#BECCS", "#MRV", "#MultiRegistry", "#SustainableBiomass", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [1, 2, 0, 0, 0, 1, 2], "first_tx": "06/05/2024", "last_tx": "06/05/2025"}, {"id": 10, "name": "Vaulted Deep", "org_type": "Large Corp", "country": "United States", "continent": "North America", "technology": "Biomass Geological Sequestration", "certification": "Frontier Climate", "committed": 5204753, "delivered": 0, "delivery_rate": 0.0, "tx_count": 261, "method_count": 2, "price_per_tonne": 120.0, "hashtags": ["#BiomassGeoseq", "#Additionality", "#WasteCircularity", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [-1, 1, 0, 1, 0, 0, 2], "first_tx": "16/12/2023", "last_tx": "31/03/2026"}, {"id": 121, "name": "CO280", "org_type": "Large Corp", "country": "Canada", "continent": "North America", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2", "committed": 4562442, "delivered": 0, "delivery_rate": 0.0, "tx_count": 7, "method_count": 1, "price_per_tonne": 550.0, "hashtags": ["#BECCS", "#MRV", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [1, 2, 0, 0, 0, 0, 2], "first_tx": "17/12/2024", "last_tx": "20/05/2025"}, {"id": 184, "name": "\u00d8rsted", "org_type": "Large Corp", "country": "Denmark", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2, CDM", "committed": 4001500, "delivered": 0, "delivery_rate": 0.0, "tx_count": 3, "method_count": 1, "price_per_tonne": 180.0, "hashtags": ["#BECCS", "#MRV", "#MultiRegistry", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [1, 2, 0, 0, 0, 1, 2], "first_tx": "15/05/2023", "last_tx": "18/09/2024"}, {"id": 244, "name": "C2X", "org_type": "Large Corp", "country": "Denmark", "continent": "Europe", "technology": "BiCRS - Bioenergy with Carbon Capture and Sequestration", "certification": "None", "committed": 3600000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BECCS", "#CarbonAccounting"], "prestige": 3, "quality": 4.0, "impact": 2.4, "sentiment": [0, -1, 0, 0, 0, -1, 2], "first_tx": "11/12/2025", "last_tx": "11/12/2025"}, {"id": 164, "name": "Gaia ProjectCo", "org_type": "Large Corp", "country": "Denmark", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2, CDM", "committed": 2950000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": 180.0, "hashtags": ["#BECCS", "#MRV", "#MultiRegistry", "#CarbonAccounting"], "prestige": 3, "quality": 5.5, "impact": 3.3, "sentiment": [1, 2, 0, 0, 0, 1, 2], "first_tx": "07/07/2025", "last_tx": "07/07/2025"}, {"id": 1, "name": "Exomad Green", "org_type": "Large Corp", "country": "Bolivia", "continent": "South America", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth CORC", "committed": 2414020, "delivered": 0, "delivery_rate": 0.0, "tx_count": 323, "method_count": 1, "price_per_tonne": 140.0, "hashtags": ["#BCR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 4, "quality": 5.0, "impact": 4.0, "sentiment": [-1, 1, 0, 0, 0, 0, 2], "first_tx": "13/07/2023", "last_tx": "30/04/2026"}, {"id": 153, "name": "OXY Low Carbon Ventures | 1PointFive", "org_type": "Large Corp", "country": "United States", "continent": "North America", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 1325842, "delivered": 0, "delivery_rate": 0.0, "tx_count": 77, "method_count": 1, "price_per_tonne": 600.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 4, "quality": 5.0, "impact": 4.0, "sentiment": [1, 2, 0, 0, 1, 0, 2], "first_tx": "09/03/2021", "last_tx": "16/07/2025"}, {"id": 160, "name": "Hafslund Celsio", "org_type": "Large Corp", "country": "Norway", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS, ", "certification": "ISO 14064-2, CDM", "committed": 1223662, "delivered": 0, "delivery_rate": 0.0, "tx_count": 3, "method_count": 2, "price_per_tonne": 195.0, "hashtags": ["#BECCS", "#BiomassGeoseq", "#MRV", "#MultiRegistry", "#WasteCircularity", "#CarbonAccounting"], "prestige": 3, "quality": 6.0, "impact": 3.6, "sentiment": [1, 2, 0, 1, 0, 1, 2], "first_tx": "01/04/2025", "last_tx": "30/06/2025"}, {"id": 221, "name": "Liferaft", "org_type": "Large Corp", "country": "United States", "continent": "North America", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 1003000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 2, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 3, "quality": 4.0, "impact": 2.4, "sentiment": [0, -1, 0, 0, 0, -1, 2], "first_tx": "06/11/2025", "last_tx": "24/03/2026"}, {"id": 216, "name": "North Star Carbon Solutions", "org_type": "Mid Corp", "country": "Canada", "continent": "North America", "technology": "BiCRS - Bioenergy with Carbon Capture and Sequestration", "certification": "None", "committed": 626000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BECCS", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [0, -1, 0, 0, 0, -1, 1], "first_tx": "06/04/2026", "last_tx": "06/04/2026"}, {"id": 8, "name": "Not Disclosed", "org_type": "Mid Corp", "country": "Various", "continent": "Various", "technology": "Alkalinity Enhancement, Biochar Carbon Removal BCR, Bio", "certification": "Puro.earth, EBC, IBI", "committed": 584087, "delivered": 0, "delivery_rate": 0.0, "tx_count": 297, "method_count": 10, "price_per_tonne": 150.0, "hashtags": ["#BECCS", "#BCR", "#DACCS", "#EnhancedWeathering", "#mCDR", "#Mineralization"], "prestige": 3, "quality": 6.5, "impact": 3.9, "sentiment": [-1, 1, 0, 1, 0, 1, 1], "first_tx": "01/01/2020", "last_tx": "20/03/2026"}, {"id": 2, "name": "Varaha", "org_type": "Mid Corp", "country": "India", "continent": "Asia", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth CORC, Isometric", "committed": 542156, "delivered": 0, "delivery_rate": 0.0, "tx_count": 186, "method_count": 1, "price_per_tonne": 120.0, "hashtags": ["#BCR", "#Additionality", "#Permanence", "#MultiRegistry", "#WasteCircularity", "#CarbonAccounting"], "prestige": 4, "quality": 5.5, "impact": 4.4, "sentiment": [1, 1, 0, 0, 0, 1, 1], "first_tx": "04/10/2023", "last_tx": "26/02/2026"}, {"id": 18, "name": "Charm Industrial", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Biochar Carbon Removal BCR, Biomass Geological Sequestr", "certification": "Isometric, Frontier Climate", "committed": 485890, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1215, "method_count": 4, "price_per_tonne": 130.0, "hashtags": ["#BCR", "#BiomassGeoseq", "#Additionality", "#MultiRegistry", "#WasteCircularity", "#CarbonAccounting"], "prestige": 4, "quality": 6.0, "impact": 4.8, "sentiment": [1, 1, -1, 1, 0, 1, 1], "first_tx": "13/05/2020", "last_tx": "25/03/2026"}, {"id": 163, "name": "Gigablue", "org_type": "Mid Corp", "country": "New Zealand", "continent": "Oceania", "technology": "Direct Ocean Removal", "certification": "Puro.earth", "committed": 480000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 4, "method_count": 2, "price_per_tonne": 140.0, "hashtags": ["#mCDR", "#Permanence", "#SustainableBiomass", "#CarbonAccounting"], "prestige": 3, "quality": 5.0, "impact": 3.0, "sentiment": [-1, 1, -1, 0, 0, 0, 1], "first_tx": "14/01/2025", "last_tx": "04/11/2025"}, {"id": 53, "name": "Climeworks", "org_type": "Mid Corp", "country": "Switzerland", "continent": "Europe", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 425430, "delivered": 0, "delivery_rate": 0.0, "tx_count": 446, "method_count": 2, "price_per_tonne": 600.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 4, "quality": 5.0, "impact": 4.0, "sentiment": [1, 2, -1, 0, 1, 0, 1], "first_tx": "07/01/2020", "last_tx": "18/03/2026"}, {"id": 214, "name": "Engrow", "org_type": "Mid Corp", "country": "Germany", "continent": "Europe", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 425000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "21/04/2026", "last_tx": "21/04/2026"}, {"id": 64, "name": "Alcom Carbon Markets", "org_type": "Mid Corp", "country": "Philippines", "continent": "Asia", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth", "committed": 360750, "delivered": 0, "delivery_rate": 0.0, "tx_count": 11, "method_count": 1, "price_per_tonne": 145.0, "hashtags": ["#BCR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [-1, 1, -1, 0, 0, 0, 1], "first_tx": "01/08/2024", "last_tx": "16/12/2025"}, {"id": 158, "name": "Heirloom", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 346879, "delivered": 0, "delivery_rate": 0.0, "tx_count": 23, "method_count": 1, "price_per_tonne": 600.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 3, "quality": 4.5, "impact": 2.7, "sentiment": [1, 2, -1, 0, 1, 0, 1], "first_tx": "30/03/2021", "last_tx": "12/12/2025"}, {"id": 181, "name": "Terradot", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Enhanced Weathering", "certification": "Isometric", "committed": 319322, "delivered": 0, "delivery_rate": 0.0, "tx_count": 4, "method_count": 1, "price_per_tonne": 120.0, "hashtags": ["#EnhancedWeathering", "#Additionality", "#CarbonAccounting"], "prestige": 3, "quality": 4.5, "impact": 2.7, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "12/12/2024", "last_tx": "03/04/2025"}, {"id": 222, "name": "Empacar", "org_type": "Mid Corp", "country": "Mexico", "continent": "North America", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 305000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "23/03/2026", "last_tx": "23/03/2026"}, {"id": 139, "name": "Arca", "org_type": "Mid Corp", "country": "Canada", "continent": "North America", "technology": "Mineralization", "certification": "ISO 14064-2", "committed": 294243, "delivered": 0, "delivery_rate": 0.0, "tx_count": 6, "method_count": 1, "price_per_tonne": 125.0, "hashtags": ["#Mineralization", "#MRV", "#CarbonAccounting"], "prestige": 3, "quality": 4.0, "impact": 2.4, "sentiment": [1, 2, -1, 0, 0, 0, 1], "first_tx": "28/03/2022", "last_tx": "29/10/2025"}, {"id": 55, "name": "Planetary", "org_type": "Mid Corp", "country": "Canada", "continent": "North America", "technology": "Alkalinity Enhancement", "certification": "Isometric", "committed": 272330, "delivered": 0, "delivery_rate": 0.0, "tx_count": 39, "method_count": 2, "price_per_tonne": 120.0, "hashtags": ["#mCDR", "#Additionality", "#CarbonAccounting"], "prestige": 3, "quality": 4.5, "impact": 2.7, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "15/09/2020", "last_tx": "31/03/2026"}, {"id": 100, "name": "Lithos", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Enhanced Weathering", "certification": "Puro.earth", "committed": 230958, "delivered": 0, "delivery_rate": 0.0, "tx_count": 26, "method_count": 1, "price_per_tonne": 120.0, "hashtags": ["#EnhancedWeathering", "#Permanence", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [-1, 1, -1, 0, 0, 0, 1], "first_tx": "30/06/2023", "last_tx": "25/03/2026"}, {"id": 224, "name": "AMP", "org_type": "Mid Corp", "country": "Norway", "continent": "Europe", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 200000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "17/03/2026", "last_tx": "17/03/2026"}, {"id": 156, "name": "Sawa EcoSolutions", "org_type": "Mid Corp", "country": "Singapore", "continent": "Asia", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth", "committed": 178129, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": 148.0, "hashtags": ["#BCR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [-1, 1, -1, 0, 0, 0, 1], "first_tx": "24/04/2024", "last_tx": "24/04/2024"}, {"id": 4, "name": "Carboneers", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Biochar Carbon Removal BCR", "certification": "Isometric", "committed": 171488, "delivered": 0, "delivery_rate": 0.0, "tx_count": 179, "method_count": 1, "price_per_tonne": 130.0, "hashtags": ["#BCR", "#Additionality", "#WasteCircularity", "#CarbonAccounting"], "prestige": 3, "quality": 4.5, "impact": 2.7, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "24/05/2023", "last_tx": "17/03/2026"}, {"id": 243, "name": "EcoGaia", "org_type": "Mid Corp", "country": "France", "continent": "Europe", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 165000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "12/12/2025", "last_tx": "12/12/2025"}, {"id": 174, "name": "Arbor", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS, ", "certification": "Puro.earth", "committed": 156927, "delivered": 0, "delivery_rate": 0.0, "tx_count": 9, "method_count": 2, "price_per_tonne": 140.0, "hashtags": ["#BECCS", "#BiomassGeoseq", "#Permanence", "#SustainableBiomass", "#CarbonAccounting"], "prestige": 2, "quality": 5.0, "impact": 2.0, "sentiment": [-1, 1, -1, 1, 0, 0, 1], "first_tx": "15/12/2022", "last_tx": "08/07/2025"}, {"id": 218, "name": "NULIFE GreenTech", "org_type": "Mid Corp", "country": "Singapore", "continent": "Asia", "technology": "BiCRS - Biomass Geological Sequestration", "certification": "None", "committed": 150557, "delivered": 0, "delivery_rate": 0.0, "tx_count": 21, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BiomassGeoseq", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "03/10/2025", "last_tx": "30/03/2026"}, {"id": 31, "name": "Neustark", "org_type": "Mid Corp", "country": "Switzerland", "continent": "Europe", "technology": "Mineralization", "certification": "ISO 14064-2", "committed": 142708, "delivered": 0, "delivery_rate": 0.0, "tx_count": 67, "method_count": 2, "price_per_tonne": 180.0, "hashtags": ["#Mineralization", "#MRV", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [1, 2, -1, 0, 0, 0, 1], "first_tx": "30/09/2021", "last_tx": "08/02/2026"}, {"id": 3, "name": "Aperam BioEnergia", "org_type": "Mid Corp", "country": "Brazil", "continent": "South America", "technology": "Biochar Carbon Removal BCR, Mineralization", "certification": "FSC, Puro.earth", "committed": 141183, "delivered": 0, "delivery_rate": 0.0, "tx_count": 102, "method_count": 2, "price_per_tonne": 130.0, "hashtags": ["#BCR", "#Mineralization", "#Permanence", "#MultiRegistry", "#SustainableBiomass", "#CarbonAccounting"], "prestige": 2, "quality": 5.5, "impact": 2.2, "sentiment": [-1, 1, -1, 1, 0, 1, 1], "first_tx": "16/02/2023", "last_tx": "26/03/2026"}, {"id": 87, "name": "CREW Carbon", "org_type": "Mid Corp", "country": "Singapore", "continent": "Asia", "technology": "Alkalinity Enhancement", "certification": "Isometric", "committed": 129579, "delivered": 0, "delivery_rate": 0.0, "tx_count": 36, "method_count": 2, "price_per_tonne": 120.0, "hashtags": ["#mCDR", "#Additionality", "#CarbonAccounting"], "prestige": 2, "quality": 5.0, "impact": 2.0, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "15/12/2022", "last_tx": "17/01/2026"}, {"id": 260, "name": "Green Carbon Inc.", "org_type": "Mid Corp", "country": "Japan", "continent": "Asia", "technology": "Biochar Carbon Removal BCR", "certification": "None", "committed": 120300, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BCR", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "08/09/2025", "last_tx": "08/09/2025"}, {"id": 133, "name": "\u00d6resundskraft AB", "org_type": "Mid Corp", "country": "Sweden", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2, CDM", "committed": 120000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 2, "method_count": 1, "price_per_tonne": 190.0, "hashtags": ["#BECCS", "#MRV", "#MultiRegistry", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 5.0, "impact": 2.0, "sentiment": [1, 2, -1, 0, 0, 1, 1], "first_tx": "03/04/2025", "last_tx": "03/04/2025"}, {"id": 247, "name": "Reverion", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "BiCRS - Bioenergy with Carbon Capture and Sequestration", "certification": "None", "committed": 119671, "delivered": 0, "delivery_rate": 0.0, "tx_count": 2, "method_count": 1, "price_per_tonne": null, "hashtags": ["#BECCS", "#CarbonAccounting"], "prestige": 2, "quality": 3.5, "impact": 1.4, "sentiment": [0, -1, -1, 0, 0, -1, 1], "first_tx": "25/11/2025", "last_tx": "25/11/2025"}, {"id": 24, "name": "Graphyte", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Biomass Direct Storage", "certification": "Isometric", "committed": 112616, "delivered": 0, "delivery_rate": 0.0, "tx_count": 44, "method_count": 1, "price_per_tonne": 100.0, "hashtags": ["#BiomassStorage", "#Additionality", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "28/11/2023", "last_tx": "09/04/2026"}, {"id": 15, "name": "O.C.O. Technology", "org_type": "Mid Corp", "country": "United Kingdom", "continent": "Europe", "technology": "Enhanced Weathering, Mineralization", "certification": "Puro.earth", "committed": 109622, "delivered": 0, "delivery_rate": 0.0, "tx_count": 139, "method_count": 3, "price_per_tonne": 180.0, "hashtags": ["#EnhancedWeathering", "#Mineralization", "#Permanence", "#CarbonAccounting"], "prestige": 3, "quality": 5.0, "impact": 3.0, "sentiment": [-1, 1, -1, 0, 0, 0, 1], "first_tx": "13/04/2023", "last_tx": "01/04/2026"}, {"id": 197, "name": "Carbon Capture Inc.", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 104857, "delivered": 0, "delivery_rate": 0.0, "tx_count": 52, "method_count": 1, "price_per_tonne": 600.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 2, "quality": 5.0, "impact": 2.0, "sentiment": [1, 2, -1, 0, 1, 0, 1], "first_tx": "10/12/2022", "last_tx": "12/01/2024"}, {"id": 54, "name": "Eion", "org_type": "Mid Corp", "country": "United States", "continent": "North America", "technology": "Enhanced Weathering", "certification": "Isometric", "committed": 103324, "delivered": 0, "delivery_rate": 0.0, "tx_count": 35, "method_count": 1, "price_per_tonne": 120.0, "hashtags": ["#EnhancedWeathering", "#Additionality", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [1, 1, -1, 0, 0, 0, 1], "first_tx": "14/12/2021", "last_tx": "09/07/2025"}, {"id": 124, "name": "OXY Low Carbon Ventures | Holocene", "org_type": "Mid Corp", "country": "Kenya", "continent": "Africa", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 100532, "delivered": 0, "delivery_rate": 0.0, "tx_count": 5, "method_count": 1, "price_per_tonne": 600.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [1, 2, -1, 0, 1, 0, 1], "first_tx": "07/09/2023", "last_tx": "10/09/2024"}, {"id": 177, "name": "Applied Carbon", "org_type": "SME/Startup", "country": "Thailand", "continent": "Asia", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth", "committed": 84940, "delivered": 0, "delivery_rate": 0.0, "tx_count": 8, "method_count": 1, "price_per_tonne": 140.0, "hashtags": ["#BCR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [-1, 1, -1, 0, 0, 0, 0], "first_tx": "31/03/2022", "last_tx": "22/12/2025"}, {"id": 61, "name": "UNDO", "org_type": "SME/Startup", "country": "United Kingdom", "continent": "Europe", "technology": "Enhanced Weathering", "certification": "Isometric", "committed": 76232, "delivered": 0, "delivery_rate": 0.0, "tx_count": 146, "method_count": 1, "price_per_tonne": 135.0, "hashtags": ["#EnhancedWeathering", "#Additionality", "#CarbonAccounting"], "prestige": 3, "quality": 4.0, "impact": 2.4, "sentiment": [1, 1, -1, 0, 0, 0, 0], "first_tx": "27/05/2021", "last_tx": "21/10/2025"}, {"id": 134, "name": "280 Earth", "org_type": "SME/Startup", "country": "United States", "continent": "North America", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "ISO 14064-2", "committed": 74872, "delivered": 0, "delivery_rate": 0.0, "tx_count": 2, "method_count": 1, "price_per_tonne": 560.0, "hashtags": ["#DACCS", "#MRV", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [1, 2, -1, 0, 1, 0, 0], "first_tx": "11/07/2024", "last_tx": "11/07/2024"}, {"id": 104, "name": "CarbonRun", "org_type": "SME/Startup", "country": "Canada", "continent": "North America", "technology": "Alkalinity Enhancement", "certification": "Puro.earth", "committed": 70192, "delivered": 0, "delivery_rate": 0.0, "tx_count": 18, "method_count": 2, "price_per_tonne": 120.0, "hashtags": ["#mCDR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [-1, 1, -1, 0, 0, 0, 0], "first_tx": "07/09/2023", "last_tx": "24/01/2026"}, {"id": 232, "name": "1PointFive", "org_type": "SME/Startup", "country": "United States", "continent": "North America", "technology": "Direct Air Carbon Capture And Sequestration DACCS", "certification": "None", "committed": 69127, "delivered": 0, "delivery_rate": 0.0, "tx_count": 7, "method_count": 1, "price_per_tonne": null, "hashtags": ["#DACCS", "#CarbonAccounting"], "prestige": 2, "quality": 3.0, "impact": 1.2, "sentiment": [0, -1, -1, 0, 0, -1, 0], "first_tx": "24/06/2025", "last_tx": "13/01/2026"}, {"id": 207, "name": "Inherit Carbon Solutions", "org_type": "SME/Startup", "country": "Norway", "continent": "Europe", "technology": "Bioenergy With Carbon Capture And Sequestration BECCS", "certification": "ISO 14064-2", "committed": 68000, "delivered": 0, "delivery_rate": 0.0, "tx_count": 1, "method_count": 1, "price_per_tonne": 140.0, "hashtags": ["#BECCS", "#MRV", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [1, 2, -1, 0, 0, 0, 0], "first_tx": "13/03/2025", "last_tx": "13/03/2025"}, {"id": 96, "name": "Equatic", "org_type": "SME/Startup", "country": "Canada", "continent": "North America", "technology": "Direct Ocean Removal", "certification": "Isometric, Ocean CDR Standards", "committed": 64440, "delivered": 0, "delivery_rate": 0.0, "tx_count": 16, "method_count": 1, "price_per_tonne": 150.0, "hashtags": ["#mCDR", "#Additionality", "#MultiRegistry", "#CarbonAccounting"], "prestige": 2, "quality": 4.5, "impact": 1.8, "sentiment": [1, 1, -1, 0, 0, 1, 0], "first_tx": "27/05/2021", "last_tx": "05/03/2025"}, {"id": 5, "name": "Wakefield Biochar", "org_type": "SME/Startup", "country": "United States", "continent": "North America", "technology": "Biochar Carbon Removal BCR", "certification": "Puro.earth", "committed": 62934, "delivered": 0, "delivery_rate": 0.0, "tx_count": 170, "method_count": 1, "price_per_tonne": 140.0, "hashtags": ["#BCR", "#Permanence", "#WasteCircularity", "#CarbonAccounting"], "prestige": 2, "quality": 4.0, "impact": 1.6, "sentiment": [-1, 1, -1, 0, 0, 0, 0], "first_tx": "12/06/2022", "last_tx": "25/03/2026"}];
+
+const CRCF_THEMES = [
+  {
+    n:1, name:'MRV Standards Harmonisation', cat:'General Topics',
+    tier:1, catKey:'general',
+    freq: 41, sntIdx:1,
+    desc:'Establish unified Monitoring, Reporting & Verification protocols across all CDR methods to ensure comparability, reduce fragmentation and support CRCF accreditation.'
+  },
+  {
+    n:2, name:'Additionality & Baseline Integrity', cat:'General Topics',
+    tier:1, catKey:'general',
+    freq: 38, sntIdx:0,
+    desc:'Ensure that every tCO₂ credited represents removal genuinely additional to what would have occurred without the financial incentive, with robust counterfactual baselines.'
+  },
+  {
+    n:3, name:'Permanence & Long-Term Liability', cat:'General Topics',
+    tier:1, catKey:'general',
+    freq: 35, sntIdx:2,
+    desc:'Address the risk of carbon reversal through buffer pools, insurance mechanisms or long-term monitoring obligations, calibrated to the geological vs biological storage horizon.'
+  },
+  {
+    n:4, name:'Energy & LCA Accounting for DACCS', cat:'Specific for DACCS',
+    tier:2, catKey:'daccs',
+    freq: 22, sntIdx:4,
+    desc:'Require full lifecycle energy accounting (electricity source, heat, water) in DACCS credits to prevent greenwashing from fossil-grid-powered plants claiming net removal.'
+  },
+  {
+    n:5, name:'Sustainable Biomass Sourcing (BECCS & BCR)', cat:'Specific for BECCS & BCR',
+    tier:2, catKey:'beccs_bcr',
+    freq: 29, sntIdx:3,
+    desc:'Mandate sustainability criteria (FSC/PEFC or equivalent) and additionality of biomass feedstock. Waste & residue streams should receive preferential treatment in CRCF tiering.'
+  },
+  {
+    n:6, name:'Cascade Use Principle for BECCS Biomass', cat:'Only for BECCS',
+    tier:2, catKey:'beccs',
+    freq: 17, sntIdx:3,
+    desc:'Require that biomass used in BECCS plants follows the EU cascade hierarchy (material use first, energy last), ensuring only genuine residues enter the carbon removal value chain.'
+  },
+  {
+    n:7, name:'Field-Scale MRV for BCR Soil Applications', cat:'Only for BCR',
+    tier:3, catKey:'bcr',
+    freq: 24, sntIdx:1,
+    desc:'Develop standardised field-measurement protocols for biochar soil applications, including stability testing (H/C ratio), soil carbon monitoring and disaggregated chain-of-custody.'
+  }
+];
+
+const THEME_KEYS = ['additionality','mrv_standards','permanence','biomass_sustainability','energy_accounting','registry_interop','market_scaling'];
+const THEME_LABELS = ['Additionality','MRV Standards','Permanence','Biomass Sust.','Energy Acct.','Registry Interop','Market Scaling'];
+
+const ORG_COLORS = {
+  'Large Corp':  '#4F8EF7',
+  'Mid Corp':    '#A78BFA',
+  'SME/Startup': '#4ADE80',
+  'NGO':         '#FB923C',
+  'Academia':    '#F59E0B',
+  'Association': '#2DD4BF',
+  'Government':  '#F87171'
+};
+
+function fmt(n){ if(!n && n!==0) return '—'; if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(0)+'K'; return n.toFixed(0); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function sntColor(v){
+  if(v>=2)  return {bg:'rgba(74,222,128,.2)',  c:'#4ADE80'};
+  if(v>=1)  return {bg:'rgba(74,222,128,.1)',  c:'#86EFAC'};
+  if(v===0) return {bg:'rgba(100,116,139,.15)',c:'#94A3B8'};
+  if(v>=-1) return {bg:'rgba(251,146,60,.15)', c:'#FB923C'};
+  return           {bg:'rgba(248,113,113,.2)', c:'#F87171'};
+}
+
+function impactColor(v){
+  if(v>=4)   return {bg:'rgba(74,222,128,.15)',   c:'#4ADE80'};
+  if(v>=3)   return {bg:'rgba(79,142,247,.15)',   c:'#4F8EF7'};
+  if(v>=2)   return {bg:'rgba(251,146,60,.12)',   c:'#FB923C'};
+  return            {bg:'rgba(100,116,139,.1)',   c:'#94A3B8'};
+}
+
+function orgBadgeStyle(t){
+  const m = {
+    'Large Corp':  'background:rgba(79,142,247,.15);color:#4F8EF7;border:1px solid rgba(79,142,247,.3)',
+    'Mid Corp':    'background:rgba(167,139,250,.12);color:#A78BFA;border:1px solid rgba(167,139,250,.25)',
+    'SME/Startup': 'background:rgba(74,222,128,.1);color:#4ADE80;border:1px solid rgba(74,222,128,.25)',
+    'NGO':         'background:rgba(251,146,60,.12);color:#FB923C;border:1px solid rgba(251,146,60,.25)',
+    'Academia':    'background:rgba(245,158,11,.12);color:#F59E0B;border:1px solid rgba(245,158,11,.25)',
+    'Association': 'background:rgba(45,212,191,.1);color:#2DD4BF;border:1px solid rgba(45,212,191,.2)',
+    'Government':  'background:rgba(248,113,113,.12);color:#F87171;border:1px solid rgba(248,113,113,.25)'
+  };
+  return m[t]||'background:var(--bg2);color:var(--text2)';
+}
+
+let crcfLoaded = false;
+let crcfSortKey = 'impact';
+let crcfSortDir = -1;
+let crcfBubbleChart = null;
+let crcfOrgChart = null;
+
+function loadCrcf(){
+  if(crcfLoaded) return;
+  crcfLoaded = true;
+  renderCrcfKpis();
+  renderCrcfTable(CRCF_DATA);
+  renderCrcfThemes();
+  renderCrcfHeatmap();
+  renderCrcfSentSummary();
+}
+
+/* ── KPI strip ── */
+function renderCrcfKpis(){
+  const el = document.getElementById('crcf-kpis');
+  if(!el) return;
+  const avgImpact = (CRCF_DATA.reduce((a,r)=>a+r.impact,0)/CRCF_DATA.length).toFixed(1);
+  const avgPrestige = (CRCF_DATA.reduce((a,r)=>a+r.prestige,0)/CRCF_DATA.length).toFixed(1);
+  const avgQuality = (CRCF_DATA.reduce((a,r)=>a+r.quality,0)/CRCF_DATA.length).toFixed(1);
+  const topIF = Math.max(...CRCF_DATA.map(r=>r.impact)).toFixed(1);
+  const types = [...new Set(CRCF_DATA.map(r=>r.org_type))].length;
+  const kpis = [
+    {v:CRCF_DATA.length,  l:'Stakeholders Profiled', i:'fa-users',       c:'var(--blue)'},
+    {v:avgImpact,         l:'Avg Impact Factor',     i:'fa-bolt',        c:'var(--orange)'},
+    {v:topIF,             l:'Peak Impact Factor',    i:'fa-trophy',      c:'var(--yellow)'},
+    {v:avgPrestige+'/5',  l:'Avg Prestige Factor',   i:'fa-star',        c:'var(--purple)'},
+    {v:types,             l:'Org Types Covered',     i:'fa-building',    c:'var(--teal)'},
+  ];
+  el.innerHTML = kpis.map(k=>`
+    <div class="crcf-kpi">
+      <div class="crcf-kpi-icon" style="color:${k.c}"><i class="fas ${k.i}"></i></div>
+      <div>
+        <div class="crcf-kpi-v">${k.v}</div>
+        <div class="crcf-kpi-l">${k.l}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Master table ── */
+function renderCrcfTable(data){
+  const tbody = document.getElementById('crcf-tbody');
+  if(!tbody) return;
+  const sorted = [...data].sort((a,b)=> crcfSortDir * (b[crcfSortKey] - a[crcfSortKey]));
+  tbody.innerHTML = sorted.map((r,i)=>{
+    const ic = impactColor(r.impact);
+    const sntAvg = (r.sentiment.reduce((a,v)=>a+v,0)/r.sentiment.length).toFixed(1);
+    const sntC = sntColor(parseFloat(sntAvg));
+    const pctP = (r.prestige/5*100).toFixed(0);
+    const pctQ = (r.quality/10*100).toFixed(0);
+    const drC = r.delivery_rate>20?'#4ADE80':r.delivery_rate>5?'#FB923C':'#94A3B8';
+    return `<tr>
+      <td style="color:var(--text3);font-size:11px">${i+1}</td>
+      <td>
+        <div style="font-weight:700;color:var(--text);font-size:12px">${esc(r.name)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${esc(r.continent)}</div>
+      </td>
+      <td><span class="org-badge" style="${orgBadgeStyle(r.org_type)}">${esc(r.org_type)}</span></td>
+      <td style="font-size:11.5px;color:var(--text2)">${esc(r.country)}</td>
+      <td>
+        <div class="ht-list">
+          ${(r.hashtags||[]).map(h=>`<span class="ht">${esc(h)}</span>`).join('')}
+        </div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span style="font-weight:700;color:var(--text);min-width:14px">${r.prestige}</span>
+          <div class="sbar-track"><div class="sbar-fill" style="width:${pctP}%;background:var(--purple)"></div></div>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar">
+          <span style="font-weight:700;color:var(--text);min-width:20px">${r.quality}</span>
+          <div class="sbar-track"><div class="sbar-fill" style="width:${pctQ}%;background:var(--blue)"></div></div>
+        </div>
+      </td>
+      <td>
+        <span class="impact-badge" style="background:${ic.bg};color:${ic.c};border:1px solid ${ic.c}44">
+          <i class="fas fa-bolt" style="font-size:9px"></i> ${r.impact}
+        </span>
+      </td>
+      <td style="font-size:10.5px;color:var(--text2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(r.technology)}">${esc(r.technology.replace('And Sequestration','& Seq.'))}</td>
+      <td style="font-size:11.5px;color:var(--blue);text-align:right;font-weight:600">${fmt(r.committed)}</td>
+      <td style="font-size:11.5px;font-weight:700;color:${drC};text-align:right">${r.delivery_rate.toFixed(1)}%</td>
+      <td style="font-size:10px;color:var(--text3);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(r.certification)}">${esc(r.certification)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function crcfSort(key){
+  if(crcfSortKey===key) crcfSortDir*=-1; else { crcfSortKey=key; crcfSortDir=-1; }
+  const q = document.getElementById('crcf-search').value.toLowerCase();
+  const t = document.getElementById('crcf-filter-type').value;
+  let d = CRCF_DATA.filter(r=>
+    (!q || r.name.toLowerCase().includes(q) || r.country.toLowerCase().includes(q)) &&
+    (!t || r.org_type===t)
+  );
+  renderCrcfTable(d);
+}
+
+function crcfFilter(){
+  const q = document.getElementById('crcf-search').value.toLowerCase();
+  const t = document.getElementById('crcf-filter-type').value;
+  let d = CRCF_DATA.filter(r=>
+    (!q || r.name.toLowerCase().includes(q) || r.country.toLowerCase().includes(q) ||
+     (r.hashtags||[]).join(' ').toLowerCase().includes(q)) &&
+    (!t || r.org_type===t)
+  );
+  renderCrcfTable(d);
+}
+
+/* ── Thematic analysis ── */
+function renderCrcfThemes(){
+  const tbody = document.getElementById('crcf-themes-tbody');
+  if(!tbody) return;
+
+  // Calcola avg sentiment per tema da CRCF_DATA
+  const sntAvgs = THEME_KEYS.map((_,idx)=>{
+    const vals = CRCF_DATA.map(r=>r.sentiment[idx]);
+    return (vals.reduce((a,v)=>a+v,0)/vals.length).toFixed(2);
+  });
+
+  const tierClass = t => t===1?'tier-1':t===2?'tier-2':'tier-3';
+  const tierLabel = t => t===1?'Tier 1 — Critical':t===2?'Tier 2 — Important':'Tier 3 — Supplementary';
+
+  // Map theme to sentiment index
+  const themeToSntIdx = [0,1,2,3,4,5,6]; // matches THEME_KEYS order
+
+  tbody.innerHTML = CRCF_THEMES.map(th=>{
+    const sIdx = th.sntIdx;
+    const avg = parseFloat(sntAvgs[sIdx]);
+    const sc = sntColor(avg);
+    const pct = ((avg+2)/4*100).toFixed(0);
+    return `<tr>
+      <td style="color:var(--text3)">${th.n}</td>
+      <td style="font-weight:700;color:var(--text)">${esc(th.name)}</td>
+      <td><span class="cat-label">${esc(th.cat)}</span></td>
+      <td><span class="tier-badge ${tierClass(th.tier)}">${tierLabel(th.tier)}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:60px;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
+            <div style="width:${Math.min(100,(th.freq/45*100)).toFixed(0)}%;height:100%;background:var(--blue);border-radius:3px"></div>
+          </div>
+          <span style="font-size:11px;color:var(--text2)">${th.freq} suppliers</span>
+        </div>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:700;font-size:12px;color:${sc.c}">${avg>0?'+':''}${avg}</span>
+          <div style="width:70px;height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${sc.c};border-radius:3px"></div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:11px;color:var(--text2);max-width:280px">${esc(th.desc)}</td>
+    </tr>`;
+  }).join('');
+
+  // Theme summary cards
+  const cards = document.getElementById('crcf-theme-cards');
+  if(!cards) return;
+  const catColors = {
+    'General Topics':'var(--blue)','Specific for DACCS':'var(--teal)',
+    'Specific for BECCS & BCR':'var(--green)','Only for BECCS':'var(--orange)','Only for BCR':'var(--purple)'
+  };
+  const catGroups = {};
+  CRCF_THEMES.forEach(t=>{ if(!catGroups[t.cat]) catGroups[t.cat]=[]; catGroups[t.cat].push(t); });
+  cards.innerHTML = Object.entries(catGroups).map(([cat, themes])=>{
+    const col = catColors[cat]||'var(--blue)';
+    return `<div class="crcf-card">
+      <div class="crcf-card-head">
+        <div class="crcf-card-title" style="color:${col}"><i class="fas fa-tag"></i> ${esc(cat)}</div>
+        <div class="crcf-card-meta">${themes.length} theme${themes.length>1?'s':''}</div>
+      </div>
+      <div class="crcf-card-body" style="display:flex;flex-direction:column;gap:10px">
+        ${themes.map(t=>`
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span style="font-size:12px;font-weight:600;color:var(--text)">${esc(t.name)}</span>
+              <span class="tier-badge ${t.tier===1?'tier-1':t.tier===2?'tier-2':'tier-3'}" style="flex-shrink:0">T${t.tier}</span>
+            </div>
+            <div style="font-size:10.5px;color:var(--text3)">${esc(t.desc.substring(0,100))}…</div>
+          </div>`).join('<hr style="border:none;border-top:1px solid var(--border);margin:2px 0">')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Heatmap ── */
+function renderCrcfHeatmap(){
+  const tbl = document.getElementById('crcf-heatmap');
+  if(!tbl) return;
+  // Prendi top 20 per impact
+  const top20 = [...CRCF_DATA].sort((a,b)=>b.impact-a.impact).slice(0,20);
+  const shortLabels = ['Additionality','MRV','Permanence','BioSust.','Energy','Registry','Scaling'];
+
+  let html = '<thead><tr><th class="row-header">Stakeholder</th><th>Type</th><th>IF</th>';
+  shortLabels.forEach(l=>{ html+=`<th style="text-align:center">${l}</th>`; });
+  html+='</tr></thead><tbody>';
+
+  top20.forEach(r=>{
+    const ic = impactColor(r.impact);
+    html+=`<tr><td class="row-label">${esc(r.name)}</td>
+      <td><span class="org-badge" style="${orgBadgeStyle(r.org_type)};font-size:9px">${esc(r.org_type)}</span></td>
+      <td style="text-align:center"><span style="font-weight:700;color:${ic.c}">${r.impact}</span></td>`;
+    r.sentiment.forEach(v=>{
+      const sc = sntColor(v);
+      const label = v>0?`+${v}`:v===0?'0':v;
+      html+=`<td class="hm-cell"><div class="hm-val" style="background:${sc.bg};color:${sc.c}">${label}</div></td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  tbl.innerHTML = html;
+}
+
+/* ── Sentiment summary ── */
+function renderCrcfSentSummary(){
+  const el = document.getElementById('crcf-snt-summary');
+  if(!el) return;
+  const fullNames = ['Additionality & Baseline Integrity','MRV Standards Harmonisation','Permanence & Long-Term Liability',
+    'Sustainable Biomass Sourcing','Energy & LCA Accounting (DACCS)','Registry Interoperability','Market Scaling'];
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' +
+    THEME_KEYS.map((k,i)=>{
+      const vals = CRCF_DATA.map(r=>r.sentiment[i]);
+      const avg = vals.reduce((a,v)=>a+v,0)/vals.length;
+      const pos = vals.filter(v=>v>0).length;
+      const neu = vals.filter(v=>v===0).length;
+      const neg = vals.filter(v=>v<0).length;
+      const sc = sntColor(avg);
+      const pct = ((avg+2)/4*100).toFixed(0);
+      return `<div style="display:grid;grid-template-columns:220px 60px 1fr 120px;align-items:center;gap:12px">
+        <span style="font-size:11.5px;font-weight:600;color:var(--text)">${esc(fullNames[i])}</span>
+        <span style="font-weight:700;font-size:13px;color:${sc.c};text-align:right">${avg>0?'+':''}${avg.toFixed(2)}</span>
+        <div style="height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${sc.c};border-radius:4px"></div>
+        </div>
+        <div style="display:flex;gap:6px;font-size:10px">
+          <span style="color:#4ADE80">▲${pos}</span>
+          <span style="color:#94A3B8">◆${neu}</span>
+          <span style="color:#F87171">▼${neg}</span>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+/* ── Phase tabs ── */
+function crcfTab(id){
+  document.querySelectorAll('.crcf-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.crcf-panel').forEach(p=>p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('crcf-'+id).classList.add('active');
+  if(id==='ph4') setTimeout(renderCrcfCharts, 50);
+}
+
+/* ── Charts (Phase 4) ── */
+function renderCrcfCharts(){
+  renderBubbleChart();
+  renderOrgChart();
+  renderImpactRanking();
+}
+
+function renderBubbleChart(){
+  const canvas = document.getElementById('crcf-bubble-chart');
+  if(!canvas) return;
+  if(crcfBubbleChart){ crcfBubbleChart.destroy(); crcfBubbleChart=null; }
+
+  const datasets = {};
+  CRCF_DATA.forEach(r=>{
+    const avgSnt = r.sentiment.reduce((a,v)=>a+v,0)/r.sentiment.length;
+    const col = ORG_COLORS[r.org_type]||'#94A3B8';
+    if(!datasets[r.org_type]) datasets[r.org_type]={label:r.org_type,data:[],backgroundColor:col+'99',borderColor:col,borderWidth:1.5};
+    datasets[r.org_type].data.push({
+      x: parseFloat(avgSnt.toFixed(2)),
+      y: r.impact,
+      r: r.prestige * 5 + 4,
+      name: r.name
+    });
+  });
+
+  crcfBubbleChart = new Chart(canvas, {
+    type:'bubble',
+    data:{ datasets: Object.values(datasets) },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ labels:{ color:'#94A3B8', font:{size:11} } },
+        tooltip:{
+          callbacks:{
+            label: ctx => {
+              const d = ctx.raw;
+              return [`${d.name}`, `Impact: ${d.y}`, `Avg Sentiment: ${d.x}`, `Prestige: ${Math.round((d.r-4)/5)}`];
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ title:{ display:true, text:'Average Sentiment (-2 to +2)', color:'#64748B' },
+            grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#94A3B8' },
+            min:-2.2, max:2.2 },
+        y:{ title:{ display:true, text:'Impact Factor (PF × QF / 5)', color:'#64748B' },
+            grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ color:'#94A3B8' },
+            min:0, max:5.5 }
+      }
+    }
+  });
+}
+
+function renderOrgChart(){
+  const canvas = document.getElementById('crcf-org-chart');
+  if(!canvas) return;
+  if(crcfOrgChart){ crcfOrgChart.destroy(); crcfOrgChart=null; }
+
+  const counts = {};
+  CRCF_DATA.forEach(r=>{ counts[r.org_type]=(counts[r.org_type]||0)+1; });
+  const labels = Object.keys(counts);
+  const values = labels.map(l=>counts[l]);
+  const colors = labels.map(l=>ORG_COLORS[l]||'#94A3B8');
+
+  crcfOrgChart = new Chart(canvas, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:values, backgroundColor:colors.map(c=>c+'CC'), borderColor:colors, borderWidth:1.5 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{ color:'#94A3B8', font:{size:11}, padding:14 } },
+        tooltip:{ callbacks:{ label: ctx=>`${ctx.label}: ${ctx.raw} (${(ctx.raw/CRCF_DATA.length*100).toFixed(0)}%)` } }
+      }
+    }
+  });
+}
+
+function renderImpactRanking(){
+  const el = document.getElementById('crcf-impact-rank');
+  if(!el) return;
+  const top15 = [...CRCF_DATA].sort((a,b)=>b.impact-a.impact).slice(0,15);
+  const maxIF = top15[0].impact;
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' +
+    top15.map((r,i)=>{
+      const ic = impactColor(r.impact);
+      const pct = (r.impact/maxIF*100).toFixed(0);
+      const medal = i<3?['🥇','🥈','🥉'][i]:`<span style="color:var(--text3);font-size:11px">${i+1}</span>`;
+      return `<div style="display:grid;grid-template-columns:28px 1fr 80px;align-items:center;gap:10px">
+        <div style="text-align:center">${medal}</div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(r.name)}</div>
+          <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:4px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${ic.c};border-radius:2px"></div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <span style="font-weight:700;color:${ic.c}">${r.impact}</span>
+          <div style="font-size:9.5px;color:var(--text3)">${esc(r.org_type)}</div>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
 }
 
 /* ═══════════════════════════════════════════════════════════════
