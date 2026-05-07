@@ -114,7 +114,11 @@ def on_startup():
     # 2. Inizializza DB
     init_db()
 
-    # 3. Seed automatico se vuoto
+    # 3. Carica seed dal dump SQL se DB vuoto (Railway deploy)
+    from init_db_from_dump import load_seed_if_empty
+    load_seed_if_empty()
+
+    # 4. Seed automatico se ancora vuoto
     auto_seed_if_empty()
 
     # 4. Avvia scheduler settimanale in background thread
