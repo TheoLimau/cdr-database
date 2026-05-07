@@ -150,6 +150,59 @@ def admin_reseed(background_tasks: BackgroundTasks):
     }
 
 
+# ─── Admin: reset completo DB + ricarica da seed_data.sql ─────────────────────
+@app.post("/api/admin/reset-db")
+def admin_reset_db():
+    """
+    Svuota completamente il DB e ricarica da seed_data.sql.
+    Usato per correggere dati duplicati dopo un reseed errato.
+    """
+    import sqlite3 as _sqlite3
+    db_path = os.path.join(os.path.dirname(__file__), "data", "carbon_db.sqlite")
+    sql_path = os.path.join(os.path.dirname(__file__), "data", "seed_data.sql")
+
+    if not os.path.exists(sql_path):
+        return {"status": "error", "message": "seed_data.sql non trovato"}
+
+    try:
+        conn = _sqlite3.connect(db_path)
+        # Svuota le tabelle
+        conn.execute("DELETE FROM transactions")
+        conn.execute("DELETE FROM suppliers")
+        conn.commit()
+
+        # Ricarica dal seed SQL
+        with open(sql_path, "r", encoding="utf-8") as f:
+            sql = f.read()
+
+        # Esegui solo gli INSERT (salta CREATE TABLE che già esistono)
+        for stmt in sql.split(";\n"):
+            stmt = stmt.strip()
+            if stmt.upper().startswith("INSERT INTO"):
+                try:
+                    conn.execute(stmt)
+                except Exception:
+                    pass
+        conn.commit()
+
+        # Verifica finale
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM transactions")
+        tx = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM suppliers")
+        sup = c.fetchone()[0]
+        conn.close()
+
+        return {
+            "status": "ok",
+            "transactions": tx,
+            "suppliers": sup,
+            "message": f"Reset completato: {tx} transazioni, {sup} suppliers"
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 @app.get("/api/admin/reseed")
 def admin_reseed_status():
     """Ritorna lo stato attuale del DB (utile per monitorare il seed)."""
