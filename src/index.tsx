@@ -181,7 +181,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     </div>
     <div class="nav-section">
       <div class="nav-label">Other Registries</div>
-      <button class="nav-btn" onclick="showPage('rainbow')"><span class="icon">🌈</span><span>Rainbow Standard</span><span class="nav-badge" style="background:var(--purple)">50</span></button>
+      <button class="nav-btn" onclick="showPage('rainbow')"><span class="icon">🌈</span><span>Rainbow Standard</span><span class="nav-badge" style="background:var(--purple)">115</span></button>
       <button class="nav-btn" onclick="showPage('isometric')"><span class="icon">⚖️</span><span>Isometric</span><span class="nav-badge" style="background:var(--pink)">305</span></button>
     </div>
   </nav>
@@ -291,9 +291,9 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         </div>
         <div class="kpi-card" style="border-color:rgba(139,92,246,0.3);">
           <div class="kpi-label">Rainbow Standard</div>
-          <div class="kpi-value" style="font-size:18px;color:var(--purple);">50</div>
+          <div class="kpi-value" style="font-size:18px;color:var(--purple);">115</div>
           <div class="kpi-sub">listed projects</div>
-          <div style="margin-top:8px;font-size:10px;color:var(--text3);">86,103 credits issued · 14 countries</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--text3);">421,377 credits issued · 25 countries</div>
           <div style="margin-top:6px;"><span class="badge" style="background:rgba(139,92,246,0.15);color:var(--purple);border:1px solid rgba(139,92,246,0.25);">BiCRS + Avoidance</span></div>
         </div>
         <div class="kpi-card" style="border-color:rgba(236,72,153,0.3);">
@@ -458,15 +458,16 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
   <div class="page" id="page-rainbow">
     <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(236,72,153,.05));border-color:rgba(139,92,246,.2);">
       <div class="ribbon-icon">🌈</div>
-      <div class="ribbon-text"><strong style="color:var(--purple);">Rainbow Standard Registry</strong> · 50 projects · BiCRS, Biobased construction, Biogas, Electronic refurbishment · 14 countries · registry.rainbowstandard.io</div>
+      <div class="ribbon-text"><strong style="color:var(--purple);">Rainbow Standard Registry</strong> · 115 projects · Biomass Carbon Removal, Biobased Construction, Biogas, Electronic Refurbishment · 25 countries · registry.rainbowstandard.io</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px;">
-      <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value" style="color:var(--purple);">50</div><div class="kpi-sub">listed projects</div><div class="kpi-icon">📋</div></div>
-      <div class="kpi-card"><div class="kpi-label">Credits Issued</div><div class="kpi-value" style="color:var(--pink);">86,103</div><div class="kpi-sub">tCO₂eq verified</div><div class="kpi-icon">✅</div></div>
-      <div class="kpi-card"><div class="kpi-label">Credited Projects</div><div class="kpi-value green" id="rb-credited">—</div><div class="kpi-sub">with issued credits</div><div class="kpi-icon">🌱</div></div>
-      <div class="kpi-card"><div class="kpi-label">Removal Projects</div><div class="kpi-value accent" id="rb-removal">—</div><div class="kpi-sub">BiCRS + construction</div><div class="kpi-icon">⬇️</div></div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:24px;">
+      <div class="kpi-card"><div class="kpi-label">Total Projects</div><div class="kpi-value" style="color:var(--purple);" id="rb-total">115</div><div class="kpi-sub">registered projects</div><div class="kpi-icon">📋</div></div>
+      <div class="kpi-card"><div class="kpi-label">Credits Issued</div><div class="kpi-value" style="color:var(--pink);" id="rb-issued">421,377</div><div class="kpi-sub">tCO₂eq verified</div><div class="kpi-icon">✅</div></div>
+      <div class="kpi-card"><div class="kpi-label">Credits Available</div><div class="kpi-value green" id="rb-available">282,202</div><div class="kpi-sub">on market now</div><div class="kpi-icon">💹</div></div>
+      <div class="kpi-card"><div class="kpi-label">Credited Projects</div><div class="kpi-value accent" id="rb-credited">—</div><div class="kpi-sub">with issued credits</div><div class="kpi-icon">🌱</div></div>
+      <div class="kpi-card"><div class="kpi-label">Removal Projects</div><div class="kpi-value" style="color:var(--purple);" id="rb-removal">—</div><div class="kpi-sub">BiCRS + construction</div><div class="kpi-icon">⬇️</div></div>
       <div class="kpi-card"><div class="kpi-label">Avoidance Projects</div><div class="kpi-value amber" id="rb-avoid">—</div><div class="kpi-sub">Biogas + refurb</div><div class="kpi-icon">🛡️</div></div>
-      <div class="kpi-card"><div class="kpi-label">Countries</div><div class="kpi-value">15</div><div class="kpi-sub">unique countries</div><div class="kpi-icon">🌍</div></div>
+      <div class="kpi-card"><div class="kpi-label">Countries</div><div class="kpi-value" id="rb-countries">25</div><div class="kpi-sub">unique countries</div><div class="kpi-icon">🌍</div></div>
     </div>
     <div class="charts-grid" style="margin-bottom:24px;">
       <div class="chart-card">
@@ -505,19 +506,27 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         </select>
         <select class="filter-select" id="rb-method" onchange="filterRb()">
           <option value="">All Methodologies</option>
-          <option value="BiCRS">BiCRS</option>
-          <option value="Biobased construction">Biobased construction</option>
-          <option value="Biogas">Biogas</option>
-          <option value="Electronic refurbishment">Electronic refurbishment</option>
-          <option value="General Std Rules">General Std Rules</option>
+          <option value="Biomass carbon removal and storage">Biomass carbon removal</option>
+          <option value="Biobased construction materials">Biobased construction</option>
+          <option value="Biogas from anaerobic digestion">Biogas</option>
+          <option value="Refurbishing of electronic devices">Electronic refurbishment</option>
+          <option value="General requirements">General requirements</option>
+          <option value="Textile recycling">Textile recycling</option>
+        </select>
+        <select class="filter-select" id="rb-mechanism" onchange="filterRb()">
+          <option value="">All Mechanisms</option>
+          <option value="REMOVAL">Removal</option>
+          <option value="AVOIDANCE">Avoidance</option>
         </select>
         <select class="filter-select" id="rb-status" onchange="filterRb()">
           <option value="">All Statuses</option>
-          <option value="Credited">Credited</option>
-          <option value="Validated">Validated</option>
-          <option value="Listed">Listed</option>
-          <option value="Registered">Registered</option>
-          <option value="Withdrawn">Withdrawn</option>
+          <option value="CREDITED">Credited</option>
+          <option value="VALIDATED">Validated</option>
+          <option value="LISTED">Listed</option>
+          <option value="REGISTERED">Registered</option>
+          <option value="PUBLIC_COMMENT_PERIOD">Comment Period</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="WITHDRAWN">Withdrawn</option>
         </select>
         <span id="rb-count" style="font-size:12px;color:var(--text3);margin-left:auto;white-space:nowrap;"></span>
       </div>
@@ -526,12 +535,14 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
           <thead>
             <tr>
               <th onclick="sortRb('name')">Project ↕</th>
-              <th onclick="sortRb('company')">Company ↕</th>
+              <th onclick="sortRb('developer')">Developer ↕</th>
               <th onclick="sortRb('methodology')">Methodology ↕</th>
-              <th onclick="sortRb('type')">Type ↕</th>
+              <th onclick="sortRb('mechanism')">Mechanism ↕</th>
               <th onclick="sortRb('country')">Country ↕</th>
+              <th onclick="sortRb('city')">City ↕</th>
               <th onclick="sortRb('status')">Status ↕</th>
-              <th onclick="sortRb('credits')" style="text-align:right;">Credits ↕</th>
+              <th onclick="sortRb('issuedCredits')" style="text-align:right;">Issued ↕</th>
+              <th onclick="sortRb('availableCredits')" style="text-align:right;">Available ↕</th>
               <th>Durability</th>
             </tr>
           </thead>
@@ -678,7 +689,7 @@ var pageMeta={
   projects:{title:'Puro.earth Registry',sub:'113 registered projects · May 2026 export'},
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
-  rainbow:{title:'Rainbow Standard Registry',sub:'50 projects · BiCRS, Biobased construction, Biogas, Electronic refurbishment'},
+  rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'}
 };
 var chartsRendered={};
@@ -732,7 +743,7 @@ function renderDashboard(){
   var ck=Object.keys(cc).sort(function(a,b){return cc[b]-cc[a];}).slice(0,10);
   new Chart(document.getElementById('puroCountryChart'),{type:'bar',data:{labels:ck,datasets:[{label:'Projects',data:ck.map(function(k){return cc[k];}),backgroundColor:'rgba(0,212,255,0.6)',borderColor:'#00d4ff',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9},maxRotation:35},border:{display:false}},y:{grid:{color:'rgba(30,45,74,0.5)'},ticks:{color:'#5a7399',font:{size:10}},border:{display:false}}}}});
   // Cross-registry comparison
-  new Chart(document.getElementById('registryCompareChart'),{type:'bar',data:{labels:['Puro.earth\n(Delivered)','Rainbow Std\n(Credits)','Isometric\n(Issued)','Isometric\n(Retired)'],datasets:[{label:'Credits / Tonnes',data:[927053,86103,99731,32616],backgroundColor:['rgba(0,212,255,0.7)','rgba(139,92,246,0.7)','rgba(236,72,153,0.7)','rgba(236,72,153,0.4)'],borderColor:['#00d4ff','#8b5cf6','#ec4899','#ec4899'],borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}},y:{grid:{color:'rgba(30,45,74,0.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}}}}});
+  new Chart(document.getElementById('registryCompareChart'),{type:'bar',data:{labels:['Puro.earth\n(Delivered)','Rainbow Std\n(Credits)','Isometric\n(Issued)','Isometric\n(Retired)'],datasets:[{label:'Credits / Tonnes',data:[927053,421377,99731,32616],backgroundColor:['rgba(0,212,255,0.7)','rgba(139,92,246,0.7)','rgba(236,72,153,0.7)','rgba(236,72,153,0.4)'],borderColor:['#00d4ff','#8b5cf6','#ec4899','#ec4899'],borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}},y:{grid:{color:'rgba(30,45,74,0.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}}}}});
   // Rainbow methodology breakdown for cross-registry chart
   if(DATA.rainbow){
     var rbm=DATA.rainbow.methodologyDist;
@@ -920,15 +931,19 @@ function renderPagination(cid,current,total,onClick){
 // ====================================================
 // RAINBOW STANDARD
 // ====================================================
-var rbFiltered=[],rbPage=1,RB_PER_PAGE=25,rbSortKey='credits',rbSortDir=-1;
+var rbFiltered=[],rbPage=1,RB_PER_PAGE=25,rbSortKey='issuedCredits',rbSortDir=-1;
 
 function renderRainbow(){
   if(!DATA||!DATA.rainbow)return;
   var rb=DATA.rainbow;
   // KPI dinamici
+  document.getElementById('rb-total').textContent=fmtNum(rb.kpis.totalProjects);
+  document.getElementById('rb-issued').textContent=fmtNum(rb.kpis.totalIssuedCredits);
+  document.getElementById('rb-available').textContent=fmtNum(rb.kpis.totalAvailableCredits);
   document.getElementById('rb-credited').textContent=rb.kpis.creditedProjects;
   document.getElementById('rb-removal').textContent=rb.kpis.removalProjects;
   document.getElementById('rb-avoid').textContent=rb.kpis.avoidanceProjects;
+  document.getElementById('rb-countries').textContent=rb.kpis.countries;
   // Methodology bar chart
   var mDist=rb.methodologyDist;
   var mKeys=Object.keys(mDist).sort(function(a,b){return mDist[b]-mDist[a];});
@@ -940,14 +955,14 @@ function renderRainbow(){
   new Chart(document.getElementById('rbCountryChart'),{type:'bar',data:{labels:cKeys,datasets:[{label:'Projects',data:cKeys.map(function(k){return cDist[k];}),backgroundColor:'rgba(139,92,246,0.6)',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9},maxRotation:35},border:{display:false}},y:{grid:{color:'rgba(30,45,74,0.5)'},ticks:{color:'#5a7399',font:{size:10},stepSize:2},border:{display:false}}}}});
   // Status donut
   var sDist=rb.statusDist;
-  var sCols={Credited:'#8b5cf6',Validated:'#a78bfa',Listed:'#f59e0b',Registered:'#06b6d4',Withdrawn:'#ef4444'};
+  var sCols={CREDITED:'#8b5cf6',VALIDATED:'#a78bfa',LISTED:'#f59e0b',REGISTERED:'#06b6d4',PUBLIC_COMMENT_PERIOD:'#10b981',REJECTED:'#ef4444',WITHDRAWN:'#6b7280'};
   new Chart(document.getElementById('rbStatusChart'),{type:'doughnut',data:{labels:Object.keys(sDist),datasets:[{data:Object.values(sDist),backgroundColor:Object.keys(sDist).map(function(k){return sCols[k]||'#5a7399';}),borderWidth:2,borderColor:'#131d32'}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' '+ctx.label+': '+ctx.raw;}}}}}});
   var leg=document.getElementById('rbStatusLegend');
   leg.innerHTML='';
   Object.keys(sDist).forEach(function(k){leg.innerHTML+='<div class="status-item"><div class="status-dot" style="background:'+(sCols[k]||'#5a7399')+'"></div><span class="status-name">'+k+'</span><span class="status-count">'+sDist[k]+'</span></div>';});
   // Credits by methodology (only credited projects)
   var credByMethod={};
-  rb.projects.filter(function(p){return p.status==='Credited'&&p.credits>0;}).forEach(function(p){credByMethod[p.methodology]=(credByMethod[p.methodology]||0)+p.credits;});
+  rb.projects.filter(function(p){return p.status==='CREDITED'&&p.issuedCredits>0;}).forEach(function(p){credByMethod[p.methodology]=(credByMethod[p.methodology]||0)+p.issuedCredits;});
   var cbmk=Object.keys(credByMethod).sort(function(a,b){return credByMethod[b]-credByMethod[a];});
   new Chart(document.getElementById('rbCreditsChart'),{type:'bar',data:{labels:cbmk,datasets:[{label:'Credits',data:cbmk.map(function(k){return credByMethod[k];}),backgroundColor:['rgba(236,72,153,0.7)','rgba(139,92,246,0.7)','rgba(245,158,11,0.7)','rgba(6,182,212,0.7)'],borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' '+fmtNum(ctx.raw)+' credits';}}}},scales:{x:{grid:{color:'rgba(30,45,74,0.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}}}});
   // Init table
@@ -958,36 +973,40 @@ function renderRainbow(){
 function filterRb(){
   if(!DATA||!DATA.rainbow)return;
   var q=(document.getElementById('rb-search').value||'').toLowerCase();
-  var type=document.getElementById('rb-type').value;
+  var mechanism=document.getElementById('rb-mechanism').value;
   var method=document.getElementById('rb-method').value;
   var status=document.getElementById('rb-status').value;
   rbFiltered=DATA.rainbow.projects.filter(function(p){
-    if(q&&!p.name.toLowerCase().includes(q)&&!p.company.toLowerCase().includes(q)&&!p.country.toLowerCase().includes(q))return false;
-    if(type&&p.type!==type)return false;
+    if(q&&!p.name.toLowerCase().includes(q)&&!(p.developer||'').toLowerCase().includes(q)&&!p.country.toLowerCase().includes(q)&&!(p.city||'').toLowerCase().includes(q))return false;
+    if(mechanism&&p.mechanism!==mechanism)return false;
     if(method&&p.methodology!==method)return false;
     if(status&&p.status!==status)return false;
     return true;
   });
-  rbFiltered.sort(function(a,b){var va=a[rbSortKey],vb=b[rbSortKey];if(typeof va==='string')return rbSortDir*va.localeCompare(vb);return rbSortDir*((va||0)-(vb||0));});
+  rbFiltered.sort(function(a,b){var va=a[rbSortKey],vb=b[rbSortKey];if(typeof va==='string')return rbSortDir*(va||'').localeCompare(vb||'');return rbSortDir*((va||0)-(vb||0));});
   rbPage=1;
-  document.getElementById('rb-count').textContent=rbFiltered.length+' projects';
+  document.getElementById('rb-count').textContent=rbFiltered.length+' of '+DATA.rainbow.kpis.totalProjects+' projects';
   renderRbTable();
 }
 
 function sortRb(key){if(rbSortKey===key)rbSortDir*=-1;else{rbSortKey=key;rbSortDir=-1;}filterRb();}
 
-var rbStatusCls={Credited:'badge-retired',Validated:'badge-contracted',Listed:'badge-partial',Registered:'badge-other',Withdrawn:'badge-other'};
-var rbTypeCls={Removal:'badge-delivered',Avoidance:'badge-partial'};
+var rbStatusCls={CREDITED:'badge-retired',VALIDATED:'badge-contracted',LISTED:'badge-partial',REGISTERED:'badge-other',PUBLIC_COMMENT_PERIOD:'badge-bcr',REJECTED:'badge-other',WITHDRAWN:'badge-other'};
+var rbMechCls={REMOVAL:'badge-delivered',AVOIDANCE:'badge-partial'};
+var rbMethodShort={'Biomass carbon removal and storage':'BiCRS','Biobased construction materials':'Biobased Const.','Biogas from anaerobic digestion':'Biogas','Refurbishing of electronic devices':'Electronics','General requirements':'General','Textile recycling':'Textiles','Textile to fibre recycling':'Tex→Fibre','Organic waste collection':'Organic Waste','Wet waste valorisation':'Wet Waste','Natural refrigerants in stationary refrigeration':'Refrigerants','Biochar applications':'Biochar'};
 
 function renderRbTable(){
   var start=(rbPage-1)*RB_PER_PAGE;
   var rows=rbFiltered.slice(start,start+RB_PER_PAGE);
   var tbody=document.getElementById('rb-body');
   tbody.innerHTML=rows.map(function(p){
-    var credStr=p.credits>0?'<span style="color:var(--purple);font-weight:700;">'+fmtNum(p.credits)+'</span>':'<span style="color:var(--text3)">—</span>';
-    var durStr=p.durability?'<span style="font-size:10px;color:var(--text3);">'+p.durability+'</span>':'<span style="color:var(--text3)">—</span>';
-    var mBadge=p.methodology==='BiCRS'?'badge-bcr':p.methodology==='Biobased construction'?'badge-wood':p.methodology==='Biogas'?'badge-erw':'badge-other';
-    return '<tr><td class="td-bold" style="max-width:220px;">'+p.name+'</td><td>'+p.company+'</td><td><span class="badge '+mBadge+'">'+p.methodology+'</span></td><td><span class="badge '+(rbTypeCls[p.type]||'badge-other')+'">'+p.type+'</span></td><td>'+p.country+'</td><td><span class="badge '+(rbStatusCls[p.status]||'badge-other')+'">'+p.status+'</span></td><td style="text-align:right;">'+credStr+'</td><td>'+durStr+'</td></tr>';
+    var issuedStr=p.issuedCredits>0?'<span style="color:var(--purple);font-weight:700;">'+fmtNum(p.issuedCredits)+'</span>':'<span style="color:var(--text3)">—</span>';
+    var availStr=p.availableCredits>0?'<span style="color:var(--green);font-weight:700;">'+fmtNum(p.availableCredits)+'</span>':'<span style="color:var(--text3)">—</span>';
+    var durStr=p.durability&&p.durability!=='N/A'?'<span style="font-size:10px;color:var(--accent);">'+p.durability+'</span>':'<span style="color:var(--text3)">N/A</span>';
+    var mShort=rbMethodShort[p.methodology]||p.methodology;
+    var mBadge=p.mechanism==='REMOVAL'?'badge-bcr':'badge-erw';
+    var cityStr=(p.city&&p.city.trim())?p.city+(p.location&&p.location!==p.city?' <span style="color:var(--text3);font-size:10px;">('+p.location+')</span>':''):'<span style="color:var(--text3)">—</span>';
+    return '<tr><td class="td-bold" style="max-width:200px;"><a href="https://registry.rainbowstandard.io" target="_blank" style="color:var(--purple);text-decoration:none;">'+p.name+'</a></td><td style="font-size:12px;">'+p.developer+'</td><td><span class="badge badge-other" style="font-size:10px;">'+mShort+'</span></td><td><span class="badge '+(rbMechCls[p.mechanism]||'badge-other')+'">'+p.mechanism+'</span></td><td>'+p.country+'</td><td style="font-size:11px;">'+cityStr+'</td><td><span class="badge '+(rbStatusCls[p.status]||'badge-other')+'">'+p.status+'</span></td><td style="text-align:right;">'+issuedStr+'</td><td style="text-align:right;">'+availStr+'</td><td>'+durStr+'</td></tr>';
   }).join('');
   var total=rbFiltered.length,pages=Math.ceil(total/RB_PER_PAGE);
   document.getElementById('rb-info').textContent='Showing '+(start+1)+'–'+Math.min(start+RB_PER_PAGE,total)+' of '+total;
