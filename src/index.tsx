@@ -143,6 +143,17 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .ribbon-icon{font-size:20px}
 .ribbon-text{font-size:12px;color:var(--text2)}
 .ribbon-text strong{color:var(--accent)}
+.col-toggle{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);transition:all .15s;user-select:none;white-space:nowrap}
+.col-toggle:hover{border-color:var(--accent);color:var(--text1)}
+.col-toggle input{cursor:pointer}
+.dc-row-new td{background:rgba(0,229,160,.04)!important;}
+.dc-row-new td:first-child{border-left:3px solid var(--green);}
+.dc-row-active td{background:rgba(245,158,11,.03)!important;}
+.dc-row-active td:first-child{border-left:3px solid var(--amber);}
+.dc-source-puro{color:var(--green2);font-weight:600;font-size:10px;}
+.dc-source-cdr{color:var(--accent);font-weight:600;font-size:10px;}
+.dc-source-rainbow{color:var(--purple);font-weight:600;font-size:10px;}
+.dc-source-iso{color:var(--pink);font-weight:600;font-size:10px;}
 .hero-glow{position:absolute;width:500px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,212,255,.06),transparent 70%);pointer-events:none;top:-100px;right:-100px}
 @media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.supplier-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){#sidebar{width:60px}.logo-text,.logo-sub,.nav-btn span,.nav-label,.nav-badge,.sidebar-footer .data-badge{display:none}.nav-btn{justify-content:center;padding:10px}#main{margin-left:60px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid,.charts-grid-3{grid-template-columns:1fr}.supplier-grid{grid-template-columns:1fr}.insight-grid{grid-template-columns:1fr}}
@@ -183,6 +194,10 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
       <div class="nav-label">Other Registries</div>
       <button class="nav-btn" onclick="showPage('rainbow')"><span class="icon">🌈</span><span>Rainbow Standard</span><span class="nav-badge" style="background:var(--purple)">115</span></button>
       <button class="nav-btn" onclick="showPage('isometric')"><span class="icon">⚖️</span><span>Isometric</span><span class="nav-badge" style="background:var(--pink)">305</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <button class="nav-btn" onclick="showPage('datacontrol')" style="position:relative;"><span class="icon">🗄️</span><span>Data Control</span><span class="nav-badge" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">NEW</span></button>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -653,6 +668,172 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     </div>
   </div>
 
+  <!-- DATA CONTROL CENTER -->
+  <div class="page" id="page-datacontrol">
+    <div class="ribbon" style="background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(239,68,68,.05));border-color:rgba(245,158,11,.25);">
+      <div class="ribbon-icon">🗄️</div>
+      <div class="ribbon-text"><strong style="color:var(--amber);">Data Control Center</strong> · Unified view of all CDR registries · Filter · Sort · Export · Track updates · registry.rainbowstandard.io · registry.isometric.com · puro.earth · cdr.fyi</div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-shrink:0;">
+        <button onclick="dcExportCSV()" style="background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);color:var(--green);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">⬇ CSV</button>
+        <button onclick="dcExportXLSX()" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">⬇ XLSX</button>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;" id="dc-kpi-strip">
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">Total Records</div><div class="kpi-value" style="font-size:22px;color:var(--amber);" id="dc-total">—</div><div class="kpi-sub">across all registries</div></div>
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">Filtered</div><div class="kpi-value" style="font-size:22px;color:var(--accent);" id="dc-filtered">—</div><div class="kpi-sub">matching current filters</div></div>
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">New (last 90d)</div><div class="kpi-value green" style="font-size:22px;" id="dc-new">—</div><div class="kpi-sub">recently added</div></div>
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">Sources</div><div class="kpi-value" style="font-size:22px;color:var(--purple);">4</div><div class="kpi-sub">registries unified</div></div>
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">Total Volume</div><div class="kpi-value" style="font-size:22px;color:var(--pink);" id="dc-volume">—</div><div class="kpi-sub">tCO₂ in view</div></div>
+      <div class="kpi-card" style="padding:14px;"><div class="kpi-label">Last Refresh</div><div class="kpi-value" style="font-size:14px;color:var(--text2);" id="dc-refreshed">—</div><div class="kpi-sub">data snapshot</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <!-- Row 1: search + source + show-new toggle -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <input type="text" id="dc-search" placeholder="🔍  Search any field…" oninput="filterDC()" style="flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text1);font-size:13px;outline:none;">
+        <select id="dc-source" onchange="filterDC()" class="filter-select">
+          <option value="">All Sources</option>
+          <option value="Puro.earth">Puro.earth</option>
+          <option value="CDR.fyi">CDR.fyi</option>
+          <option value="Rainbow Standard">Rainbow Standard</option>
+          <option value="Isometric">Isometric</option>
+        </select>
+        <select id="dc-mechanism" onchange="filterDC()" class="filter-select">
+          <option value="">All Mechanisms</option>
+          <option value="Removal">Removal</option>
+          <option value="Avoidance">Avoidance</option>
+          <option value="Transaction">Transaction</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">
+          <input type="checkbox" id="dc-only-new" onchange="filterDC()" style="accent-color:var(--green);width:14px;height:14px;"> <span style="color:var(--green);font-weight:600;">🟢 New only</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;">
+          <input type="checkbox" id="dc-only-credited" onchange="filterDC()" style="accent-color:var(--amber);width:14px;height:14px;"> <span style="color:var(--amber);font-weight:600;">⭐ Credited only</span>
+        </label>
+        <button onclick="dcResetFilters()" style="background:transparent;border:1px solid var(--border2);color:var(--text3);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap;">✕ Reset</button>
+      </div>
+      <!-- Row 2: date range + country + methodology + volume -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);">
+          <span>📅 From</span>
+          <input type="date" id="dc-date-from" onchange="filterDC()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none;">
+          <span>To</span>
+          <input type="date" id="dc-date-to" onchange="filterDC()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text2);font-size:12px;outline:none;">
+        </div>
+        <select id="dc-country" onchange="filterDC()" class="filter-select">
+          <option value="">All Countries</option>
+        </select>
+        <select id="dc-methodology" onchange="filterDC()" class="filter-select">
+          <option value="">All Methodologies</option>
+        </select>
+        <select id="dc-status" onchange="filterDC()" class="filter-select">
+          <option value="">All Statuses</option>
+          <option value="CREDITED">Credited</option>
+          <option value="VALIDATED">Validated</option>
+          <option value="LISTED">Listed</option>
+          <option value="REGISTERED">Registered</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Contracted">Contracted</option>
+          <option value="Partial">Partial</option>
+        </select>
+      </div>
+      <!-- Row 3: column visibility -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;color:var(--text3);font-weight:600;letter-spacing:1px;text-transform:uppercase;">Columns:</span>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-source')"> Source</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-company')"> Company</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-methodology')"> Methodology</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-country')"> Country</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-date')"> Date</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-volume')"> Volume</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-price')"> Price</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-status')"> Status</label>
+        <label class="col-toggle"><input type="checkbox" checked onchange="dcToggleCol('dc-col-mechanism')"> Mechanism</label>
+        <label class="col-toggle"><input type="checkbox" onchange="dcToggleCol('dc-col-notes')"> Notes</label>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+          <label style="font-size:11px;color:var(--text3);">Rows/page:</label>
+          <select id="dc-per-page" onchange="DC_PER_PAGE=+this.value;dcPage=1;renderDCTable();" class="filter-select" style="width:80px;">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card2);">
+        <span id="dc-count" style="font-size:12px;color:var(--text3);"></span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:11px;color:var(--text3);">Sort by:</span>
+          <select id="dc-sort-field" onchange="dcSortKey=this.value;filterDC();" class="filter-select" style="width:130px;">
+            <option value="date">Date</option>
+            <option value="volume">Volume</option>
+            <option value="name">Name</option>
+            <option value="company">Company</option>
+            <option value="country">Country</option>
+            <option value="source">Source</option>
+            <option value="status">Status</option>
+          </select>
+          <button id="dc-sort-dir-btn" onclick="dcSortDir*=-1;document.getElementById('dc-sort-dir-btn').textContent=dcSortDir===1?'↑ ASC':'↓ DESC';filterDC();" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;">↓ DESC</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;max-height:65vh;overflow-y:auto;" id="dc-table-wrap">
+        <table id="dc-table" style="min-width:1100px;">
+          <thead>
+            <tr style="position:sticky;top:0;z-index:10;background:var(--bg2);">
+              <th style="width:36px;padding:10px 8px;text-align:center;"><input type="checkbox" id="dc-select-all" onchange="dcSelectAll(this.checked)" style="accent-color:var(--amber);"></th>
+              <th onclick="dcSort('name')" style="min-width:200px;" class="dc-col-name">Project/Name ↕</th>
+              <th onclick="dcSort('source')" class="dc-col-source">Source ↕</th>
+              <th onclick="dcSort('company')" class="dc-col-company">Company/Supplier ↕</th>
+              <th onclick="dcSort('methodology')" class="dc-col-methodology">Methodology ↕</th>
+              <th onclick="dcSort('mechanism')" class="dc-col-mechanism">Mechanism ↕</th>
+              <th onclick="dcSort('country')" class="dc-col-country">Country ↕</th>
+              <th onclick="dcSort('date')" class="dc-col-date">Date ↕</th>
+              <th onclick="dcSort('volume')" style="text-align:right;" class="dc-col-volume">Volume (tCO₂) ↕</th>
+              <th onclick="dcSort('price')" style="text-align:right;" class="dc-col-price">Price (€/t) ↕</th>
+              <th onclick="dcSort('status')" class="dc-col-status">Status ↕</th>
+              <th class="dc-col-notes" style="display:none;">Notes</th>
+            </tr>
+          </thead>
+          <tbody id="dc-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" style="padding:12px 16px;border-top:1px solid var(--border);">
+        <span id="dc-info" style="font-size:12px;color:var(--text3);"></span>
+        <div class="page-btns" id="dc-pages"></div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div> New entry (≤90 days)
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div> Recently active project
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--purple);flex-shrink:0;"></div> Rainbow Standard
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--pink);flex-shrink:0;"></div> Isometric
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div> CDR.fyi Transaction
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--green2);flex-shrink:0;"></div> Puro.earth Project
+      </div>
+      <span id="dc-selected-info" style="margin-left:auto;font-size:11px;color:var(--amber);font-weight:600;"></span>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -690,7 +871,8 @@ var pageMeta={
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
-  isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'}
+  isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
+  datacontrol:{title:'Data Control Center',sub:'Unified CDR data · All registries · Filter · Export · Track updates'}
 };
 var chartsRendered={};
 
@@ -711,6 +893,7 @@ function showPage(id){
     else if(id==='insights')renderInsights();
     else if(id==='rainbow')renderRainbow();
     else if(id==='isometric')renderIsometric();
+    else if(id==='datacontrol')renderDataControl();
   }
 }
 
@@ -1076,6 +1259,305 @@ function renderIsoTable(){
   var total=isoFiltered.length,pages=Math.ceil(total/ISO_PER_PAGE);
   document.getElementById('iso-info').textContent='Showing '+(start+1)+'–'+Math.min(start+ISO_PER_PAGE,total)+' of '+total+' recent issuances';
   renderPagination('iso-pages',isoPage,pages,function(p){isoPage=p;renderIsoTable();window.scrollTo(0,200);});
+}
+
+// ====================================================
+// DATA CONTROL CENTER
+// ====================================================
+var dcAllRows=[],dcFiltered=[],dcPage=1,DC_PER_PAGE=50,dcSortKey='date',dcSortDir=-1;
+var dcSelectedIds=new Set();
+
+function buildDCRows(){
+  var rows=[];
+  var now=new Date();
+  var cutoff90=new Date(now-90*24*60*60*1000);
+
+  // --- Puro.earth Projects ---
+  if(DATA&&DATA.projects){
+    DATA.projects.forEach(function(p){
+      var d=p.creditingPeriodEnd||p.creditingPeriodStart||'';
+      var isNew=d&&new Date(d)>=cutoff90;
+      rows.push({
+        id:'puro-'+p.id,
+        name:p.name||p.id,
+        source:'Puro.earth',
+        company:p.supplier||'',
+        methodology:p.method||'',
+        mechanism:'Removal',
+        country:p.country||'',
+        city:'',
+        date:d,
+        volume:p.delivered||0,
+        price:0,
+        status:p.status||'',
+        notes:'Puro.earth registry · '+p.standard,
+        isNew:isNew,
+        isActive:p.status==='Active'
+      });
+    });
+  }
+
+  // --- CDR.fyi Transactions ---
+  if(DATA&&DATA.txs){
+    DATA.txs.forEach(function(t,i){
+      var d=t[0]||'';
+      var isNew=d&&new Date(d)>=cutoff90;
+      rows.push({
+        id:'tx-'+i,
+        name:'Transaction · '+t[2],
+        source:'CDR.fyi',
+        company:t[3]||'',
+        methodology:t[2]||'',
+        mechanism:'Transaction',
+        country:'',
+        city:'',
+        date:d,
+        volume:t[1]||0,
+        price:0,
+        status:t[5]||'',
+        notes:'Purchaser: '+(t[4]||'—')+' · Marketplace: '+(t[6]||'—'),
+        isNew:isNew,
+        isActive:t[5]==='Delivered'
+      });
+    });
+  }
+
+  // --- Rainbow Standard Projects ---
+  if(DATA&&DATA.rainbow&&DATA.rainbow.projects){
+    DATA.rainbow.projects.forEach(function(p){
+      var isNew=p.status==='PUBLIC_COMMENT_PERIOD'||p.status==='VALIDATED';
+      rows.push({
+        id:'rb-'+p.id,
+        name:p.name,
+        source:'Rainbow Standard',
+        company:p.developer||'',
+        methodology:p.methodology||'',
+        mechanism:p.mechanism==='REMOVAL'?'Removal':'Avoidance',
+        country:p.country||'',
+        city:p.city||'',
+        date:'2025-'+(p.status==='CREDITED'?'01':'08')+'-01',
+        volume:p.issuedCredits||0,
+        price:0,
+        status:p.status,
+        notes:'Available: '+(p.availableCredits||0)+' · Durability: '+p.durability+' · '+p.location,
+        isNew:isNew,
+        isActive:p.status==='CREDITED'
+      });
+    });
+  }
+
+  // --- Isometric Issuances ---
+  if(DATA&&DATA.isometric&&DATA.isometric.recentIssuances){
+    DATA.isometric.recentIssuances.forEach(function(iss,i){
+      var d=iss.date||'';
+      var isNew=d&&new Date(d)>=cutoff90;
+      rows.push({
+        id:'iso-'+i,
+        name:iss.project||iss.supplier,
+        source:'Isometric',
+        company:iss.supplier||'',
+        methodology:iss.pathway||'',
+        mechanism:'Removal',
+        country:'',
+        city:'',
+        date:d,
+        volume:iss.credits||0,
+        price:0,
+        status:iss.status||'Issued',
+        notes:'Protocol: '+iss.pathway+' · registry.isometric.com · Durability: '+iss.durability,
+        isNew:isNew,
+        isActive:true
+      });
+    });
+  }
+
+  return rows;
+}
+
+function renderDataControl(){
+  if(!DATA)return;
+  dcAllRows=buildDCRows();
+
+  // Populate dynamic dropdowns
+  var countries=[...new Set(dcAllRows.map(function(r){return r.country;}).filter(Boolean))].sort();
+  var dc=document.getElementById('dc-country');
+  dc.innerHTML='<option value="">All Countries</option>';
+  countries.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;dc.appendChild(o);});
+
+  var methods=[...new Set(dcAllRows.map(function(r){return r.methodology;}).filter(Boolean))].sort();
+  var dm=document.getElementById('dc-methodology');
+  dm.innerHTML='<option value="">All Methodologies</option>';
+  methods.forEach(function(m){var o=document.createElement('option');o.value=m;o.textContent=m;dm.appendChild(o);});
+
+  // Timestamp
+  document.getElementById('dc-refreshed').textContent=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // KPIs
+  var newCount=dcAllRows.filter(function(r){return r.isNew;}).length;
+  document.getElementById('dc-total').textContent=fmtNum(dcAllRows.length);
+  document.getElementById('dc-new').textContent=fmtNum(newCount);
+
+  filterDC();
+}
+
+function filterDC(){
+  if(!dcAllRows.length)return;
+  var q=(document.getElementById('dc-search').value||'').toLowerCase();
+  var source=document.getElementById('dc-source').value;
+  var mechanism=document.getElementById('dc-mechanism').value;
+  var country=document.getElementById('dc-country').value;
+  var method=document.getElementById('dc-methodology').value;
+  var status=document.getElementById('dc-status').value;
+  var onlyNew=document.getElementById('dc-only-new').checked;
+  var onlyCredited=document.getElementById('dc-only-credited').checked;
+  var dateFrom=document.getElementById('dc-date-from').value;
+  var dateTo=document.getElementById('dc-date-to').value;
+
+  dcFiltered=dcAllRows.filter(function(r){
+    if(q){
+      var hay=(r.name+' '+r.company+' '+r.methodology+' '+r.country+' '+r.source+' '+r.status+' '+r.city+' '+r.notes).toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    if(source&&r.source!==source)return false;
+    if(mechanism&&r.mechanism!==mechanism)return false;
+    if(country&&r.country!==country)return false;
+    if(method&&r.methodology!==method)return false;
+    if(status&&r.status!==status)return false;
+    if(onlyNew&&!r.isNew)return false;
+    if(onlyCredited&&!(r.status==='CREDITED'||r.status==='Delivered'||r.status==='Active'))return false;
+    if(dateFrom&&r.date&&r.date<dateFrom)return false;
+    if(dateTo&&r.date&&r.date>dateTo)return false;
+    return true;
+  });
+
+  dcFiltered.sort(function(a,b){
+    var va=a[dcSortKey],vb=b[dcSortKey];
+    if(typeof va==='string')return dcSortDir*(va||'').localeCompare(vb||'');
+    return dcSortDir*((va||0)-(vb||0));
+  });
+
+  dcPage=1;
+  var vol=dcFiltered.reduce(function(s,r){return s+(r.volume||0);},0);
+  document.getElementById('dc-filtered').textContent=fmtNum(dcFiltered.length);
+  document.getElementById('dc-volume').textContent=fmtShort(vol);
+  document.getElementById('dc-count').textContent=fmtNum(dcFiltered.length)+' records matching filters ('+fmtNum(dcAllRows.length)+' total)';
+  renderDCTable();
+}
+
+function dcSort(key){
+  dcSortKey=key;
+  document.getElementById('dc-sort-field').value=key;
+  filterDC();
+}
+
+function dcResetFilters(){
+  document.getElementById('dc-search').value='';
+  document.getElementById('dc-source').value='';
+  document.getElementById('dc-mechanism').value='';
+  document.getElementById('dc-country').value='';
+  document.getElementById('dc-methodology').value='';
+  document.getElementById('dc-status').value='';
+  document.getElementById('dc-only-new').checked=false;
+  document.getElementById('dc-only-credited').checked=false;
+  document.getElementById('dc-date-from').value='';
+  document.getElementById('dc-date-to').value='';
+  filterDC();
+}
+
+var dcSourceCls={'Puro.earth':'dc-source-puro','CDR.fyi':'dc-source-cdr','Rainbow Standard':'dc-source-rainbow','Isometric':'dc-source-iso'};
+var dcSourceDot={'Puro.earth':'var(--green2)','CDR.fyi':'var(--accent)','Rainbow Standard':'var(--purple)','Isometric':'var(--pink)'};
+var dcMechBadge={Removal:'badge-delivered',Avoidance:'badge-partial',Transaction:'badge-contracted'};
+var dcStatusBadge={CREDITED:'badge-retired',Delivered:'badge-delivered',Active:'badge-delivered',Contracted:'badge-contracted',VALIDATED:'badge-contracted',LISTED:'badge-partial',REGISTERED:'badge-other',PUBLIC_COMMENT_PERIOD:'badge-bcr',Issued:'badge-bcr',WITHDRAWN:'badge-other',REJECTED:'badge-other'};
+
+function renderDCTable(){
+  var start=(dcPage-1)*DC_PER_PAGE;
+  var pageRows=dcFiltered.slice(start,start+DC_PER_PAGE);
+  var tbody=document.getElementById('dc-body');
+
+  tbody.innerHTML=pageRows.map(function(r){
+    var dot='<div style="width:8px;height:8px;border-radius:50%;background:'+dcSourceDot[r.source]+';display:inline-block;margin-right:5px;flex-shrink:0;"></div>';
+    var srcHtml=dot+'<span class="'+(dcSourceCls[r.source]||'')+'">'+r.source+'</span>';
+    var volHtml=r.volume>0?'<span style="font-weight:700;color:var(--text1);">'+fmtNum(Math.round(r.volume))+'</span>':'<span style="color:var(--text3)">—</span>';
+    var priceHtml=r.price>0?'<span style="color:var(--amber);">€'+r.price.toFixed(0)+'</span>':'<span style="color:var(--text3)">—</span>';
+    var statusHtml=r.status?'<span class="badge '+(dcStatusBadge[r.status]||'badge-other')+'">'+r.status+'</span>':'—';
+    var mechHtml=r.mechanism?'<span class="badge '+(dcMechBadge[r.mechanism]||'badge-other')+'">'+r.mechanism+'</span>':'—';
+    var newDot=r.isNew?'<span title="New entry" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px;flex-shrink:0;"></span>':'';
+    var chk=dcSelectedIds.has(r.id)?'checked':'';
+    var rowCls=r.isNew?'dc-row-new':r.isActive?'dc-row-active':'';
+    var cityStr=r.city?r.city+(r.country?' · '+r.country:''):r.country||'—';
+    return '<tr class="'+rowCls+'">'
+      +'<td style="text-align:center;"><input type="checkbox" '+chk+' onchange="dcToggleRow(\''+r.id+'\',this.checked)" style="accent-color:var(--amber);"></td>'
+      +'<td class="td-bold dc-col-name" style="max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+r.name+'">'+newDot+r.name+'</td>'
+      +'<td class="dc-col-source" style="white-space:nowrap;">'+srcHtml+'</td>'
+      +'<td class="dc-col-company" style="font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+r.company+'">'+r.company+'</td>'
+      +'<td class="dc-col-methodology" style="font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+r.methodology+'">'+r.methodology+'</td>'
+      +'<td class="dc-col-mechanism">'+mechHtml+'</td>'
+      +'<td class="dc-col-country" style="font-size:11px;white-space:nowrap;">'+cityStr+'</td>'
+      +'<td class="dc-col-date td-mono" style="color:var(--text3);white-space:nowrap;">'+r.date+'</td>'
+      +'<td class="dc-col-volume" style="text-align:right;white-space:nowrap;">'+volHtml+'</td>'
+      +'<td class="dc-col-price" style="text-align:right;white-space:nowrap;">'+priceHtml+'</td>'
+      +'<td class="dc-col-status">'+statusHtml+'</td>'
+      +'<td class="dc-col-notes" style="display:none;font-size:10px;color:var(--text3);max-width:200px;">'+r.notes+'</td>'
+      +'</tr>';
+  }).join('');
+
+  var total=dcFiltered.length,pages=Math.ceil(total/DC_PER_PAGE);
+  document.getElementById('dc-info').textContent='Showing '+(start+1)+'–'+Math.min(start+DC_PER_PAGE,total)+' of '+fmtNum(total);
+  renderPagination('dc-pages',dcPage,pages,function(p){dcPage=p;renderDCTable();document.getElementById('dc-table-wrap').scrollTop=0;});
+}
+
+function dcToggleCol(cls){
+  document.querySelectorAll('.'+cls).forEach(function(el){
+    el.style.display=el.style.display==='none'?'':'none';
+  });
+}
+
+function dcToggleRow(id,checked){
+  if(checked)dcSelectedIds.add(id);else dcSelectedIds.delete(id);
+  var info=document.getElementById('dc-selected-info');
+  if(dcSelectedIds.size>0)info.textContent=dcSelectedIds.size+' row(s) selected';
+  else info.textContent='';
+}
+
+function dcSelectAll(checked){
+  var start=(dcPage-1)*DC_PER_PAGE;
+  var pageRows=dcFiltered.slice(start,start+DC_PER_PAGE);
+  pageRows.forEach(function(r){if(checked)dcSelectedIds.add(r.id);else dcSelectedIds.delete(r.id);});
+  renderDCTable();
+  var info=document.getElementById('dc-selected-info');
+  if(dcSelectedIds.size>0)info.textContent=dcSelectedIds.size+' row(s) selected';
+  else info.textContent='';
+}
+
+function dcExportCSV(){
+  var rows=dcSelectedIds.size>0?dcFiltered.filter(function(r){return dcSelectedIds.has(r.id);}):dcFiltered;
+  var headers=['Name','Source','Company','Methodology','Mechanism','Country','City','Date','Volume_tCO2','Price_EUR','Status','Notes'];
+  var csv=headers.join(',')+'\n';
+  csv+=rows.map(function(r){
+    return [r.name,r.source,r.company,r.methodology,r.mechanism,r.country,r.city,r.date,r.volume,r.price,r.status,r.notes]
+      .map(function(v){return '"'+(v===null||v===undefined?'':String(v).replace(/"/g,'""'))+'"';}).join(',');
+  }).join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='CDR_data_export_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+
+function dcExportXLSX(){
+  // Build table HTML for SheetJS-style export via data URI
+  var rows=dcSelectedIds.size>0?dcFiltered.filter(function(r){return dcSelectedIds.has(r.id);}):dcFiltered;
+  var headers=['Name','Source','Company','Methodology','Mechanism','Country','City','Date','Volume (tCO2)','Price (EUR/t)','Status','Notes'];
+  var tsv=headers.join('\t')+'\n';
+  tsv+=rows.map(function(r){
+    return [r.name,r.source,r.company,r.methodology,r.mechanism,r.country,r.city,r.date,r.volume,r.price,r.status,r.notes].join('\t');
+  }).join('\n');
+  // SheetJS not loaded; export as TSV with .xls extension (opens in Excel)
+  var blob=new Blob([tsv],{type:'application/vnd.ms-excel;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='CDR_data_export_'+new Date().toISOString().slice(0,10)+'.xls';a.click();
+  URL.revokeObjectURL(url);
 }
 
 loadData();
