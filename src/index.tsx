@@ -155,11 +155,116 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .dc-source-rainbow{color:var(--purple);font-weight:600;font-size:10px;}
 .dc-source-iso{color:var(--pink);font-weight:600;font-size:10px;}
 .hero-glow{position:absolute;width:500px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,212,255,.06),transparent 70%);pointer-events:none;top:-100px;right:-100px}
-@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.supplier-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:900px){#sidebar{width:60px}.logo-text,.logo-sub,.nav-btn span,.nav-label,.nav-badge,.sidebar-footer .data-badge{display:none}.nav-btn{justify-content:center;padding:10px}#main{margin-left:60px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid,.charts-grid-3{grid-template-columns:1fr}.supplier-grid{grid-template-columns:1fr}.insight-grid{grid-template-columns:1fr}}
+/* ── HAMBURGER BUTTON (mobile only) ─────────────────────────── */
+#hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--card2);border:1px solid var(--border2);border-radius:10px;width:40px;height:40px;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:5px;padding:8px;transition:background .2s}
+#hamburger span{display:block;width:20px;height:2px;background:var(--text2);border-radius:2px;transition:all .3s}
+#hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+#hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+/* ── OVERLAY (mobile only) ───────────────────────────────────── */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
+/* ── TABLE SCROLL HINT ───────────────────────────────────────── */
+.table-scroll-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+.table-scroll-wrap::after{content:'';position:absolute;top:0;right:0;bottom:0;width:32px;background:linear-gradient(to left,var(--card),transparent);pointer-events:none;opacity:0;transition:opacity .3s}
+.table-scroll-wrap.has-scroll::after{opacity:1}
+.scroll-hint{display:none;font-size:10px;color:var(--text3);text-align:right;padding:4px 8px 0;}
+/* ── FILTER COLLAPSE (mobile) ─────────────────────────────────── */
+.filter-panel{transition:max-height .3s ease,opacity .3s ease;max-height:600px;opacity:1;overflow:hidden}
+.filter-panel.collapsed{max-height:0;opacity:0}
+.filter-toggle-btn{display:none;width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text2);padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;text-align:left;margin-bottom:10px}
+/* ─────────────────────────────────────────────────────────────── */
+/* TABLET  ≤1200px                                                 */
+/* ─────────────────────────────────────────────────────────────── */
+@media(max-width:1200px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .supplier-grid{grid-template-columns:repeat(2,1fr)}
+}
+/* ─────────────────────────────────────────────────────────────── */
+/* SMALL TABLET  ≤900px                                            */
+/* ─────────────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  #hamburger{display:flex}
+  #sidebar{transform:translateX(-100%);width:260px;transition:transform .3s ease;z-index:100}
+  #sidebar.open{transform:translateX(0)}
+  #sidebar-overlay.open{display:block}
+  #main{margin-left:0}
+  .topbar{padding:0 14px 0 64px;height:56px}
+  .page-title{font-size:14px}
+  .page-sub{font-size:11px}
+  .live-badge{padding:4px 10px;font-size:10px}
+  .page{padding:16px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .kpi-card{padding:14px}
+  .kpi-value{font-size:18px}
+  .kpi-icon{font-size:16px;top:12px;right:12px}
+  .charts-grid,.charts-grid-3{grid-template-columns:1fr;gap:14px}
+  .chart-wrap{height:180px}
+  .chart-wrap.tall{height:220px}
+  .supplier-grid{grid-template-columns:repeat(2,1fr)}
+  .insight-grid{grid-template-columns:1fr}
+  .ribbon{flex-wrap:wrap;gap:8px;padding:10px 12px}
+  .ribbon-text{font-size:11px}
+  .scroll-hint{display:block}
+  .filter-toggle-btn{display:block}
+  .table-toolbar{padding:10px 12px;gap:8px}
+  .search-box{min-width:140px}
+  .pagination{flex-wrap:wrap;gap:6px;padding:10px 12px}
+  .page-btns{flex-wrap:wrap}
+  .page-btn{padding:7px 11px;min-width:36px;min-height:36px}
+  th{padding:8px 10px;font-size:9px}
+  td{padding:9px 10px;font-size:11px}
+}
+/* ─────────────────────────────────────────────────────────────── */
+/* MOBILE  ≤600px                                                  */
+/* ─────────────────────────────────────────────────────────────── */
+@media(max-width:600px){
+  .topbar{height:52px;padding:0 10px 0 60px}
+  .page-sub{display:none}
+  .topbar-right .live-badge{display:flex}
+  .topbar-right>*:last-child{display:none}
+  .page{padding:12px}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .kpi-card{padding:12px 10px;border-radius:10px}
+  .kpi-label{font-size:9px;margin-bottom:6px}
+  .kpi-value{font-size:16px}
+  .kpi-sub{font-size:10px}
+  .kpi-icon{display:none}
+  .charts-grid,.charts-grid-3{gap:10px}
+  .chart-card{padding:14px}
+  .chart-title{font-size:12px}
+  .chart-sub{font-size:10px;margin-bottom:10px}
+  .chart-wrap{height:160px}
+  .chart-wrap.tall{height:190px}
+  .supplier-grid{grid-template-columns:1fr}
+  .ribbon{padding:8px 10px}
+  .ribbon-icon{font-size:16px}
+  .ribbon-text{font-size:10px}
+  .table-toolbar{padding:8px 10px;gap:6px}
+  .search-box{font-size:13px;padding:10px 12px;min-height:44px}
+  .filter-select{font-size:12px;padding:10px 10px;min-height:44px}
+  .section-title{font-size:13px}
+  th{padding:8px 8px;font-size:9px}
+  td{padding:8px 8px;font-size:11px}
+  .badge{font-size:9px;padding:2px 6px}
+  .page-btn{padding:8px 12px;min-width:38px;min-height:38px;font-size:11px}
+  .nav-btn{padding:10px 12px;min-height:44px}
+  .pagination{padding:8px 10px}
+  /* dc specific */
+  #dc-kpi-strip{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .col-toggle{padding:6px 8px;font-size:10px;min-height:36px}
+  /* hide secondary topbar info on very small */
+  #dc-table{min-width:700px}
+}
 </style>
 </head>
 <body>
+
+<!-- HAMBURGER BUTTON -->
+<button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+  <span></span><span></span><span></span>
+</button>
+<!-- SIDEBAR OVERLAY -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <nav id="sidebar">
   <div class="logo-area">
@@ -368,7 +473,8 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         </select>
         <span id="tx-count" style="font-size:12px;color:var(--text3);margin-left:auto;white-space:nowrap;"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-scroll-wrap" id="tx-scroll">
+        <div class="scroll-hint">← scorri per vedere più colonne →</div>
         <table>
           <thead>
             <tr>
@@ -434,7 +540,8 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         <select class="filter-select" id="proj-country" onchange="filterProj()"></select>
         <span id="proj-count" style="font-size:12px;color:var(--text3);margin-left:auto;white-space:nowrap;"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-scroll-wrap" id="proj-scroll">
+        <div class="scroll-hint">← scorri per vedere più colonne →</div>
         <table>
           <thead>
             <tr>
@@ -545,7 +652,8 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         </select>
         <span id="rb-count" style="font-size:12px;color:var(--text3);margin-left:auto;white-space:nowrap;"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-scroll-wrap" id="rb-scroll">
+        <div class="scroll-hint">← scorri per vedere più colonne →</div>
         <table>
           <thead>
             <tr>
@@ -622,7 +730,8 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
         </select>
         <span id="iso-count" style="font-size:12px;color:var(--text3);margin-left:auto;white-space:nowrap;"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="table-scroll-wrap" id="iso-scroll">
+        <div class="scroll-hint">← scorri per vedere più colonne →</div>
         <table>
           <thead>
             <tr>
@@ -783,7 +892,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
           <button id="dc-sort-dir-btn" onclick="dcSortDir*=-1;document.getElementById('dc-sort-dir-btn').textContent=dcSortDir===1?'↑ ASC':'↓ DESC';filterDC();" style="background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;">↓ DESC</button>
         </div>
       </div>
-      <div style="overflow-x:auto;max-height:65vh;overflow-y:auto;" id="dc-table-wrap">
+      <div class="table-scroll-wrap" style="max-height:65vh;overflow-y:auto;" id="dc-table-wrap">
         <table id="dc-table" style="min-width:1100px;">
           <thead>
             <tr style="position:sticky;top:0;z-index:10;background:var(--bg2);">
@@ -839,6 +948,60 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 <script>
 var DATA=null,txFiltered=[],txPage=1,TX_PER_PAGE=50,projFiltered=[],projPage=1,PROJ_PER_PAGE=25,supFiltered=[],supPage=1,SUP_PER_PAGE=18,txSortKey='date',txSortDir=-1,projSortKey='id',projSortDir=1;
 
+// ====================================================
+// MOBILE SIDEBAR DRAWER
+// ====================================================
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  var hb=document.getElementById('hamburger');
+  var open=sb.classList.toggle('open');
+  ov.classList.toggle('open',open);
+  hb.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+  document.body.style.overflow='';
+}
+// Close sidebar when a nav button is clicked on mobile
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.nav-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      if(window.innerWidth<=900)closeSidebar();
+    });
+  });
+  // Init scroll-hint visibility on all table wrappers
+  document.querySelectorAll('.table-scroll-wrap').forEach(function(el){
+    checkScrollHint(el);
+    el.addEventListener('scroll',function(){checkScrollHint(el);},{passive:true});
+  });
+  // Close sidebar on ESC
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape')closeSidebar();
+  });
+  // Handle resize: if desktop, always show sidebar, remove overlay
+  window.addEventListener('resize',function(){
+    if(window.innerWidth>900){
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+      document.body.style.overflow='';
+    }
+  });
+});
+
+function checkScrollHint(el){
+  // Show gradient fade if content is wider than container
+  if(el.scrollWidth>el.clientWidth+4){
+    el.classList.add('has-scroll');
+  } else {
+    el.classList.remove('has-scroll');
+  }
+}
+
 async function loadData(){
   try{
     var r=await fetch('/static/cdr_data.json');
@@ -884,6 +1047,8 @@ function showPage(id){
   var m=pageMeta[id]||{};
   document.getElementById('page-title').textContent=m.title||id;
   document.getElementById('page-sub').textContent=m.sub||'';
+  // scroll to top on mobile when switching page
+  if(window.innerWidth<=900)window.scrollTo({top:0,behavior:'smooth'});
   if(!chartsRendered[id]){
     chartsRendered[id]=true;
     if(id==='transactions')filterTx();
@@ -895,6 +1060,10 @@ function showPage(id){
     else if(id==='isometric')renderIsometric();
     else if(id==='datacontrol')renderDataControl();
   }
+  // re-check scroll hints after page switch
+  setTimeout(function(){
+    document.querySelectorAll('.table-scroll-wrap').forEach(function(el){checkScrollHint(el);});
+  },100);
 }
 
 var MCOL=['#00d4ff','#00e5a0','#8b5cf6','#f59e0b','#ec4899','#06b6d4','#10b981','#f97316','#a78bfa','#34d399','#94a3b8'];
