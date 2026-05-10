@@ -2154,8 +2154,7 @@ function injectMicrosoftWarning(){
       '<strong style="color:var(--amber);">Market Concentration Note</strong> — '+
       '<strong style="color:var(--text1);">Microsoft</strong> alone accounts for <strong style="color:var(--amber);">'+bc.top1pct+'%</strong> of all CDR.fyi volume. '+
       'Top 3 buyers: <strong style="color:var(--amber);">'+bc.top3pct+'%</strong>. Top 10: <strong style="color:var(--amber);">'+bc.top10pct+'%</strong>. '+
-      'HHI Index: <strong style="color:var(--amber);">'+bc.hhi+'</strong> (highly concentrated). '+
-      ''+'
+      'HHI Index: <strong style="color:var(--amber);">'+bc.hhi+'</strong> (highly concentrated).'+
     '</div>'+
     '<button onclick="this.parentElement.style.display=&quot;none&quot;" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
   // Insert after KPI grid — use appendChild as safe fallback
