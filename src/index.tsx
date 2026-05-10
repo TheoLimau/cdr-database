@@ -14,6 +14,7 @@ app.get('/', (c) => {
 <title>CDR Intelligence Platform</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230a0f1e'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='20'>🌿</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -1000,7 +1001,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
   <div class="page" id="page-deliverygap">
     <div class="ribbon" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.05));border-color:rgba(239,68,68,.3);">
       <div class="ribbon-icon">⚠️</div>
-      <div class="ribbon-text"><strong style="color:#ef4444;">Delivery Gap Analysis</strong> · Only <strong style="color:var(--amber);">2.4%</strong> of contracted CDR has been physically delivered · BECCS and DACCS have near-zero delivery rates · Data source: CDR.fyi 5,498 transactions</div>
+      <div class="ribbon-text"><strong style="color:#ef4444;">Delivery Gap Analysis</strong> · Only <strong style="color:var(--amber);">5.4%</strong> of contracted CDR has been physically delivered · BECCS and DACCS have near-zero delivery rates · Data source: CDR.fyi 5,498 transactions</div>
     </div>
     <!-- KPI strip -->
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;" class="kpi-grid" id="dg-kpi-strip">
@@ -1017,7 +1018,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">Market Concentration Alert — HHI: 6,368 (Highly Concentrated)</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6;">
-          <strong style="color:var(--text1);">Microsoft</strong> has purchased <strong style="color:var(--amber);">79.5%</strong> of all CDR.fyi volume (30.8M tCO₂ of 38.8M total). 
+          <strong style="color:var(--text1);">Microsoft</strong> has purchased <strong style="color:var(--amber);">79.5%</strong> of all CDR.fyi volume (30.9M tCO₂ of 38.8M total). 
           The top 3 buyers control <strong style="color:var(--amber);">87.2%</strong> and the top 10 control <strong style="color:var(--amber);">94.6%</strong>. 
           This extreme concentration (HHI 6,368 vs. competitive threshold of 1,500) means the market growth figures reflect primarily one company's purchasing decisions, not broad market adoption.
           An HHI above 2,500 is classified as a highly concentrated market by antitrust standards.
@@ -1091,7 +1092,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-title">Rainbow Standard — Projects by Country</div>
-        <div class="chart-sub">115 projects across 25 countries · issued credits</div>
+        <div class="chart-sub">Rainbow projects per country · 25 countries covered</div>
         <div class="chart-wrap tall"><canvas id="geoRainbowChart"></canvas></div>
       </div>
       <div class="chart-card">
@@ -1112,7 +1113,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
   <div class="page" id="page-crossregistry">
     <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
       <div class="ribbon-icon">🔗</div>
-      <div class="ribbon-text"><strong style="color:var(--purple);">Cross-Registry Supplier Profiles</strong> · Fuzzy-matched suppliers appearing across CDR.fyi, Puro.earth and Rainbow Standard · 24 cross-registry matches identified</div>
+      <div class="ribbon-text"><strong style="color:var(--purple);">Cross-Registry Supplier Profiles</strong> · Fuzzy-matched suppliers appearing across CDR.fyi, Puro.earth and Rainbow Standard · 24 multi-registry suppliers identified out of 50 total</div>
     </div>
     <!-- Search + filter -->
     <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1264,9 +1265,9 @@ var pageMeta={
   projects:{title:'Puro.earth Registry',sub:'113 registered projects · May 2026 export'},
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
-  deliverygap:{title:'Delivery Gap Analysis',sub:'Contracted vs. Delivered · 2.4% delivery rate · BECCS 0% · Biochar 54%'},
-  geography:{title:'Geographic Distribution',sub:'Global CDR supply-side heatmap · 4 registries'},
-  crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'Fuzzy-matched suppliers across CDR.fyi · Puro · Rainbow'},
+  deliverygap:{title:'Delivery Gap Analysis',sub:'Contracted vs. Delivered · 5.4% overall delivery rate · BECCS 0% · Biochar 54%'},
+  geography:{title:'Geographic Distribution',sub:'Global CDR supply-side heatmap · 20 CDR.fyi · 28 Puro · 25 Rainbow countries'},
+  crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'50 suppliers profiled · 24 cross-registry matches · Puro + Rainbow'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
   datacontrol:{title:'Data Control Center',sub:'Unified CDR data · All registries · Filter · Export · Track updates'},
@@ -1979,7 +1980,7 @@ function fmtPct(n){if(!n&&n!==0)return'—';return n.toFixed(1)+'%';}
 function renderPriceDiscovery(){
   if(!DATA||!DATA.priceDiscovery)return;
   var pd=DATA.priceDiscovery;
-  var container=document.getElementById('price-discovery-section');
+  var container=document.getElementById('price-discovery-content')||document.getElementById('price-discovery-section');
   if(!container)return;
   var methods=Object.keys(pd).sort(function(a,b){return pd[b].avg-pd[a].avg;});
   var maxAvg=Math.max.apply(null,methods.map(function(m){return pd[m].avg;}));
@@ -2039,7 +2040,7 @@ function renderDeliveryGap(){
     if(d.deliveryRate>bestRate&&m!=='Other'){bestRate=d.deliveryRate;bestMethod=m;}
     if(d.deliveryRate<2&&d.total>100000)atRisk++;
   });
-  var overallRate=totalContr+totalDel>0?(totalDel/(totalContr+totalDel)*100):0;
+  var overallRate=totalContr>0?(totalDel/totalContr*100):0;
   var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   el('dg-contracted',fmtShort(totalContr));
   el('dg-delivered',fmtShort(totalDel));
@@ -2103,8 +2104,10 @@ function renderDeliveryGap(){
     var clockMethods=labels.filter(function(m){return dg[m]&&dg[m].contracted>50000;}).sort(function(a,b){return dg[b].contracted-dg[a].contracted;});
     clockMethods.forEach(function(m){
       var d=dg[m];
-      var gap=d.contracted-d.delivered-d.partial;
-      var annualDelForMethod=d.deliveryRate>0?(d.delivered+d.partial)>0?((d.delivered+d.partial)/3):1000:0;
+      var gap=Math.max(0,d.contracted-d.delivered-d.partial);
+      // Annual delivery = total delivered over ~6 years of CDR.fyi data (2019-2025)
+      var totalDelivered=d.delivered+d.partial;
+      var annualDelForMethod=totalDelivered>0?totalDelivered/6:0;
       var years=annualDelForMethod>0?Math.round(gap/annualDelForMethod):999;
       var col=methodColors[m]||'#94a3b8';
       var yearsDisplay=years>200?'∞':years>50?'50+':years.toString();
@@ -2174,7 +2177,7 @@ function renderDeliveryGap(){
     },
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{color:'#8fa8cc',font:{size:11}}},
-        tooltip:{callbacks:{label:function(ctx){return ctx.dataset.yAxisID==='y2'?' YoY: '+(ctx.raw||'base')+'%':' Volume: '+fmtShort(ctx.raw)+' tCO₂';}}}},
+        tooltip:{callbacks:{label:function(ctx){return ctx.dataset.yAxisID==='y2'?' YoY: '+(ctx.raw!=null?ctx.raw+'%':'base'):' Volume: '+fmtShort(ctx.raw)+' tCO₂';}}}},  
       scales:{
         x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#8fa8cc',font:{size:11}},border:{display:false}},
         y:{position:'left',grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
@@ -2334,7 +2337,7 @@ function filterCR(){
   crFiltered=DATA.crossRegistry.filter(function(s){
     if(sl&&s.name.toLowerCase().indexOf(sl)===-1)return false;
     if(filter==='multi'&&!s.puro.length&&!s.rainbow.length)return false;
-    if(filter==='cdrfyi'&&(s.puro.length||s.rainbow.length))return false;
+    if(filter==='cdrfyi'&&(s.puro.length>0||s.rainbow.length>0))return false;
     if(method&&s.cdrfyi.canonicalMethod!==method)return false;
     return true;
   });
@@ -2447,12 +2450,8 @@ function injectPriceDiscovery(){
   var section=document.createElement('div');
   section.id='price-discovery-section';
   section.style.cssText='margin-bottom:24px;';
-  var header=document.createElement('div');
-  header.className='section-header';
-  header.innerHTML='<div><div class="section-title">💰 Price Discovery — Market Prices by Technology</div><div class="section-sub">Price per tCO₂e from CDR.fyi supplier data · 49/50 suppliers with price data · Range $100–$200</div></div>';
-  section.prepend(header);
-  txPage.insertBefore(header,txPage.firstChild);
-  txPage.insertBefore(section,txPage.firstChild);
+  section.innerHTML='<div class="section-header"><div><div class="section-title">💰 Price Discovery — Market Prices by Technology</div><div class="section-sub">Price per tCO₂e from CDR.fyi supplier data</div></div></div><div id="price-discovery-content"></div>';
+  txPage.insertAdjacentElement('afterbegin',section);
   renderPriceDiscovery();
 }
 
@@ -2476,10 +2475,10 @@ function injectMicrosoftWarning(){
       '<a href="#" onclick="event.preventDefault();showPage(&quot;deliverygap&quot;)" style="color:var(--accent);">→ View full analysis</a>'+
     '</div>'+
     '<button onclick="this.parentElement.style.display=&quot;none&quot;" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
-  // Insert after KPI grid
+  // Insert after KPI grid — use appendChild as safe fallback
   var kpiGrid=dashPage.querySelector('.kpi-grid');
-  if(kpiGrid&&kpiGrid.nextSibling){dashPage.insertBefore(div,kpiGrid.nextSibling);}
-  else{dashPage.insertBefore(div,dashPage.firstChild);}
+  if(kpiGrid){kpiGrid.insertAdjacentElement('afterend',div);}
+  else{dashPage.appendChild(div);}
 }
 
 // ============================================================
