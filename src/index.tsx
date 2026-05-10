@@ -362,12 +362,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .price-card:hover{border-color:var(--border2);transform:translateY(-2px)}
 .price-bar-wrap{height:8px;background:var(--bg3);border-radius:4px;margin:8px 0;overflow:hidden}
 .price-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .6s ease}
-/* ===== DELIVERY GAP ===== */
-.gap-clock-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(30,45,74,.4)}
-.gap-clock-item:last-child{border-bottom:none}
-.gap-years{font-size:20px;font-weight:800;min-width:54px;text-align:right;flex-shrink:0}
-.gap-method{font-size:12px;font-weight:600;color:var(--text1)}
-.gap-rate{font-size:11px;color:var(--text3)}
 /* ===== CROSS REGISTRY ===== */
 .cr-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}
 .cr-card:hover{border-color:var(--border2);box-shadow:var(--glow)}
@@ -441,7 +435,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     <div class="nav-section">
       <div class="nav-label">Analysis</div>
       <button class="nav-btn" onclick="showPage('insights')"><span class="icon">🧠</span><span>Insights</span></button>
-      <button class="nav-btn" onclick="showPage('deliverygap')"><span class="icon">⚠️</span><span>Delivery Gap</span><span class="nav-badge" style="background:#ef4444;">!</span></button>
       <button class="nav-btn" onclick="showPage('crossregistry')"><span class="icon">🔗</span><span>Cross-Registry</span></button>
     </div>
     <div class="nav-section">
@@ -1092,79 +1085,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
       <span id="dc-selected-info" style="margin-left:auto;font-size:11px;color:var(--amber);font-weight:600;"></span>
     </div>
   
-  <!-- DELIVERY GAP PAGE -->
-  <div class="page" id="page-deliverygap">
-    <div class="ribbon" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.05));border-color:rgba(239,68,68,.3);">
-      <div class="ribbon-icon">⚠️</div>
-      <div class="ribbon-text"><strong style="color:#ef4444;">Delivery Gap Analysis</strong> · Only <strong style="color:var(--amber);">5.4%</strong> of contracted CDR has been physically delivered · BECCS and DACCS have near-zero delivery rates · Data source: CDR.fyi 5,498 transactions</div>
-    </div>
-    <!-- KPI strip -->
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;" class="kpi-grid" id="dg-kpi-strip">
-      <div class="kpi-card"><div class="kpi-label">Total Contracted</div><div class="kpi-value accent" id="dg-contracted">—</div><div class="kpi-sub">tCO₂ promised</div><div class="kpi-icon">📋</div></div>
-      <div class="kpi-card"><div class="kpi-label">Total Delivered</div><div class="kpi-value green" id="dg-delivered">—</div><div class="kpi-sub">tCO₂ physically removed</div><div class="kpi-icon">✅</div></div>
-      <div class="kpi-card"><div class="kpi-label">Delivery Gap</div><div class="kpi-value" style="color:#ef4444;" id="dg-gap">—</div><div class="kpi-sub">tCO₂ never delivered</div><div class="kpi-icon">❌</div></div>
-      <div class="kpi-card"><div class="kpi-label">Overall Rate</div><div class="kpi-value amber" id="dg-rate">—</div><div class="kpi-sub">delivered / total</div><div class="kpi-icon">📊</div></div>
-      <div class="kpi-card"><div class="kpi-label">Best Performer</div><div class="kpi-value green" style="font-size:14px;" id="dg-best">—</div><div class="kpi-sub">highest delivery rate</div><div class="kpi-icon">🏆</div></div>
-      <div class="kpi-card"><div class="kpi-label">At Risk</div><div class="kpi-value" style="color:#ef4444;font-size:14px;" id="dg-atrisk">—</div><div class="kpi-sub">methods &lt;2% delivery</div><div class="kpi-icon">🔴</div></div>
-    </div>
-    <!-- Microsoft warning -->
-    <div id="ms-warning" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
-      <div style="font-size:22px;flex-shrink:0;">⚠️</div>
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">Market Concentration Alert — HHI: 6,368 (Highly Concentrated)</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.6;">
-          <strong style="color:var(--text1);">Microsoft</strong> has purchased <strong style="color:var(--amber);">79.5%</strong> of all CDR.fyi volume (30.9M tCO₂ of 38.8M total). 
-          The top 3 buyers control <strong style="color:var(--amber);">87.2%</strong> and the top 10 control <strong style="color:var(--amber);">94.6%</strong>. 
-          This extreme concentration (HHI 6,368 vs. competitive threshold of 1,500) means the market growth figures reflect primarily one company's purchasing decisions, not broad market adoption.
-          An HHI above 2,500 is classified as a highly concentrated market by antitrust standards.
-        </div>
-      </div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card" style="grid-column:1/-1;">
-        <div class="chart-title">Contracted vs. Delivered by Technology (tCO₂e)</div>
-        <div class="chart-sub">Stacked view — the gap between contracted and delivered represents carbon that was promised but not yet removed</div>
-        <div class="chart-wrap tall"><canvas id="dgStackedChart"></canvas></div>
-      </div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Delivery Rate by Technology (%)</div>
-        <div class="chart-sub">Percentage of contracted volume that has been physically delivered</div>
-        <div class="chart-wrap"><canvas id="dgRateChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Gap Clock — Years to Close at Current Rate</div>
-        <div class="chart-sub">At current delivery pace, how many years to fulfill existing contracts</div>
-        <div id="dg-gap-clock" style="padding:12px 0;"></div>
-      </div>
-    </div>
-    <!-- Buyer concentration -->
-    <div class="section-header" style="margin-top:8px;">
-      <div><div class="section-title">🏢 Buyer Concentration — Top 20 Purchasers</div><div class="section-sub">CDR.fyi volume by purchaser · HHI index measures market concentration</div></div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Volume Share — Top 15 Buyers</div>
-        <div class="chart-sub">Horizontal bar · tCO₂ purchased · 518 unique buyers total</div>
-        <div class="chart-wrap tall"><canvas id="dgBuyerChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;" id="dg-buyer-table"></div>
-      </div>
-    </div>
-    <!-- YoY Growth -->
-    <div class="section-header" style="margin-top:8px;">
-      <div><div class="section-title">📈 CDR Market Growth 2019–2025</div><div class="section-sub">Annual transaction volume and year-over-year growth rate</div></div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card" style="grid-column:1/-1;">
-        <div class="chart-title">Annual CDR Volume (tCO₂e) with YoY Growth %</div>
-        <div class="chart-sub">Bar = volume · Line = year-over-year growth percentage</div>
-        <div class="chart-wrap tall"><canvas id="dgTimelineChart"></canvas></div>
-      </div>
-    </div>
-  </div>
 
   <!-- CROSS-REGISTRY SUPPLIER PAGE -->
   <div class="page" id="page-crossregistry">
@@ -1322,7 +1242,6 @@ var pageMeta={
   projects:{title:'Puro.earth Registry',sub:'113 registered projects · May 2026 export'},
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
-  deliverygap:{title:'Delivery Gap Analysis',sub:'Contracted vs. Delivered · 5.4% overall delivery rate · BECCS 0% · Biochar 54%'},
   crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'50 suppliers profiled · 24 cross-registry matches · Puro + Rainbow'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
@@ -1358,7 +1277,6 @@ function showPage(id){
       else if(id==='rainbow')renderRainbow();
       else if(id==='isometric')renderIsometric();
       else if(id==='datacontrol')renderDataControl();
-      else if(id==='deliverygap')renderDeliveryGap();
       else if(id==='crossregistry')renderCrossRegistry();
     }catch(err){console.error('[CDR] render error on page '+id+':', err.message, err.stack);}
   }
@@ -2082,172 +2000,7 @@ function renderPriceDiscovery(){
   container.innerHTML=html;
 }
 
-// ============================================================
-// DELIVERY GAP PAGE
-// ============================================================
-function renderDeliveryGap(){
-  if(!DATA)return;
-  var dg=DATA.deliveryGap||{};
-  var bc=DATA.buyerConcentration||{};
-  var tl=DATA.timeline||[];
-  var methodOrder=['BECCS','DACCS','Biomass Storage','Enhanced Weathering','Mineralization','Ocean Alkalinity','Ocean Removal','Biochar','Other'];
-  var methodColors={'Biochar':'#00e5a0','BECCS':'#00d4ff','DACCS':'#8b5cf6','Enhanced Weathering':'#f59e0b','Mineralization':'#ec4899','Ocean Alkalinity':'#06b6d4','Ocean Removal':'#10b981','Biomass Storage':'#f97316','Other':'#94a3b8'};
 
-  // KPIs
-  var totalContr=0,totalDel=0;
-  var bestMethod='',bestRate=0,atRisk=0;
-  Object.keys(dg).forEach(function(m){
-    var d=dg[m];
-    totalContr+=d.contracted;
-    totalDel+=d.delivered+d.partial;
-    if(d.deliveryRate>bestRate&&m!=='Other'){bestRate=d.deliveryRate;bestMethod=m;}
-    if(d.deliveryRate<2&&d.total>100000)atRisk++;
-  });
-  var overallRate=totalContr>0?(totalDel/totalContr*100):0;
-  var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  el('dg-contracted',fmtShort(totalContr));
-  el('dg-delivered',fmtShort(totalDel));
-  el('dg-gap',fmtShort(totalContr-totalDel));
-  el('dg-rate',overallRate.toFixed(1)+'%');
-  el('dg-best',bestMethod+' '+bestRate.toFixed(0)+'%');
-  el('dg-atrisk',atRisk+' methods');
-
-  // Stacked bar chart: contracted vs delivered
-  var labels=methodOrder.filter(function(m){return dg[m]&&dg[m].total>10000;});
-  new Chart(document.getElementById('dgStackedChart'),{
-    type:'bar',
-    data:{
-      labels:labels,
-      datasets:[
-        {label:'Contracted',data:labels.map(function(m){return dg[m]?dg[m].contracted:0;}),backgroundColor:labels.map(function(m){var c=methodColors[m]||'#94a3b8';return c+'66';}),borderColor:labels.map(function(m){return methodColors[m]||'#94a3b8';}),borderWidth:1,borderRadius:4},
-        {label:'Delivered',data:labels.map(function(m){return dg[m]?(dg[m].delivered+dg[m].partial):0;}),backgroundColor:labels.map(function(m){return methodColors[m]||'#94a3b8';}),borderRadius:4}
-      ]
-    },
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#8fa8cc',font:{size:11}}},
-        tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fmtNum(ctx.raw)+' tCO₂';}}}},
-      scales:{
-        x:{stacked:false,grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
-        y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}
-      }}
-  });
-
-  // Delivery rate bar chart
-  var rateLabels=labels.slice().sort(function(a,b){return (dg[b]?dg[b].deliveryRate:0)-(dg[a]?dg[a].deliveryRate:0);});
-  new Chart(document.getElementById('dgRateChart'),{
-    type:'bar',
-    data:{
-      labels:rateLabels,
-      datasets:[{
-        label:'Delivery Rate %',
-        data:rateLabels.map(function(m){return dg[m]?dg[m].deliveryRate:0;}),
-        backgroundColor:rateLabels.map(function(m){var r=dg[m]?dg[m].deliveryRate:0;return r<2?'#ef444488':r<10?'#f59e0b88':'#00e5a088';}),
-        borderColor:rateLabels.map(function(m){var r=dg[m]?dg[m].deliveryRate:0;return r<2?'#ef4444':r<10?'#f59e0b':'#00e5a0';}),
-        borderWidth:1,borderRadius:4
-      }]
-    },
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw.toFixed(1)+'% delivery rate';}}}},
-      scales:{
-        x:{max:100,grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return v+'%';}},border:{display:false}},
-        y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}
-      }}
-  });
-
-  // Gap clock
-  var clockEl=document.getElementById('dg-gap-clock');
-  if(clockEl){
-    // Calculate annual delivery rate from timeline
-    var recent=tl.slice(-3);
-    var annualDel=recent.length>0?recent.reduce(function(s,t){return s+(t.vol||0);},0)/recent.length:0;
-    // Annual delivery fraction ~ based on delivered ratio historically
-    var delFraction=totalContr>0?totalDel/totalContr:0;
-    var annualActualDel=annualDel*delFraction;
-    var html='';
-    var clockMethods=labels.filter(function(m){return dg[m]&&dg[m].contracted>50000;}).sort(function(a,b){return dg[b].contracted-dg[a].contracted;});
-    clockMethods.forEach(function(m){
-      var d=dg[m];
-      var gap=Math.max(0,d.contracted-d.delivered-d.partial);
-      // Annual delivery = total delivered over ~6 years of CDR.fyi data (2019-2025)
-      var totalDelivered=d.delivered+d.partial;
-      var annualDelForMethod=totalDelivered>0?totalDelivered/6:0;
-      var years=annualDelForMethod>0?Math.round(gap/annualDelForMethod):999;
-      var col=methodColors[m]||'#94a3b8';
-      var yearsDisplay=years>200?'∞':years>50?'50+':years.toString();
-      var yearsCol=years>50?'#ef4444':years>20?'#f59e0b':'#00e5a0';
-      html+='<div class="gap-clock-item">'+
-        '<div class="gap-years" style="color:'+yearsCol+'">'+yearsDisplay+'y</div>'+
-        '<div style="flex:1;">'+
-          '<div class="gap-method">'+m+'</div>'+
-          '<div class="gap-rate">Gap: '+fmtShort(gap)+' tCO₂ · Rate: '+d.deliveryRate.toFixed(1)+'%</div>'+
-        '</div>'+
-        '<div style="width:36px;height:36px;border-radius:50%;border:3px solid '+col+'33;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+col+';">'+d.deliveryRate.toFixed(0)+'%</div>'+
-      '</div>';
-    });
-    clockEl.innerHTML=html||'<div style="color:var(--text3);font-size:12px;padding:20px;text-align:center;">No significant gap data</div>';
-  }
-
-  // Buyer chart
-  var buyers=bc.topBuyers||[];
-  var buyerLabels=buyers.slice(0,12).map(function(b){return b.name.length>22?b.name.slice(0,22)+'…':b.name;});
-  var buyerVols=buyers.slice(0,12).map(function(b){return b.volume;});
-  var buyerColors=buyerVols.map(function(v,i){return i===0?'#00d4ff88':i<3?'#f59e0b88':'#8b5cf688';});
-  var buyerBorders=buyerVols.map(function(v,i){return i===0?'#00d4ff':i<3?'#f59e0b':'#8b5cf6';});
-  new Chart(document.getElementById('dgBuyerChart'),{
-    type:'bar',
-    data:{labels:buyerLabels,datasets:[{label:'Volume tCO₂',data:buyerVols,backgroundColor:buyerColors,borderColor:buyerBorders,borderWidth:1,borderRadius:4}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂ ('+buyers[ctx.dataIndex].pct+'%)';}}}},
-      scales:{x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}}}
-  });
-
-  // Buyer table cards
-  var btEl=document.getElementById('dg-buyer-table');
-  if(btEl){
-    var bhtml='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Top Buyers Ranked by Volume</div>';
-    bhtml+='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text2);">'+
-      '<span style="color:var(--amber);font-weight:700;">HHI Index: '+bc.hhi+'</span> — Highly Concentrated Market<br>'+
-      '<span style="color:var(--text3);">HHI &gt; 2,500 = highly concentrated · &gt; 1,500 = concentrated · &lt; 1,500 = competitive</span></div>';
-    buyers.slice(0,10).forEach(function(b,i){
-      var col=i===0?'#00d4ff':i<3?'#f59e0b':'#8fa8cc';
-      var barW=Math.round(b.pct);
-      bhtml+='<div style="margin-bottom:8px;">'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'+
-          '<span style="font-size:12px;font-weight:600;color:var(--text1);">'+(i+1)+'. '+b.name+'</span>'+
-          '<span style="font-size:11px;color:'+col+';font-weight:700;">'+b.pct+'%</span>'+
-        '</div>'+
-        '<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;">'+
-          '<div style="height:100%;width:'+Math.min(barW,100)+'%;background:'+col+';border-radius:3px;"></div>'+
-        '</div>'+
-        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">'+fmtShort(b.volume)+' tCO₂ · '+b.tx+' transactions</div>'+
-      '</div>';
-    });
-    btEl.innerHTML=bhtml;
-  }
-
-  // Timeline chart (bar+line combo)
-  var tlYears=tl.map(function(t){return t.year;});
-  var tlVols=tl.map(function(t){return t.vol;});
-  var tlYoy=tl.map(function(t){return t.yoy;});
-  new Chart(document.getElementById('dgTimelineChart'),{
-    type:'bar',
-    data:{
-      labels:tlYears,
-      datasets:[
-        {type:'bar',label:'Volume (tCO₂)',data:tlVols,backgroundColor:'#00d4ff44',borderColor:'#00d4ff',borderWidth:1,borderRadius:4,yAxisID:'y'},
-        {type:'line',label:'YoY Growth %',data:tlYoy,borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.3,yAxisID:'y2',spanGaps:true}
-      ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'#8fa8cc',font:{size:11}}},
-        tooltip:{callbacks:{label:function(ctx){return ctx.dataset.yAxisID==='y2'?' YoY: '+(ctx.raw!=null?ctx.raw+'%':'base'):' Volume: '+fmtShort(ctx.raw)+' tCO₂';}}}},  
-      scales:{
-        x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#8fa8cc',font:{size:11}},border:{display:false}},
-        y:{position:'left',grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
-        y2:{position:'right',grid:{display:false},ticks:{color:'#f59e0b',font:{size:10},callback:function(v){return v!=null?v+'%':'';}},border:{display:false}}
-      }}
-  });
-}
 
 // ============================================================
 // CROSS-REGISTRY SUPPLIER PAGE
@@ -2402,7 +2155,7 @@ function injectMicrosoftWarning(){
       '<strong style="color:var(--text1);">Microsoft</strong> alone accounts for <strong style="color:var(--amber);">'+bc.top1pct+'%</strong> of all CDR.fyi volume. '+
       'Top 3 buyers: <strong style="color:var(--amber);">'+bc.top3pct+'%</strong>. Top 10: <strong style="color:var(--amber);">'+bc.top10pct+'%</strong>. '+
       'HHI Index: <strong style="color:var(--amber);">'+bc.hhi+'</strong> (highly concentrated). '+
-      '<a href="#" onclick="event.preventDefault();showPage(&quot;deliverygap&quot;)" style="color:var(--accent);">→ View full analysis</a>'+
+      ''+'
     '</div>'+
     '<button onclick="this.parentElement.style.display=&quot;none&quot;" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
   // Insert after KPI grid — use appendChild as safe fallback
