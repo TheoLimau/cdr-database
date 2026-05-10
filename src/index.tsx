@@ -380,10 +380,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .cr-stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 .cr-stat{font-size:11px;color:var(--text3)}
 .cr-stat strong{color:var(--text1);font-weight:600}
-/* ===== GEOGRAPHY ===== */
-.geo-country-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;transition:background .15s}
-.geo-country-row:hover{background:var(--card2)}
-.geo-bar{height:6px;border-radius:3px;background:var(--accent);flex-shrink:0}
 /* ===== SPARKLINES ===== */
 .kpi-sparkline{margin-top:8px;height:32px;position:relative}
 .sparkline-svg{width:100%;height:32px;overflow:visible}
@@ -446,7 +442,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
       <div class="nav-label">Analysis</div>
       <button class="nav-btn" onclick="showPage('insights')"><span class="icon">🧠</span><span>Insights</span></button>
       <button class="nav-btn" onclick="showPage('deliverygap')"><span class="icon">⚠️</span><span>Delivery Gap</span><span class="nav-badge" style="background:#ef4444;">!</span></button>
-      <button class="nav-btn" onclick="showPage('geography')"><span class="icon">🌍</span><span>Geography</span></button>
       <button class="nav-btn" onclick="showPage('crossregistry')"><span class="icon">🔗</span><span>Cross-Registry</span></button>
     </div>
     <div class="nav-section">
@@ -1171,44 +1166,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     </div>
   </div>
 
-  <!-- GEOGRAPHY PAGE -->
-  <div class="page" id="page-geography">
-    <div class="ribbon" style="background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(0,212,255,.05));border-color:rgba(16,185,129,.25);">
-      <div class="ribbon-icon">🌍</div>
-      <div class="ribbon-text"><strong style="color:var(--green);">Geographic Distribution</strong> · Where CDR is being produced and registered across 4 registries · Supply-side geography</div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">CDR.fyi — Supplier Countries by Committed Volume</div>
-        <div class="chart-sub">Top supplier nations by total contracted tCO₂e</div>
-        <div class="chart-wrap tall"><canvas id="geoSupplierChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Puro.earth — Projects by Country</div>
-        <div class="chart-sub">Number of registered projects per country</div>
-        <div class="chart-wrap tall"><canvas id="geoPuroChart"></canvas></div>
-      </div>
-    </div>
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Rainbow Standard — Projects by Country</div>
-        <div class="chart-sub">Rainbow projects per country · 25 countries covered</div>
-        <div class="chart-wrap tall"><canvas id="geoRainbowChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Cross-Registry Country Overlap</div>
-        <div class="chart-sub">Countries present in multiple registries</div>
-        <div id="geo-overlap-table" style="padding:4px 0;overflow-y:auto;max-height:260px;"></div>
-      </div>
-    </div>
-    <!-- World heatmap SVG -->
-    <div class="chart-card" style="margin-top:0;">
-      <div class="chart-title">🗺 Global CDR Activity Heatmap</div>
-      <div class="chart-sub">Country score = sum of (supplier count×3) + (Puro projects×2) + Rainbow projects · Circle size proportional to activity</div>
-      <div id="geo-world-map" style="position:relative;width:100%;background:var(--bg3);border-radius:10px;overflow:hidden;margin-top:12px;min-height:340px;"></div>
-    </div>
-  </div>
-
   <!-- CROSS-REGISTRY SUPPLIER PAGE -->
   <div class="page" id="page-crossregistry">
     <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
@@ -1366,7 +1323,6 @@ var pageMeta={
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
   deliverygap:{title:'Delivery Gap Analysis',sub:'Contracted vs. Delivered · 5.4% overall delivery rate · BECCS 0% · Biochar 54%'},
-  geography:{title:'Geographic Distribution',sub:'Global CDR supply-side heatmap · 20 CDR.fyi · 28 Puro · 25 Rainbow countries'},
   crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'50 suppliers profiled · 24 cross-registry matches · Puro + Rainbow'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
@@ -1403,7 +1359,6 @@ function showPage(id){
       else if(id==='isometric')renderIsometric();
       else if(id==='datacontrol')renderDataControl();
       else if(id==='deliverygap')renderDeliveryGap();
-      else if(id==='geography')renderGeography();
       else if(id==='crossregistry')renderCrossRegistry();
     }catch(err){console.error('[CDR] render error on page '+id+':', err.message, err.stack);}
   }
@@ -2292,139 +2247,6 @@ function renderDeliveryGap(){
         y2:{position:'right',grid:{display:false},ticks:{color:'#f59e0b',font:{size:10},callback:function(v){return v!=null?v+'%':'';}},border:{display:false}}
       }}
   });
-}
-
-// ============================================================
-// GEOGRAPHY PAGE
-// ============================================================
-function renderGeography(){
-  if(!DATA)return;
-  var geo=DATA.geographic||{};
-  var chartOpts=function(label,col){return {indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' '+label;}}}},scales:{x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}}};};
-
-  // CDR.fyi supplier chart
-  var cdrGeo=geo.cdrfyi||{};
-  var cdrSorted=Object.keys(cdrGeo).sort(function(a,b){return cdrGeo[b].committed-cdrGeo[a].committed;}).slice(0,15);
-  new Chart(document.getElementById('geoSupplierChart'),{type:'bar',
-    data:{labels:cdrSorted,datasets:[{label:'Committed tCO₂',data:cdrSorted.map(function(c){return cdrGeo[c].committed;}),backgroundColor:'#00d4ff55',borderColor:'#00d4ff',borderWidth:1,borderRadius:4}]},
-    options:chartOpts('tCO₂ committed','#00d4ff')});
-
-  // Puro chart
-  var puroGeo=geo.puro||{};
-  var puroSorted=Object.keys(puroGeo).sort(function(a,b){return puroGeo[b].projects-puroGeo[a].projects;}).slice(0,15);
-  new Chart(document.getElementById('geoPuroChart'),{type:'bar',
-    data:{labels:puroSorted,datasets:[{label:'Projects',data:puroSorted.map(function(c){return puroGeo[c].projects;}),backgroundColor:'#00e5a055',borderColor:'#00e5a0',borderWidth:1,borderRadius:4}]},
-    options:chartOpts('projects','#00e5a0')});
-
-  // Rainbow chart
-  var rbGeo=geo.rainbow||{};
-  var rbSorted=Object.keys(rbGeo).filter(function(c){return c!=='Unknown';}).sort(function(a,b){return rbGeo[b].projects-rbGeo[a].projects;}).slice(0,12);
-  new Chart(document.getElementById('geoRainbowChart'),{type:'bar',
-    data:{labels:rbSorted,datasets:[{label:'Projects',data:rbSorted.map(function(c){return rbGeo[c].projects;}),backgroundColor:'#8b5cf655',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},
-    options:chartOpts('projects','#8b5cf6')});
-
-  // Cross-registry overlap table
-  var overlapEl=document.getElementById('geo-overlap-table');
-  if(overlapEl){
-    var allCountries={};
-    Object.keys(cdrGeo).forEach(function(c){if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].cdr=cdrGeo[c].suppliers||0;});
-    Object.keys(puroGeo).forEach(function(c){if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].puro=puroGeo[c].projects||0;});
-    Object.keys(rbGeo).forEach(function(c){if(c==='Unknown')return;if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].rainbow=rbGeo[c].projects||0;});
-    var multiCountries=Object.keys(allCountries).filter(function(c){var d=allCountries[c];return (d.cdr>0)+(d.puro>0)+(d.rainbow>0)>=2;}).sort(function(a,b){var da=allCountries[a],db=allCountries[b];return ((db.cdr>0)+(db.puro>0)+(db.rainbow>0))-((da.cdr>0)+(da.puro>0)+(da.rainbow>0));});
-    var ohtml='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Countries in 2+ Registries</div>';
-    multiCountries.slice(0,20).forEach(function(c){
-      var d=allCountries[c];
-      var badges='';
-      if(d.cdr>0)badges+='<span style="font-size:9px;background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.25);padding:1px 6px;border-radius:4px;font-weight:700;">CDR.fyi</span> ';
-      if(d.puro>0)badges+='<span style="font-size:9px;background:rgba(0,229,160,.15);color:var(--green);border:1px solid rgba(0,229,160,.25);padding:1px 6px;border-radius:4px;font-weight:700;">Puro</span> ';
-      if(d.rainbow>0)badges+='<span style="font-size:9px;background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.25);padding:1px 6px;border-radius:4px;font-weight:700;">Rainbow</span>';
-      ohtml+='<div class="geo-country-row"><div style="font-size:12px;font-weight:600;color:var(--text1);flex:1;">'+c+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;">'+badges+'</div></div>';
-    });
-    overlapEl.innerHTML=ohtml;
-  }
-
-  // World bubble map (SVG-based)
-  renderWorldMap();
-}
-
-function renderWorldMap(){
-  if(!DATA)return;
-  var geo=DATA.geographic||{};
-  var cdrGeo=geo.cdrfyi||{};
-  var puroGeo=geo.puro||{};
-  var rbGeo=geo.rainbow||{};
-
-  // Country centroids (lat/lon) for key CDR countries
-  var coords={
-    'United States':[38,-97],'Bolivia':[-16,-64],'India':[20,77],'Switzerland':[47,8],
-    'Brazil':[-14,-51],'Thailand':[13,100],'United Kingdom':[55,-3],'Canada':[56,-106],
-    'Germany':[51,10],'Denmark':[56,10],'Finland':[64,26],'Bulgaria':[43,25],
-    'Cambodia':[12,105],'Sweden':[62,15],'Netherlands':[52,5],'France':[46,2],
-    'Norway':[60,8],'Australia':[-25,133],'Spain':[40,-4],'Belgium':[50,4],
-    'Portugal':[39,-8],'South Africa':[-29,25],'Italy':[42,12],'Japan':[36,138],
-    'China':[35,105],'South Korea':[37,128],'Ireland':[53,-8],'Austria':[47,14],
-    'Poland':[52,20],'Chile':[-30,-71],'Colombia':[4,-72],'Mexico':[23,-102]
-  };
-
-  // Score per country
-  var scores={};
-  Object.keys(cdrGeo).forEach(function(c){if(!scores[c])scores[c]=0;scores[c]+=cdrGeo[c].suppliers*3;});
-  Object.keys(puroGeo).forEach(function(c){if(!scores[c])scores[c]=0;scores[c]+=puroGeo[c].projects*2;});
-  Object.keys(rbGeo).forEach(function(c){if(c==='Unknown')return;if(!scores[c])scores[c]=0;scores[c]+=rbGeo[c].projects;});
-
-  var maxScore=Math.max.apply(null,Object.values(scores).filter(Boolean));
-
-  // Simple Mercator projection
-  function project(lat,lon,W,H){
-    var x=(lon+180)/360*W;
-    var latRad=lat*Math.PI/180;
-    var y=(H/2)-(W/(2*Math.PI))*Math.log(Math.tan(Math.PI/4+latRad/2));
-    return [x,y];
-  }
-
-  var container=document.getElementById('geo-world-map');
-  if(!container)return;
-  var W=container.offsetWidth||800,H=340;
-
-  var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;" xmlns="http://www.w3.org/2000/svg">';
-  // Ocean background
-  svg+='<rect width="'+W+'" height="'+H+'" fill="#0a0f1e"/>';
-  // Grid lines
-  for(var lat=-60;lat<=80;lat+=30){var py=project(lat,0,W,H)[1];svg+='<line x1="0" y1="'+py+'" x2="'+W+'" y2="'+py+'" stroke="#1e2d4a" stroke-width="1" stroke-dasharray="4,4"/>';}
-  for(var lon=-150;lon<=180;lon+=60){var px=project(0,lon,W,H)[0];svg+='<line x1="'+px+'" y1="0" x2="'+px+'" y2="'+H+'" stroke="#1e2d4a" stroke-width="1" stroke-dasharray="4,4"/>';}
-  // Lat/lon labels
-  svg+='<text x="4" y="'+(project(60,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">60°N</text>';
-  svg+='<text x="4" y="'+(project(30,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">30°N</text>';
-  svg+='<text x="4" y="'+(project(0,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">EQ</text>';
-  svg+='<text x="4" y="'+(project(-30,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">30°S</text>';
-
-  // Draw bubbles
-  var sortedCountries=Object.keys(scores).filter(function(c){return coords[c]&&scores[c]>0;}).sort(function(a,b){return scores[a]-scores[b];}); // draw small first
-  sortedCountries.forEach(function(country){
-    var score=scores[country];
-    var r=Math.max(6,Math.round(Math.sqrt(score/maxScore)*36));
-    var ll=coords[country];
-    var pt=project(ll[0],ll[1],W,H);
-    var px=pt[0],py=pt[1];
-    if(px<0||px>W||py<0||py>H)return;
-    // Color based on dominant registry
-    var hasCDR=cdrGeo[country]&&cdrGeo[country].suppliers>0;
-    var hasPuro=puroGeo[country]&&puroGeo[country].projects>0;
-    var hasRb=rbGeo[country]&&rbGeo[country].projects>0&&country!=='Unknown';
-    var col=hasCDR&&hasPuro?'#f59e0b':hasCDR?'#00d4ff':hasPuro?'#00e5a0':'#8b5cf6';
-    svg+='<circle cx="'+px+'" cy="'+py+'" r="'+r+'" fill="'+col+'" opacity="0.35" stroke="'+col+'" stroke-width="1.5"/>';
-    svg+='<text x="'+px+'" y="'+(py+3)+'" text-anchor="middle" fill="'+col+'" font-size="9" font-weight="700">'+country.slice(0,3).toUpperCase()+'</text>';
-  });
-
-  // Legend
-  var lx=W-180,ly=H-80;
-  svg+='<rect x="'+(lx-8)+'" y="'+(ly-16)+'" width="176" height="80" fill="#131d32" rx="6" opacity="0.9"/>';
-  svg+='<circle cx="'+lx+'" cy="'+ly+'" r="6" fill="#00d4ff" opacity="0.5" stroke="#00d4ff" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+4)+'" fill="#8fa8cc" font-size="10">CDR.fyi dominant</text>';
-  svg+='<circle cx="'+lx+'" cy="'+(ly+20)+'" r="6" fill="#00e5a0" opacity="0.5" stroke="#00e5a0" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+24)+'" fill="#8fa8cc" font-size="10">Puro dominant</text>';
-  svg+='<circle cx="'+lx+'" cy="'+(ly+40)+'" r="6" fill="#8b5cf6" opacity="0.5" stroke="#8b5cf6" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+44)+'" fill="#8fa8cc" font-size="10">Rainbow dominant</text>';
-  svg+='<circle cx="'+lx+'" cy="'+(ly+60)+'" r="6" fill="#f59e0b" opacity="0.5" stroke="#f59e0b" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+64)+'" fill="#8fa8cc" font-size="10">Multi-registry</text>';
-  svg+='</svg>';
-  container.innerHTML=svg;
 }
 
 // ============================================================
