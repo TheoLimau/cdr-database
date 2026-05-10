@@ -255,6 +255,56 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
   /* hide secondary topbar info on very small */
   #dc-table{min-width:700px}
 }
+
+/* ===== PRICE DISCOVERY ===== */
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:all .2s}
+.price-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.price-bar-wrap{height:8px;background:var(--bg3);border-radius:4px;margin:8px 0;overflow:hidden}
+.price-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .6s ease}
+/* ===== DELIVERY GAP ===== */
+.gap-clock-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(30,45,74,.4)}
+.gap-clock-item:last-child{border-bottom:none}
+.gap-years{font-size:20px;font-weight:800;min-width:54px;text-align:right;flex-shrink:0}
+.gap-method{font-size:12px;font-weight:600;color:var(--text1)}
+.gap-rate{font-size:11px;color:var(--text3)}
+/* ===== CROSS REGISTRY ===== */
+.cr-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}
+.cr-card:hover{border-color:var(--border2);box-shadow:var(--glow)}
+.cr-card.multi{border-color:rgba(139,92,246,.35);background:linear-gradient(135deg,rgba(139,92,246,.04),var(--card))}
+.cr-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}
+.cr-name{font-size:14px;font-weight:700;color:var(--text1)}
+.cr-country{font-size:11px;color:var(--text3)}
+.cr-registries{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.cr-reg-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px}
+.cr-stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.cr-stat{font-size:11px;color:var(--text3)}
+.cr-stat strong{color:var(--text1);font-weight:600}
+/* ===== GEOGRAPHY ===== */
+.geo-country-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;transition:background .15s}
+.geo-country-row:hover{background:var(--card2)}
+.geo-bar{height:6px;border-radius:3px;background:var(--accent);flex-shrink:0}
+/* ===== SPARKLINES ===== */
+.kpi-sparkline{margin-top:8px;height:32px;position:relative}
+.sparkline-svg{width:100%;height:32px;overflow:visible}
+/* ===== LAST UPDATED BADGE ===== */
+.updated-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;margin-top:4px}
+.updated-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+/* ===== CSV UPLOAD ===== */
+#csv-dropzone.drag-over{border-color:var(--accent);background:rgba(0,212,255,.05)}
+/* ===== RIBBON ===== */
+.ribbon{display:flex;align-items:center;gap:12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:12px;padding:12px 16px;margin-bottom:20px;flex-wrap:wrap}
+.ribbon-icon{font-size:20px;flex-shrink:0}
+.ribbon-text{font-size:12px;color:var(--text2);line-height:1.5;flex:1}
+/* ===== PRICE SECTION IN CDR.fyi ===== */
+.price-discovery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+@media(max-width:900px){
+  .price-discovery-grid{grid-template-columns:1fr 1fr}
+  #cr-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .price-discovery-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -294,6 +344,9 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     <div class="nav-section">
       <div class="nav-label">Analysis</div>
       <button class="nav-btn" onclick="showPage('insights')"><span class="icon">🧠</span><span>Insights</span></button>
+      <button class="nav-btn" onclick="showPage('deliverygap')"><span class="icon">⚠️</span><span>Delivery Gap</span><span class="nav-badge" style="background:#ef4444;">!</span></button>
+      <button class="nav-btn" onclick="showPage('geography')"><span class="icon">🌍</span><span>Geography</span></button>
+      <button class="nav-btn" onclick="showPage('crossregistry')"><span class="icon">🔗</span><span>Cross-Registry</span></button>
     </div>
     <div class="nav-section">
       <div class="nav-label">Other Registries</div>
@@ -302,7 +355,8 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     </div>
     <div class="nav-section">
       <div class="nav-label">Tools</div>
-      <button class="nav-btn" onclick="showPage('datacontrol')" style="position:relative;"><span class="icon">🗄️</span><span>Data Control</span><span class="nav-badge" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">NEW</span></button>
+      <button class="nav-btn" onclick="showPage('datacontrol')"><span class="icon">🗄️</span><span>Data Control</span></button>
+      <button class="nav-btn" onclick="showPage('csvupload')"><span class="icon">📤</span><span>Update Rainbow CSV</span></button>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -941,7 +995,180 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
       </div>
       <span id="dc-selected-info" style="margin-left:auto;font-size:11px;color:var(--amber);font-weight:600;"></span>
     </div>
+  
+  <!-- DELIVERY GAP PAGE -->
+  <div class="page" id="page-deliverygap">
+    <div class="ribbon" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.05));border-color:rgba(239,68,68,.3);">
+      <div class="ribbon-icon">⚠️</div>
+      <div class="ribbon-text"><strong style="color:#ef4444;">Delivery Gap Analysis</strong> · Only <strong style="color:var(--amber);">2.4%</strong> of contracted CDR has been physically delivered · BECCS and DACCS have near-zero delivery rates · Data source: CDR.fyi 5,498 transactions</div>
+    </div>
+    <!-- KPI strip -->
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;" class="kpi-grid" id="dg-kpi-strip">
+      <div class="kpi-card"><div class="kpi-label">Total Contracted</div><div class="kpi-value accent" id="dg-contracted">—</div><div class="kpi-sub">tCO₂ promised</div><div class="kpi-icon">📋</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total Delivered</div><div class="kpi-value green" id="dg-delivered">—</div><div class="kpi-sub">tCO₂ physically removed</div><div class="kpi-icon">✅</div></div>
+      <div class="kpi-card"><div class="kpi-label">Delivery Gap</div><div class="kpi-value" style="color:#ef4444;" id="dg-gap">—</div><div class="kpi-sub">tCO₂ never delivered</div><div class="kpi-icon">❌</div></div>
+      <div class="kpi-card"><div class="kpi-label">Overall Rate</div><div class="kpi-value amber" id="dg-rate">—</div><div class="kpi-sub">delivered / total</div><div class="kpi-icon">📊</div></div>
+      <div class="kpi-card"><div class="kpi-label">Best Performer</div><div class="kpi-value green" style="font-size:14px;" id="dg-best">—</div><div class="kpi-sub">highest delivery rate</div><div class="kpi-icon">🏆</div></div>
+      <div class="kpi-card"><div class="kpi-label">At Risk</div><div class="kpi-value" style="color:#ef4444;font-size:14px;" id="dg-atrisk">—</div><div class="kpi-sub">methods &lt;2% delivery</div><div class="kpi-icon">🔴</div></div>
+    </div>
+    <!-- Microsoft warning -->
+    <div id="ms-warning" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:22px;flex-shrink:0;">⚠️</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px;">Market Concentration Alert — HHI: 6,368 (Highly Concentrated)</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+          <strong style="color:var(--text1);">Microsoft</strong> has purchased <strong style="color:var(--amber);">79.5%</strong> of all CDR.fyi volume (30.8M tCO₂ of 38.8M total). 
+          The top 3 buyers control <strong style="color:var(--amber);">87.2%</strong> and the top 10 control <strong style="color:var(--amber);">94.6%</strong>. 
+          This extreme concentration (HHI 6,368 vs. competitive threshold of 1,500) means the market growth figures reflect primarily one company's purchasing decisions, not broad market adoption.
+          An HHI above 2,500 is classified as a highly concentrated market by antitrust standards.
+        </div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card" style="grid-column:1/-1;">
+        <div class="chart-title">Contracted vs. Delivered by Technology (tCO₂e)</div>
+        <div class="chart-sub">Stacked view — the gap between contracted and delivered represents carbon that was promised but not yet removed</div>
+        <div class="chart-wrap tall"><canvas id="dgStackedChart"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Delivery Rate by Technology (%)</div>
+        <div class="chart-sub">Percentage of contracted volume that has been physically delivered</div>
+        <div class="chart-wrap"><canvas id="dgRateChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Gap Clock — Years to Close at Current Rate</div>
+        <div class="chart-sub">At current delivery pace, how many years to fulfill existing contracts</div>
+        <div id="dg-gap-clock" style="padding:12px 0;"></div>
+      </div>
+    </div>
+    <!-- Buyer concentration -->
+    <div class="section-header" style="margin-top:8px;">
+      <div><div class="section-title">🏢 Buyer Concentration — Top 20 Purchasers</div><div class="section-sub">CDR.fyi volume by purchaser · HHI index measures market concentration</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Volume Share — Top 15 Buyers</div>
+        <div class="chart-sub">Horizontal bar · tCO₂ purchased · 518 unique buyers total</div>
+        <div class="chart-wrap tall"><canvas id="dgBuyerChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;" id="dg-buyer-table"></div>
+      </div>
+    </div>
+    <!-- YoY Growth -->
+    <div class="section-header" style="margin-top:8px;">
+      <div><div class="section-title">📈 CDR Market Growth 2019–2025</div><div class="section-sub">Annual transaction volume and year-over-year growth rate</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card" style="grid-column:1/-1;">
+        <div class="chart-title">Annual CDR Volume (tCO₂e) with YoY Growth %</div>
+        <div class="chart-sub">Bar = volume · Line = year-over-year growth percentage</div>
+        <div class="chart-wrap tall"><canvas id="dgTimelineChart"></canvas></div>
+      </div>
+    </div>
   </div>
+
+  <!-- GEOGRAPHY PAGE -->
+  <div class="page" id="page-geography">
+    <div class="ribbon" style="background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(0,212,255,.05));border-color:rgba(16,185,129,.25);">
+      <div class="ribbon-icon">🌍</div>
+      <div class="ribbon-text"><strong style="color:var(--green);">Geographic Distribution</strong> · Where CDR is being produced and registered across 4 registries · Supply-side geography</div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">CDR.fyi — Supplier Countries by Committed Volume</div>
+        <div class="chart-sub">Top supplier nations by total contracted tCO₂e</div>
+        <div class="chart-wrap tall"><canvas id="geoSupplierChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Puro.earth — Projects by Country</div>
+        <div class="chart-sub">Number of registered projects per country</div>
+        <div class="chart-wrap tall"><canvas id="geoPuroChart"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Rainbow Standard — Projects by Country</div>
+        <div class="chart-sub">115 projects across 25 countries · issued credits</div>
+        <div class="chart-wrap tall"><canvas id="geoRainbowChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Cross-Registry Country Overlap</div>
+        <div class="chart-sub">Countries present in multiple registries</div>
+        <div id="geo-overlap-table" style="padding:4px 0;overflow-y:auto;max-height:260px;"></div>
+      </div>
+    </div>
+    <!-- World heatmap SVG -->
+    <div class="chart-card" style="margin-top:0;">
+      <div class="chart-title">🗺 Global CDR Activity Heatmap</div>
+      <div class="chart-sub">Country score = sum of (supplier count×3) + (Puro projects×2) + Rainbow projects · Circle size proportional to activity</div>
+      <div id="geo-world-map" style="position:relative;width:100%;background:var(--bg3);border-radius:10px;overflow:hidden;margin-top:12px;min-height:340px;"></div>
+    </div>
+  </div>
+
+  <!-- CROSS-REGISTRY SUPPLIER PAGE -->
+  <div class="page" id="page-crossregistry">
+    <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
+      <div class="ribbon-icon">🔗</div>
+      <div class="ribbon-text"><strong style="color:var(--purple);">Cross-Registry Supplier Profiles</strong> · Fuzzy-matched suppliers appearing across CDR.fyi, Puro.earth and Rainbow Standard · 24 cross-registry matches identified</div>
+    </div>
+    <!-- Search + filter -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <input type="text" id="cr-search" placeholder="🔍 Search supplier…" oninput="filterCR()" style="flex:1;min-width:200px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text1);font-size:13px;outline:none;">
+      <select id="cr-filter" onchange="filterCR()" class="filter-select">
+        <option value="">All Suppliers</option>
+        <option value="multi">Multi-Registry Only</option>
+        <option value="cdrfyi">CDR.fyi Only</option>
+      </select>
+      <select id="cr-method" onchange="filterCR()" class="filter-select">
+        <option value="">All Methods</option>
+        <option value="Biochar">Biochar</option>
+        <option value="BECCS">BECCS</option>
+        <option value="DACCS">DACCS</option>
+        <option value="Enhanced Weathering">Enhanced Weathering</option>
+        <option value="Biomass Storage">Biomass Storage</option>
+        <option value="Mineralization">Mineralization</option>
+      </select>
+      <span id="cr-count" style="font-size:12px;color:var(--text3);padding:9px 0;"></span>
+    </div>
+    <div id="cr-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;"></div>
+  </div>
+
+  <!-- CSV UPLOAD PAGE -->
+  <div class="page" id="page-csvupload">
+    <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
+      <div class="ribbon-icon">📤</div>
+      <div class="ribbon-text"><strong style="color:var(--purple);">Update Rainbow Standard Data</strong> · Upload the official CSV export from registry.rainbowstandard.io to refresh the Rainbow dataset without redeployment</div>
+    </div>
+    <div style="max-width:720px;margin:0 auto;">
+      <div class="chart-card" style="margin-bottom:20px;">
+        <div class="chart-title" style="margin-bottom:8px;">How to export Rainbow CSV</div>
+        <ol style="font-size:13px;color:var(--text2);line-height:2;padding-left:20px;">
+          <li>Go to <a href="https://registry.rainbowstandard.io" target="_blank" style="color:var(--accent);">registry.rainbowstandard.io</a></li>
+          <li>Navigate to the Projects section</li>
+          <li>Click <strong style="color:var(--text1);">"Export CSV"</strong> button (top right)</li>
+          <li>Save the downloaded file</li>
+          <li>Drag & drop or select it below</li>
+        </ol>
+        <div style="margin-top:12px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text3);">
+          ℹ️ The platform parses the CSV entirely in your browser — no data is sent to any server. The JSON is stored only in your session until page reload.
+        </div>
+      </div>
+      <!-- Drop zone -->
+      <div id="csv-dropzone" style="border:2px dashed var(--border2);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--card);" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border2)'" ondrop="handleCSVDrop(event)">
+        <div style="font-size:48px;margin-bottom:12px;">📂</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text1);margin-bottom:6px;">Drop Rainbow CSV here</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">or click to browse</div>
+        <input type="file" id="csv-file-input" accept=".csv" style="display:none;" onchange="handleCSVFile(this.files[0])">
+        <button onclick="document.getElementById('csv-file-input').click()" style="background:rgba(0,212,255,.12);border:1px solid rgba(0,212,255,.3);color:var(--accent);padding:10px 24px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">Select File</button>
+      </div>
+      <div id="csv-status" style="margin-top:16px;"></div>
+      <div id="csv-preview" style="margin-top:16px;"></div>
+    </div>
+  </div>
+
 
 </div>
 
@@ -1012,6 +1239,10 @@ async function loadData(){
 
 function initApp(){
   renderDashboard();
+  injectMicrosoftWarning();
+  injectPriceDiscovery();
+  renderSparklines();
+  renderLastUpdatedBadge();
   txFiltered=DATA.txs.map(function(t,i){return{idx:i,date:t[0],tonnes:t[1],method:t[2],supplier:t[3],purchaser:t[4],status:t[5],marketplace:t[6]||'',delivered:t[7]};});
   projFiltered=DATA.projects.slice();
   supFiltered=DATA.suppliers.slice();
@@ -1033,9 +1264,13 @@ var pageMeta={
   projects:{title:'Puro.earth Registry',sub:'113 registered projects · May 2026 export'},
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
+  deliverygap:{title:'Delivery Gap Analysis',sub:'Contracted vs. Delivered · 2.4% delivery rate · BECCS 0% · Biochar 54%'},
+  geography:{title:'Geographic Distribution',sub:'Global CDR supply-side heatmap · 4 registries'},
+  crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'Fuzzy-matched suppliers across CDR.fyi · Puro · Rainbow'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
-  datacontrol:{title:'Data Control Center',sub:'Unified CDR data · All registries · Filter · Export · Track updates'}
+  datacontrol:{title:'Data Control Center',sub:'Unified CDR data · All registries · Filter · Export · Track updates'},
+  csvupload:{title:'Update Rainbow CSV',sub:'Upload official Rainbow Standard CSV export to refresh data'}
 };
 var chartsRendered={};
 
@@ -1059,6 +1294,9 @@ function showPage(id){
     else if(id==='rainbow')renderRainbow();
     else if(id==='isometric')renderIsometric();
     else if(id==='datacontrol')renderDataControl();
+    else if(id==='deliverygap')renderDeliveryGap();
+    else if(id==='geography')renderGeography();
+    else if(id==='crossregistry')renderCrossRegistry();
   }
   // re-check scroll hints after page switch
   setTimeout(function(){
@@ -1728,6 +1966,598 @@ function dcExportXLSX(){
   a.href=url;a.download='CDR_data_export_'+new Date().toISOString().slice(0,10)+'.xls';a.click();
   URL.revokeObjectURL(url);
 }
+
+
+// ============================================================
+// HELPER: format numbers
+// ============================================================
+function fmtShort(n){if(!n&&n!==0)return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'k';return Math.round(n).toLocaleString();}
+function fmtNum(n){if(!n&&n!==0)return'—';return Math.round(n).toLocaleString();}
+function fmtPct(n){if(!n&&n!==0)return'—';return n.toFixed(1)+'%';}
+
+// ============================================================
+// PRICE DISCOVERY — injected into CDR.fyi transactions page
+// ============================================================
+function renderPriceDiscovery(){
+  if(!DATA||!DATA.priceDiscovery)return;
+  var pd=DATA.priceDiscovery;
+  var container=document.getElementById('price-discovery-section');
+  if(!container)return;
+  var methods=Object.keys(pd).sort(function(a,b){return pd[b].avg-pd[a].avg;});
+  var maxAvg=Math.max.apply(null,methods.map(function(m){return pd[m].avg;}));
+  var methodColors={'Biochar':'#00e5a0','BECCS':'#00d4ff','DACCS':'#8b5cf6','Enhanced Weathering':'#f59e0b','Mineralization':'#ec4899','Ocean Alkalinity':'#06b6d4','Ocean Removal':'#10b981','Biomass Storage':'#f97316'};
+  var html='<div class="price-discovery-grid">';
+  methods.forEach(function(m){
+    var d=pd[m];
+    var col=methodColors[m]||'#94a3b8';
+    var barW=Math.round(d.avg/maxAvg*100);
+    html+='<div class="price-card">'+
+      '<div style="font-size:10px;font-weight:700;color:'+col+';text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">'+m+'</div>'+
+      '<div style="font-size:26px;font-weight:800;color:var(--text1);">$'+Math.round(d.avg)+'</div>'+
+      '<div style="font-size:10px;color:var(--text3);margin-bottom:4px;">avg / tCO₂e · n='+d.n+' supplier'+(d.n>1?'s':'')+'</div>'+
+      '<div class="price-bar-wrap"><div class="price-bar-fill" style="width:'+barW+'%;background:'+col+';opacity:.7;"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);">'+
+        '<span>Min $'+d.min+'</span><span>Max $'+d.max+'</span>'+
+      '</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  // Top priced suppliers table
+  html+='<div class="table-wrap" style="margin-top:0;"><table style="width:100%"><thead><tr>'+
+    '<th>Supplier</th><th>Method</th><th>Country</th><th style="text-align:right">Price ($/tCO₂)</th><th style="text-align:right">Committed (t)</th>'+
+    '</tr></thead><tbody>';
+  var allSuppliers=[];
+  methods.forEach(function(m){if(pd[m].suppliers)pd[m].suppliers.forEach(function(s){allSuppliers.push({...s,method:m});});});
+  allSuppliers.sort(function(a,b){return b.price-a.price;}).slice(0,15).forEach(function(s){
+    var col=methodColors[s.method]||'#94a3b8';
+    html+='<tr><td class="td-bold">'+s.supplier+'</td>'+
+      '<td><span class="badge" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44;">'+s.method+'</span></td>'+
+      '<td>'+s.country+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:var(--accent);">$'+s.price+'</td>'+
+      '<td style="text-align:right;">'+fmtShort(s.committed)+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  container.innerHTML=html;
+}
+
+// ============================================================
+// DELIVERY GAP PAGE
+// ============================================================
+function renderDeliveryGap(){
+  if(!DATA)return;
+  var dg=DATA.deliveryGap||{};
+  var bc=DATA.buyerConcentration||{};
+  var tl=DATA.timeline||[];
+  var methodOrder=['BECCS','DACCS','Biomass Storage','Enhanced Weathering','Mineralization','Ocean Alkalinity','Ocean Removal','Biochar','Other'];
+  var methodColors={'Biochar':'#00e5a0','BECCS':'#00d4ff','DACCS':'#8b5cf6','Enhanced Weathering':'#f59e0b','Mineralization':'#ec4899','Ocean Alkalinity':'#06b6d4','Ocean Removal':'#10b981','Biomass Storage':'#f97316','Other':'#94a3b8'};
+
+  // KPIs
+  var totalContr=0,totalDel=0;
+  var bestMethod='',bestRate=0,atRisk=0;
+  Object.keys(dg).forEach(function(m){
+    var d=dg[m];
+    totalContr+=d.contracted;
+    totalDel+=d.delivered+d.partial;
+    if(d.deliveryRate>bestRate&&m!=='Other'){bestRate=d.deliveryRate;bestMethod=m;}
+    if(d.deliveryRate<2&&d.total>100000)atRisk++;
+  });
+  var overallRate=totalContr+totalDel>0?(totalDel/(totalContr+totalDel)*100):0;
+  var el=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  el('dg-contracted',fmtShort(totalContr));
+  el('dg-delivered',fmtShort(totalDel));
+  el('dg-gap',fmtShort(totalContr-totalDel));
+  el('dg-rate',overallRate.toFixed(1)+'%');
+  el('dg-best',bestMethod+' '+bestRate.toFixed(0)+'%');
+  el('dg-atrisk',atRisk+' methods');
+
+  // Stacked bar chart: contracted vs delivered
+  var labels=methodOrder.filter(function(m){return dg[m]&&dg[m].total>10000;});
+  new Chart(document.getElementById('dgStackedChart'),{
+    type:'bar',
+    data:{
+      labels:labels,
+      datasets:[
+        {label:'Contracted',data:labels.map(function(m){return dg[m]?dg[m].contracted:0;}),backgroundColor:labels.map(function(m){var c=methodColors[m]||'#94a3b8';return c+'66';}),borderColor:labels.map(function(m){return methodColors[m]||'#94a3b8';}),borderWidth:1,borderRadius:4},
+        {label:'Delivered',data:labels.map(function(m){return dg[m]?(dg[m].delivered+dg[m].partial):0;}),backgroundColor:labels.map(function(m){return methodColors[m]||'#94a3b8';}),borderRadius:4}
+      ]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8fa8cc',font:{size:11}}},
+        tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fmtNum(ctx.raw)+' tCO₂';}}}},
+      scales:{
+        x:{stacked:false,grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}
+      }}
+  });
+
+  // Delivery rate bar chart
+  var rateLabels=labels.slice().sort(function(a,b){return (dg[b]?dg[b].deliveryRate:0)-(dg[a]?dg[a].deliveryRate:0);});
+  new Chart(document.getElementById('dgRateChart'),{
+    type:'bar',
+    data:{
+      labels:rateLabels,
+      datasets:[{
+        label:'Delivery Rate %',
+        data:rateLabels.map(function(m){return dg[m]?dg[m].deliveryRate:0;}),
+        backgroundColor:rateLabels.map(function(m){var r=dg[m]?dg[m].deliveryRate:0;return r<2?'#ef444488':r<10?'#f59e0b88':'#00e5a088';}),
+        borderColor:rateLabels.map(function(m){var r=dg[m]?dg[m].deliveryRate:0;return r<2?'#ef4444':r<10?'#f59e0b':'#00e5a0';}),
+        borderWidth:1,borderRadius:4
+      }]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw.toFixed(1)+'% delivery rate';}}}},
+      scales:{
+        x:{max:100,grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return v+'%';}},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}
+      }}
+  });
+
+  // Gap clock
+  var clockEl=document.getElementById('dg-gap-clock');
+  if(clockEl){
+    // Calculate annual delivery rate from timeline
+    var recent=tl.slice(-3);
+    var annualDel=recent.length>0?recent.reduce(function(s,t){return s+(t.vol||0);},0)/recent.length:0;
+    // Annual delivery fraction ~ based on delivered ratio historically
+    var delFraction=totalContr>0?totalDel/totalContr:0;
+    var annualActualDel=annualDel*delFraction;
+    var html='';
+    var clockMethods=labels.filter(function(m){return dg[m]&&dg[m].contracted>50000;}).sort(function(a,b){return dg[b].contracted-dg[a].contracted;});
+    clockMethods.forEach(function(m){
+      var d=dg[m];
+      var gap=d.contracted-d.delivered-d.partial;
+      var annualDelForMethod=d.deliveryRate>0?(d.delivered+d.partial)>0?((d.delivered+d.partial)/3):1000:0;
+      var years=annualDelForMethod>0?Math.round(gap/annualDelForMethod):999;
+      var col=methodColors[m]||'#94a3b8';
+      var yearsDisplay=years>200?'∞':years>50?'50+':years.toString();
+      var yearsCol=years>50?'#ef4444':years>20?'#f59e0b':'#00e5a0';
+      html+='<div class="gap-clock-item">'+
+        '<div class="gap-years" style="color:'+yearsCol+'">'+yearsDisplay+'y</div>'+
+        '<div style="flex:1;">'+
+          '<div class="gap-method">'+m+'</div>'+
+          '<div class="gap-rate">Gap: '+fmtShort(gap)+' tCO₂ · Rate: '+d.deliveryRate.toFixed(1)+'%</div>'+
+        '</div>'+
+        '<div style="width:36px;height:36px;border-radius:50%;border:3px solid '+col+'33;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+col+';">'+d.deliveryRate.toFixed(0)+'%</div>'+
+      '</div>';
+    });
+    clockEl.innerHTML=html||'<div style="color:var(--text3);font-size:12px;padding:20px;text-align:center;">No significant gap data</div>';
+  }
+
+  // Buyer chart
+  var buyers=bc.topBuyers||[];
+  var buyerLabels=buyers.slice(0,12).map(function(b){return b.name.length>22?b.name.slice(0,22)+'…':b.name;});
+  var buyerVols=buyers.slice(0,12).map(function(b){return b.volume;});
+  var buyerColors=buyerVols.map(function(v,i){return i===0?'#00d4ff88':i<3?'#f59e0b88':'#8b5cf688';});
+  var buyerBorders=buyerVols.map(function(v,i){return i===0?'#00d4ff':i<3?'#f59e0b':'#8b5cf6';});
+  new Chart(document.getElementById('dgBuyerChart'),{
+    type:'bar',
+    data:{labels:buyerLabels,datasets:[{label:'Volume tCO₂',data:buyerVols,backgroundColor:buyerColors,borderColor:buyerBorders,borderWidth:1,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂ ('+buyers[ctx.dataIndex].pct+'%)';}}}},
+      scales:{x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}}}
+  });
+
+  // Buyer table cards
+  var btEl=document.getElementById('dg-buyer-table');
+  if(btEl){
+    var bhtml='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Top Buyers Ranked by Volume</div>';
+    bhtml+='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text2);">'+
+      '<span style="color:var(--amber);font-weight:700;">HHI Index: '+bc.hhi+'</span> — Highly Concentrated Market<br>'+
+      '<span style="color:var(--text3);">HHI &gt; 2,500 = highly concentrated · &gt; 1,500 = concentrated · &lt; 1,500 = competitive</span></div>';
+    buyers.slice(0,10).forEach(function(b,i){
+      var col=i===0?'#00d4ff':i<3?'#f59e0b':'#8fa8cc';
+      var barW=Math.round(b.pct);
+      bhtml+='<div style="margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'+
+          '<span style="font-size:12px;font-weight:600;color:var(--text1);">'+(i+1)+'. '+b.name+'</span>'+
+          '<span style="font-size:11px;color:'+col+';font-weight:700;">'+b.pct+'%</span>'+
+        '</div>'+
+        '<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;">'+
+          '<div style="height:100%;width:'+Math.min(barW,100)+'%;background:'+col+';border-radius:3px;"></div>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px;">'+fmtShort(b.volume)+' tCO₂ · '+b.tx+' transactions</div>'+
+      '</div>';
+    });
+    btEl.innerHTML=bhtml;
+  }
+
+  // Timeline chart (bar+line combo)
+  var tlYears=tl.map(function(t){return t.year;});
+  var tlVols=tl.map(function(t){return t.vol;});
+  var tlYoy=tl.map(function(t){return t.yoy;});
+  new Chart(document.getElementById('dgTimelineChart'),{
+    type:'bar',
+    data:{
+      labels:tlYears,
+      datasets:[
+        {type:'bar',label:'Volume (tCO₂)',data:tlVols,backgroundColor:'#00d4ff44',borderColor:'#00d4ff',borderWidth:1,borderRadius:4,yAxisID:'y'},
+        {type:'line',label:'YoY Growth %',data:tlYoy,borderColor:'#f59e0b',backgroundColor:'transparent',borderWidth:2,pointBackgroundColor:'#f59e0b',pointRadius:4,tension:.3,yAxisID:'y2',spanGaps:true}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8fa8cc',font:{size:11}}},
+        tooltip:{callbacks:{label:function(ctx){return ctx.dataset.yAxisID==='y2'?' YoY: '+(ctx.raw||'base')+'%':' Volume: '+fmtShort(ctx.raw)+' tCO₂';}}}},
+      scales:{
+        x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#8fa8cc',font:{size:11}},border:{display:false}},
+        y:{position:'left',grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
+        y2:{position:'right',grid:{display:false},ticks:{color:'#f59e0b',font:{size:10},callback:function(v){return v!=null?v+'%':'';}},border:{display:false}}
+      }}
+  });
+}
+
+// ============================================================
+// GEOGRAPHY PAGE
+// ============================================================
+function renderGeography(){
+  if(!DATA)return;
+  var geo=DATA.geographic||{};
+  var chartOpts=function(label,col){return {indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' '+label;}}}},scales:{x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}}};};
+
+  // CDR.fyi supplier chart
+  var cdrGeo=geo.cdrfyi||{};
+  var cdrSorted=Object.keys(cdrGeo).sort(function(a,b){return cdrGeo[b].committed-cdrGeo[a].committed;}).slice(0,15);
+  new Chart(document.getElementById('geoSupplierChart'),{type:'bar',
+    data:{labels:cdrSorted,datasets:[{label:'Committed tCO₂',data:cdrSorted.map(function(c){return cdrGeo[c].committed;}),backgroundColor:'#00d4ff55',borderColor:'#00d4ff',borderWidth:1,borderRadius:4}]},
+    options:chartOpts('tCO₂ committed','#00d4ff')});
+
+  // Puro chart
+  var puroGeo=geo.puro||{};
+  var puroSorted=Object.keys(puroGeo).sort(function(a,b){return puroGeo[b].projects-puroGeo[a].projects;}).slice(0,15);
+  new Chart(document.getElementById('geoPuroChart'),{type:'bar',
+    data:{labels:puroSorted,datasets:[{label:'Projects',data:puroSorted.map(function(c){return puroGeo[c].projects;}),backgroundColor:'#00e5a055',borderColor:'#00e5a0',borderWidth:1,borderRadius:4}]},
+    options:chartOpts('projects','#00e5a0')});
+
+  // Rainbow chart
+  var rbGeo=geo.rainbow||{};
+  var rbSorted=Object.keys(rbGeo).filter(function(c){return c!=='Unknown';}).sort(function(a,b){return rbGeo[b].projects-rbGeo[a].projects;}).slice(0,12);
+  new Chart(document.getElementById('geoRainbowChart'),{type:'bar',
+    data:{labels:rbSorted,datasets:[{label:'Projects',data:rbSorted.map(function(c){return rbGeo[c].projects;}),backgroundColor:'#8b5cf655',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},
+    options:chartOpts('projects','#8b5cf6')});
+
+  // Cross-registry overlap table
+  var overlapEl=document.getElementById('geo-overlap-table');
+  if(overlapEl){
+    var allCountries={};
+    Object.keys(cdrGeo).forEach(function(c){if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].cdr=cdrGeo[c].suppliers||0;});
+    Object.keys(puroGeo).forEach(function(c){if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].puro=puroGeo[c].projects||0;});
+    Object.keys(rbGeo).forEach(function(c){if(c==='Unknown')return;if(!allCountries[c])allCountries[c]={cdr:0,puro:0,rainbow:0};allCountries[c].rainbow=rbGeo[c].projects||0;});
+    var multiCountries=Object.keys(allCountries).filter(function(c){var d=allCountries[c];return (d.cdr>0)+(d.puro>0)+(d.rainbow>0)>=2;}).sort(function(a,b){var da=allCountries[a],db=allCountries[b];return ((db.cdr>0)+(db.puro>0)+(db.rainbow>0))-((da.cdr>0)+(da.puro>0)+(da.rainbow>0));});
+    var ohtml='<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Countries in 2+ Registries</div>';
+    multiCountries.slice(0,20).forEach(function(c){
+      var d=allCountries[c];
+      var badges='';
+      if(d.cdr>0)badges+='<span style="font-size:9px;background:rgba(0,212,255,.15);color:var(--accent);border:1px solid rgba(0,212,255,.25);padding:1px 6px;border-radius:4px;font-weight:700;">CDR.fyi</span> ';
+      if(d.puro>0)badges+='<span style="font-size:9px;background:rgba(0,229,160,.15);color:var(--green);border:1px solid rgba(0,229,160,.25);padding:1px 6px;border-radius:4px;font-weight:700;">Puro</span> ';
+      if(d.rainbow>0)badges+='<span style="font-size:9px;background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.25);padding:1px 6px;border-radius:4px;font-weight:700;">Rainbow</span>';
+      ohtml+='<div class="geo-country-row"><div style="font-size:12px;font-weight:600;color:var(--text1);flex:1;">'+c+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;">'+badges+'</div></div>';
+    });
+    overlapEl.innerHTML=ohtml;
+  }
+
+  // World bubble map (SVG-based)
+  renderWorldMap();
+}
+
+function renderWorldMap(){
+  if(!DATA)return;
+  var geo=DATA.geographic||{};
+  var cdrGeo=geo.cdrfyi||{};
+  var puroGeo=geo.puro||{};
+  var rbGeo=geo.rainbow||{};
+
+  // Country centroids (lat/lon) for key CDR countries
+  var coords={
+    'United States':[38,-97],'Bolivia':[-16,-64],'India':[20,77],'Switzerland':[47,8],
+    'Brazil':[-14,-51],'Thailand':[13,100],'United Kingdom':[55,-3],'Canada':[56,-106],
+    'Germany':[51,10],'Denmark':[56,10],'Finland':[64,26],'Bulgaria':[43,25],
+    'Cambodia':[12,105],'Sweden':[62,15],'Netherlands':[52,5],'France':[46,2],
+    'Norway':[60,8],'Australia':[-25,133],'Spain':[40,-4],'Belgium':[50,4],
+    'Portugal':[39,-8],'South Africa':[-29,25],'Italy':[42,12],'Japan':[36,138],
+    'China':[35,105],'South Korea':[37,128],'Ireland':[53,-8],'Austria':[47,14],
+    'Poland':[52,20],'Chile':[-30,-71],'Colombia':[4,-72],'Mexico':[23,-102]
+  };
+
+  // Score per country
+  var scores={};
+  Object.keys(cdrGeo).forEach(function(c){if(!scores[c])scores[c]=0;scores[c]+=cdrGeo[c].suppliers*3;});
+  Object.keys(puroGeo).forEach(function(c){if(!scores[c])scores[c]=0;scores[c]+=puroGeo[c].projects*2;});
+  Object.keys(rbGeo).forEach(function(c){if(c==='Unknown')return;if(!scores[c])scores[c]=0;scores[c]+=rbGeo[c].projects;});
+
+  var maxScore=Math.max.apply(null,Object.values(scores).filter(Boolean));
+
+  // Simple Mercator projection
+  function project(lat,lon,W,H){
+    var x=(lon+180)/360*W;
+    var latRad=lat*Math.PI/180;
+    var y=(H/2)-(W/(2*Math.PI))*Math.log(Math.tan(Math.PI/4+latRad/2));
+    return [x,y];
+  }
+
+  var container=document.getElementById('geo-world-map');
+  if(!container)return;
+  var W=container.offsetWidth||800,H=340;
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:'+H+'px;" xmlns="http://www.w3.org/2000/svg">';
+  // Ocean background
+  svg+='<rect width="'+W+'" height="'+H+'" fill="#0a0f1e"/>';
+  // Grid lines
+  for(var lat=-60;lat<=80;lat+=30){var py=project(lat,0,W,H)[1];svg+='<line x1="0" y1="'+py+'" x2="'+W+'" y2="'+py+'" stroke="#1e2d4a" stroke-width="1" stroke-dasharray="4,4"/>';}
+  for(var lon=-150;lon<=180;lon+=60){var px=project(0,lon,W,H)[0];svg+='<line x1="'+px+'" y1="0" x2="'+px+'" y2="'+H+'" stroke="#1e2d4a" stroke-width="1" stroke-dasharray="4,4"/>';}
+  // Lat/lon labels
+  svg+='<text x="4" y="'+(project(60,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">60°N</text>';
+  svg+='<text x="4" y="'+(project(30,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">30°N</text>';
+  svg+='<text x="4" y="'+(project(0,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">EQ</text>';
+  svg+='<text x="4" y="'+(project(-30,0,W,H)[1]+4)+'" fill="#5a7399" font-size="9">30°S</text>';
+
+  // Draw bubbles
+  var sortedCountries=Object.keys(scores).filter(function(c){return coords[c]&&scores[c]>0;}).sort(function(a,b){return scores[a]-scores[b];}); // draw small first
+  sortedCountries.forEach(function(country){
+    var score=scores[country];
+    var r=Math.max(6,Math.round(Math.sqrt(score/maxScore)*36));
+    var ll=coords[country];
+    var pt=project(ll[0],ll[1],W,H);
+    var px=pt[0],py=pt[1];
+    if(px<0||px>W||py<0||py>H)return;
+    // Color based on dominant registry
+    var hasCDR=cdrGeo[country]&&cdrGeo[country].suppliers>0;
+    var hasPuro=puroGeo[country]&&puroGeo[country].projects>0;
+    var hasRb=rbGeo[country]&&rbGeo[country].projects>0&&country!=='Unknown';
+    var col=hasCDR&&hasPuro?'#f59e0b':hasCDR?'#00d4ff':hasPuro?'#00e5a0':'#8b5cf6';
+    svg+='<circle cx="'+px+'" cy="'+py+'" r="'+r+'" fill="'+col+'" opacity="0.35" stroke="'+col+'" stroke-width="1.5"/>';
+    svg+='<text x="'+px+'" y="'+(py+3)+'" text-anchor="middle" fill="'+col+'" font-size="9" font-weight="700">'+country.slice(0,3).toUpperCase()+'</text>';
+  });
+
+  // Legend
+  var lx=W-180,ly=H-80;
+  svg+='<rect x="'+(lx-8)+'" y="'+(ly-16)+'" width="176" height="80" fill="#131d32" rx="6" opacity="0.9"/>';
+  svg+='<circle cx="'+lx+'" cy="'+ly+'" r="6" fill="#00d4ff" opacity="0.5" stroke="#00d4ff" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+4)+'" fill="#8fa8cc" font-size="10">CDR.fyi dominant</text>';
+  svg+='<circle cx="'+lx+'" cy="'+(ly+20)+'" r="6" fill="#00e5a0" opacity="0.5" stroke="#00e5a0" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+24)+'" fill="#8fa8cc" font-size="10">Puro dominant</text>';
+  svg+='<circle cx="'+lx+'" cy="'+(ly+40)+'" r="6" fill="#8b5cf6" opacity="0.5" stroke="#8b5cf6" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+44)+'" fill="#8fa8cc" font-size="10">Rainbow dominant</text>';
+  svg+='<circle cx="'+lx+'" cy="'+(ly+60)+'" r="6" fill="#f59e0b" opacity="0.5" stroke="#f59e0b" stroke-width="1.5"/><text x="'+(lx+12)+'" y="'+(ly+64)+'" fill="#8fa8cc" font-size="10">Multi-registry</text>';
+  svg+='</svg>';
+  container.innerHTML=svg;
+}
+
+// ============================================================
+// CROSS-REGISTRY SUPPLIER PAGE
+// ============================================================
+var crFiltered=[];
+function renderCrossRegistry(){
+  if(!DATA||!DATA.crossRegistry)return;
+  crFiltered=DATA.crossRegistry.slice();
+  filterCR();
+}
+function filterCR(){
+  if(!DATA||!DATA.crossRegistry)return;
+  var search=(document.getElementById('cr-search')||{}).value||'';
+  var filter=(document.getElementById('cr-filter')||{}).value||'';
+  var method=(document.getElementById('cr-method')||{}).value||'';
+  var sl=search.toLowerCase();
+  crFiltered=DATA.crossRegistry.filter(function(s){
+    if(sl&&s.name.toLowerCase().indexOf(sl)===-1)return false;
+    if(filter==='multi'&&!s.puro.length&&!s.rainbow.length)return false;
+    if(filter==='cdrfyi'&&(s.puro.length||s.rainbow.length))return false;
+    if(method&&s.cdrfyi.canonicalMethod!==method)return false;
+    return true;
+  });
+  var countEl=document.getElementById('cr-count');
+  if(countEl)countEl.textContent=crFiltered.length+' supplier'+(crFiltered.length!==1?'s':'');
+  var methodColors={'Biochar':'#00e5a0','BECCS':'#00d4ff','DACCS':'#8b5cf6','Enhanced Weathering':'#f59e0b','Mineralization':'#ec4899','Ocean Alkalinity':'#06b6d4','Ocean Removal':'#10b981','Biomass Storage':'#f97316','Other':'#94a3b8'};
+  var grid=document.getElementById('cr-grid');
+  if(!grid)return;
+  var html='';
+  crFiltered.forEach(function(s){
+    var isMulti=s.puro.length>0||s.rainbow.length>0;
+    var col=methodColors[s.cdrfyi.canonicalMethod]||'#94a3b8';
+    var regBadges='<span class="cr-reg-badge" style="background:rgba(0,212,255,.15);color:#00d4ff;border:1px solid rgba(0,212,255,.25);">CDR.fyi</span>';
+    if(s.puro.length)regBadges+=' <span class="cr-reg-badge" style="background:rgba(0,229,160,.15);color:#00e5a0;border:1px solid rgba(0,229,160,.25);">Puro.earth</span>';
+    if(s.rainbow.length)regBadges+=' <span class="cr-reg-badge" style="background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.25);">Rainbow</span>';
+    var price=s.cdrfyi.price?'$'+s.cdrfyi.price+'/t':'—';
+    var delivRate=s.cdrfyi.committed>0?((s.cdrfyi.delivered/s.cdrfyi.committed)*100).toFixed(1)+'%':'—';
+    html+='<div class="cr-card'+(isMulti?' multi':'')+'">'+
+      '<div class="cr-header">'+
+        '<div><div class="cr-name">'+s.name+'</div><div class="cr-country">📍 '+s.cdrfyi.country+'</div></div>'+
+        '<div style="text-align:right;font-size:13px;font-weight:800;color:var(--accent);">'+fmtShort(s.cdrfyi.committed)+'<div style="font-size:9px;color:var(--text3);font-weight:400;">tCO₂ committed</div></div>'+
+      '</div>'+
+      '<div class="cr-registries">'+regBadges+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'+
+        '<span class="badge" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44;">'+s.cdrfyi.canonicalMethod+'</span>'+
+      '</div>'+
+      '<div class="cr-stat-row">'+
+        '<div class="cr-stat"><strong>'+fmtShort(s.cdrfyi.delivered)+'</strong> delivered</div>'+
+        '<div class="cr-stat"><strong>'+delivRate+'</strong> del. rate</div>'+
+        '<div class="cr-stat"><strong>'+price+'</strong> price</div>'+
+        '<div class="cr-stat"><strong>'+s.cdrfyi.count+'</strong> tx</div>'+
+      '</div>'+
+      (s.puro.length?'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);">🌱 Puro: '+s.puro.map(function(p){return p.name;}).slice(0,2).join(', ')+(s.puro.length>2?'…':'')+' ('+s.puro.length+' project'+(s.puro.length>1?'s':'')+')</div>':'')+
+      (s.rainbow.length?'<div style="margin-top:6px;font-size:11px;color:var(--text3);">🌈 Rainbow: '+s.rainbow.map(function(p){return p.name;}).slice(0,2).join(', ')+(s.rainbow.length>2?'…':'')+' ('+s.rainbow.length+' project'+(s.rainbow.length>1?'s':'')+')</div>':'')+
+    '</div>';
+  });
+  grid.innerHTML=html||'<div style="color:var(--text3);padding:40px;text-align:center;font-size:13px;">No suppliers match current filters.</div>';
+}
+
+// ============================================================
+// SPARKLINES on KPI cards
+// ============================================================
+function renderSparklines(){
+  if(!DATA||!DATA.timeline)return;
+  var tl=DATA.timeline;
+  var vols=tl.map(function(t){return t.vol;});
+  var txs=tl.map(function(t){return t.tx;});
+  function makeSpark(vals,col){
+    if(!vals||vals.length<2)return'';
+    var max=Math.max.apply(null,vals),min=Math.min.apply(null,vals);
+    var range=max-min||1;
+    var W=80,H=28;
+    var pts=vals.map(function(v,i){return [Math.round(i/(vals.length-1)*(W-4)+2),Math.round(H-2-(v-min)/range*(H-4))];});
+    var d='M'+pts.map(function(p){return p[0]+','+p[1];}).join(' L');
+    return '<svg class="sparkline-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linecap="round"/>'+
+      '<circle cx="'+pts[pts.length-1][0]+'" cy="'+pts[pts.length-1][1]+'" r="2" fill="'+col+'"/>'+
+      '</svg>';
+  }
+  // Inject sparklines into dashboard KPI cards — find by kpi-label text
+  var cards=document.querySelectorAll('#page-dashboard .kpi-card');
+  cards.forEach(function(card){
+    var label=card.querySelector('.kpi-label');
+    if(!label)return;
+    if(label.textContent.indexOf('Committed')!==-1||label.textContent.indexOf('Volume')!==-1){
+      if(!card.querySelector('.kpi-sparkline')){
+        var sp=document.createElement('div');sp.className='kpi-sparkline';
+        sp.innerHTML=makeSpark(vols,'#00d4ff');
+        card.appendChild(sp);
+      }
+    }
+    if(label.textContent.indexOf('Transactions')!==-1){
+      if(!card.querySelector('.kpi-sparkline')){
+        var sp2=document.createElement('div');sp2.className='kpi-sparkline';
+        sp2.innerHTML=makeSpark(txs,'#00e5a0');
+        card.appendChild(sp2);
+      }
+    }
+  });
+}
+
+// ============================================================
+// LAST UPDATED BADGES — add to topbar-right
+// ============================================================
+function renderLastUpdatedBadge(){
+  if(!DATA||!DATA.meta)return;
+  var lu=DATA.meta.lastUpdated||{};
+  var tbr=document.querySelector('.topbar-right');
+  if(!tbr||document.getElementById('last-updated-block'))return;
+  var div=document.createElement('div');
+  div.id='last-updated-block';
+  div.style.cssText='display:flex;flex-direction:column;gap:3px;';
+  var labels={'cdrfyi':'CDR.fyi','puro':'Puro','rainbow':'Rainbow','isometric':'Isometric'};
+  var html='';
+  Object.keys(labels).forEach(function(k){
+    if(lu[k])html+='<div class="updated-badge"><div class="updated-dot"></div>'+labels[k]+': '+lu[k]+'</div>';
+  });
+  div.innerHTML=html;
+  tbr.insertBefore(div,tbr.firstChild);
+}
+
+// ============================================================
+// PRICE DISCOVERY injection into transactions page
+// ============================================================
+function injectPriceDiscovery(){
+  if(!DATA||!DATA.priceDiscovery)return;
+  var txPage=document.getElementById('page-transactions');
+  if(!txPage)return;
+  if(document.getElementById('price-discovery-section'))return;
+  var section=document.createElement('div');
+  section.id='price-discovery-section';
+  section.style.cssText='margin-bottom:24px;';
+  var header=document.createElement('div');
+  header.className='section-header';
+  header.innerHTML='<div><div class="section-title">💰 Price Discovery — Market Prices by Technology</div><div class="section-sub">Price per tCO₂e from CDR.fyi supplier data · 49/50 suppliers with price data · Range $100–$200</div></div>';
+  section.prepend(header);
+  txPage.insertBefore(header,txPage.firstChild);
+  txPage.insertBefore(section,txPage.firstChild);
+  renderPriceDiscovery();
+}
+
+// ============================================================
+// MICROSOFT WARNING in Dashboard
+// ============================================================
+function injectMicrosoftWarning(){
+  if(!DATA||!DATA.buyerConcentration)return;
+  var dashPage=document.getElementById('page-dashboard');
+  if(!dashPage||document.getElementById('ms-dash-warning'))return;
+  var bc=DATA.buyerConcentration;
+  var div=document.createElement('div');
+  div.id='ms-dash-warning';
+  div.style.cssText='background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;';
+  div.innerHTML='<div style="font-size:18px;flex-shrink:0;">⚠️</div>'+
+    '<div style="font-size:12px;color:var(--text2);line-height:1.6;">'+
+      '<strong style="color:var(--amber);">Market Concentration Note</strong> — '+
+      '<strong style="color:var(--text1);">Microsoft</strong> alone accounts for <strong style="color:var(--amber);">'+bc.top1pct+'%</strong> of all CDR.fyi volume. '+
+      'Top 3 buyers: <strong style="color:var(--amber);">'+bc.top3pct+'%</strong>. Top 10: <strong style="color:var(--amber);">'+bc.top10pct+'%</strong>. '+
+      'HHI Index: <strong style="color:var(--amber);">'+bc.hhi+'</strong> (highly concentrated). '+
+      '<a href="javascript:showPage('deliverygap')" style="color:var(--accent);">→ View full analysis</a>'+
+    '</div>'+
+    '<button onclick="this.parentElement.style.display='none'" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
+  // Insert after KPI grid
+  var kpiGrid=dashPage.querySelector('.kpi-grid');
+  if(kpiGrid&&kpiGrid.nextSibling){dashPage.insertBefore(div,kpiGrid.nextSibling);}
+  else{dashPage.insertBefore(div,dashPage.firstChild);}
+}
+
+// ============================================================
+// CSV UPLOAD for Rainbow
+// ============================================================
+function handleCSVDrop(e){
+  e.preventDefault();
+  document.getElementById('csv-dropzone').style.borderColor='var(--border2)';
+  var file=e.dataTransfer.files[0];
+  if(file)handleCSVFile(file);
+}
+function handleCSVFile(file){
+  if(!file||!file.name.endsWith('.csv')){
+    showCSVStatus('error','Please select a .csv file');return;
+  }
+  showCSVStatus('loading','Reading '+file.name+'…');
+  var reader=new FileReader();
+  reader.onload=function(e){parseRainbowCSV(e.target.result,file.name);};
+  reader.readAsText(file);
+}
+function showCSVStatus(type,msg){
+  var el=document.getElementById('csv-status');
+  if(!el)return;
+  var col=type==='success'?'#00e5a0':type==='error'?'#ef4444':'#f59e0b';
+  var icon=type==='success'?'✅':type==='error'?'❌':'⏳';
+  el.innerHTML='<div style="background:rgba('+col.replace('#','')+',.08);border:1px solid '+col+'44;border-radius:8px;padding:12px 16px;font-size:13px;color:'+col+';">'+icon+' '+msg+'</div>';
+}
+function parseRainbowCSV(text,filename){
+  try{
+    var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
+    if(lines.length<2){showCSVStatus('error','File appears empty');return;}
+    var headers=lines[0].split(',').map(function(h){return h.trim().replace(/^"|"$/g,'');});
+    var projects=[];
+    for(var i=1;i<lines.length;i++){
+      var cols=lines[i].split(',');
+      var row={};
+      headers.forEach(function(h,j){row[h]=(cols[j]||'').trim().replace(/^"|"$/g,'');});
+      if(row.Name||row.name||row['Project Name'])projects.push(row);
+    }
+    // Map to our format
+    var mapped=projects.map(function(p,idx){
+      return {
+        id:p.ID||p.id||(idx+1),
+        name:p.Name||p.name||p['Project Name']||'',
+        developer:p.Developer||p.developer||p.Company||'',
+        methodology:p.Methodology||p.methodology||p.Type||'',
+        mechanism:p.Mechanism||p.mechanism||p.Category||'',
+        durability:p.Durability||p.durability||'',
+        country:p.Country||p.country||'',
+        city:p.City||p.city||'',
+        status:p.Status||p.status||'',
+        issuedCredits:parseFloat(p['Issued Credits']||p.IssuedCredits||p.issued_credits||0)||0,
+        availableCredits:parseFloat(p['Available Credits']||p.AvailableCredits||p.available_credits||0)||0,
+        firstIssuance:p['First Issuance']||p.firstIssuance||'',
+        lastIssuance:p['Last Issuance']||p.lastIssuance||''
+      };
+    });
+    // Update DATA
+    DATA.rainbow.projects=mapped;
+    DATA.rainbow.kpis.totalProjects=mapped.length;
+    DATA.rainbow.kpis.totalIssuedCredits=mapped.reduce(function(s,p){return s+(p.issuedCredits||0);},0);
+    DATA.rainbow.kpis.totalAvailableCredits=mapped.reduce(function(s,p){return s+(p.availableCredits||0);},0);
+    // Reset rendered flag so rainbow page re-renders
+    chartsRendered['rainbow']=false;
+    showCSVStatus('success','Successfully imported '+mapped.length+' Rainbow projects from '+filename+'. Navigate to Rainbow Standard to see updated data.');
+    // Show preview
+    var prev=document.getElementById('csv-preview');
+    if(prev){
+      var ph='<div class="table-wrap" style="margin-top:0;"><table style="width:100%;"><thead><tr><th>#</th><th>Name</th><th>Methodology</th><th>Country</th><th style="text-align:right">Issued Credits</th></tr></thead><tbody>';
+      mapped.slice(0,10).forEach(function(p,i){ph+='<tr><td style="color:var(--text3);">'+(i+1)+'</td><td class="td-bold">'+p.name+'</td><td>'+p.methodology+'</td><td>'+p.country+'</td><td style="text-align:right;">'+fmtNum(p.issuedCredits)+'</td></tr>';});
+      ph+='</tbody></table><div style="padding:10px 14px;font-size:11px;color:var(--text3);">Showing 10 of '+mapped.length+' projects</div></div>';
+      prev.innerHTML=ph;
+    }
+  }catch(err){showCSVStatus('error','Parse error: '+err.message);}
+}
+
 
 loadData();
 </script>
