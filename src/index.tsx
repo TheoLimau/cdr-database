@@ -5,6 +5,106 @@ const app = new Hono()
 
 app.use('/static/*', serveStatic({ root: './public' }))
 
+// Test page — esegue le 3 pagine e mostra errori
+app.get('/diag', (c) => {
+  return c.html(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CDR Diag</title></head>
+<body style="background:#0a0f1e;color:#f0f6ff;font-family:monospace;padding:20px;font-size:12px;line-height:1.8;">
+<h2 style="margin-bottom:16px;">CDR Page Diagnostics — iframe test</h2>
+<p style="color:#5a7399;margin-bottom:12px;">Carica la SPA in un iframe invisibile, aspetta che i dati siano pronti, poi chiama showPage() per le 3 pagine e raccoglie i log.</p>
+<div id="log" style="white-space:pre-wrap;background:#0d1526;border-radius:8px;padding:16px;margin-bottom:16px;"></div>
+<iframe id="spa" src="/" style="width:1200px;height:900px;border:none;visibility:hidden;position:absolute;left:-9999px;"></iframe>
+<script>
+var logEl=document.getElementById('log');
+function w(s){console.log(s);logEl.textContent+=s+'\\n';}
+var iframe=document.getElementById('spa');
+var errors=[];
+var diagResults={deliverygap:null,geography:null,crossregistry:null};
+
+iframe.addEventListener('load',function(){
+  w('✅ SPA iframe loaded');
+  // Hook into the iframe window to capture console & errors
+  try{
+    var iw=iframe.contentWindow;
+    // Override console.error to capture render errors
+    var origErr=iw.console.error.bind(iw.console);
+    iw.console.error=function(){
+      var msg=Array.prototype.slice.call(arguments).join(' ');
+      errors.push(msg);
+      w('❌ iframe console.error: '+msg);
+      origErr.apply(this,arguments);
+    };
+    var origLog=iw.console.log.bind(iw.console);
+    iw.console.log=function(){
+      var msg=Array.prototype.slice.call(arguments).join(' ');
+      if(msg.indexOf('[CDR]')!==-1)w('ℹ️  '+msg);
+      origLog.apply(this,arguments);
+    };
+    iw.onerror=function(msg,src,line,col,err){
+      errors.push('UNCAUGHT: '+msg+' line '+line);
+      w('❌ iframe onerror: '+msg+' (line '+line+')');
+    };
+  }catch(e){w('⚠️  could not hook iframe console: '+e.message);}
+
+  // Wait for DATA to be populated in the SPA
+  var maxWait=15000,waited=0,interval=500;
+  var waiter=setInterval(function(){
+    waited+=interval;
+    try{
+      var iw=iframe.contentWindow;
+      var data=iw.DATA;
+      if(data){
+        clearInterval(waiter);
+        w('✅ DATA loaded after '+waited+'ms — keys: '+Object.keys(data).join(', '));
+        w('');
+        // Test deliverygap
+        w('--- Testing deliverygap ---');
+        try{iw.showPage('deliverygap');w('✅ showPage(deliverygap) called without throw');}
+        catch(e){w('❌ showPage(deliverygap) threw: '+e.message);}
+        setTimeout(function(){
+          w('--- Testing geography ---');
+          try{iw.showPage('geography');w('✅ showPage(geography) called without throw');}
+          catch(e){w('❌ showPage(geography) threw: '+e.message);}
+          setTimeout(function(){
+            w('--- Testing crossregistry ---');
+            try{iw.showPage('crossregistry');w('✅ showPage(crossregistry) called without throw');}
+            catch(e){w('❌ showPage(crossregistry) threw: '+e.message);}
+            setTimeout(function(){
+              w('');
+              w('=== FINAL REPORT ===');
+              w('Errors captured: '+errors.length);
+              if(errors.length===0)w('✅ NO JS ERRORS — all 3 pages rendered successfully');
+              else errors.forEach(function(e){w('  ❌ '+e);});
+              // Check DOM content
+              try{
+                var idg=iw.document.getElementById('dg-contracted');
+                var igeo=iw.document.getElementById('geo-overlap-table');
+                var icr=iw.document.getElementById('cr-grid');
+                w('');
+                w('DOM checks:');
+                w('  dg-contracted filled: '+(idg&&idg.textContent&&idg.textContent!=='—'?'✅ '+idg.textContent:'❌ still shows: '+(idg?idg.textContent:'element missing')));
+                w('  geo-overlap-table filled: '+(igeo&&igeo.innerHTML.length>50?'✅ ('+igeo.innerHTML.length+' chars)':'❌ empty/short: '+(igeo?igeo.innerHTML.length+' chars':'element missing')));
+                w('  cr-grid filled: '+(icr&&icr.innerHTML.length>100?'✅ ('+icr.innerHTML.length+' chars)':'❌ empty/short: '+(icr?icr.innerHTML.length+' chars':'element missing')));
+              }catch(e2){w('⚠️  DOM check error: '+e2.message);}
+            },2000);
+          },1000);
+        },1000);
+      }else if(waited>=maxWait){
+        clearInterval(waiter);
+        w('❌ DATA never populated after '+maxWait+'ms timeout');
+        w('chartsRendered: '+JSON.stringify(iw.chartsRendered||{}));
+      }else{
+        w('⏳ waiting for DATA... ('+waited+'ms)');
+      }
+    }catch(e){
+      clearInterval(waiter);
+      w('❌ iframe access error: '+e.message);
+    }
+  },interval);
+});
+</script>
+</body></html>`)
+})
+
 app.get('/', (c) => {
   const html = String.raw`<!DOCTYPE html>
 <html lang="en">
@@ -1278,8 +1378,14 @@ var chartsRendered={};
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelector('[onclick="showPage(\''+id+'\')"]').classList.add('active');
+  var pg=document.getElementById('page-'+id);
+  if(pg)pg.classList.add('active');
+  else{console.error('[CDR] page element not found: page-'+id);return;}
+  // Find active nav button safely without brittle attribute selector
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    var oc=b.getAttribute('onclick')||'';
+    if(oc.indexOf("showPage('"+id+"')")!==-1||oc.indexOf('showPage("'+id+'")')!==-1)b.classList.add('active');
+  });
   var m=pageMeta[id]||{};
   document.getElementById('page-title').textContent=m.title||id;
   document.getElementById('page-sub').textContent=m.sub||'';
@@ -1287,17 +1393,19 @@ function showPage(id){
   if(window.innerWidth<=900)window.scrollTo({top:0,behavior:'smooth'});
   if(!chartsRendered[id]){
     chartsRendered[id]=true;
-    if(id==='transactions')filterTx();
-    else if(id==='suppliers')filterSup();
-    else if(id==='projects')filterProj();
-    else if(id==='methods')renderMethods();
-    else if(id==='insights')renderInsights();
-    else if(id==='rainbow')renderRainbow();
-    else if(id==='isometric')renderIsometric();
-    else if(id==='datacontrol')renderDataControl();
-    else if(id==='deliverygap')renderDeliveryGap();
-    else if(id==='geography')renderGeography();
-    else if(id==='crossregistry')renderCrossRegistry();
+    try{
+      if(id==='transactions')filterTx();
+      else if(id==='suppliers')filterSup();
+      else if(id==='projects')filterProj();
+      else if(id==='methods')renderMethods();
+      else if(id==='insights')renderInsights();
+      else if(id==='rainbow')renderRainbow();
+      else if(id==='isometric')renderIsometric();
+      else if(id==='datacontrol')renderDataControl();
+      else if(id==='deliverygap')renderDeliveryGap();
+      else if(id==='geography')renderGeography();
+      else if(id==='crossregistry')renderCrossRegistry();
+    }catch(err){console.error('[CDR] render error on page '+id+':', err.message, err.stack);}
   }
   // re-check scroll hints after page switch
   setTimeout(function(){
@@ -2556,7 +2664,13 @@ function parseRainbowCSV(text,filename){
 }
 
 
-loadData();
+// Auto-navigate to page from URL hash on load
+function initFromHash(){
+  var hash=window.location.hash.replace('#','');
+  if(hash&&document.getElementById('page-'+hash))showPage(hash);
+}
+
+loadData().then(function(){setTimeout(initFromHash,200);});
 </script>
 </body>
 </html>`;
