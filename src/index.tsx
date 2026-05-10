@@ -234,13 +234,14 @@ td.td-link:hover{text-decoration:underline}
   <div class="nav-section">
     <div class="nav-label">Registries</div>
     <button class="nav-btn" onclick="showPage('puro')"><span class="icon">🌱</span><span class="nav-text">Puro.earth</span><span class="nav-badge green">113</span></button>
-    <button class="nav-btn" onclick="showPage('rainbow')"><span class="icon">🌈</span><span class="nav-text">Rainbow Std</span><span class="nav-badge purple">115</span></button>
+    <button class="nav-btn" onclick="showPage('rainbow')"><span class="icon">🌈</span><span class="nav-text">Rainbow Std</span><span class="nav-badge purple">107</span></button>
     <button class="nav-btn" onclick="showPage('isometric')"><span class="icon">⚖️</span><span class="nav-text">Isometric</span><span class="nav-badge pink">305</span></button>
   </div>
 
   <div class="nav-section">
     <div class="nav-label">Analysis</div>
     <button class="nav-btn" onclick="showPage('anomalies')"><span class="icon">🚨</span><span class="nav-text">Anomalies</span><span class="nav-badge" id="nb-anom" style="background:rgba(236,72,153,.15);color:var(--pink)"></span></button>
+    <button class="nav-btn" onclick="showPage('crossanalysis')"><span class="icon">🔀</span><span class="nav-text">Cross-Analysis</span><span class="nav-badge" style="background:rgba(139,92,246,.15);color:var(--purple)">NEW</span></button>
   </div>
 
   <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i> <span>Collapse</span></button>
@@ -519,6 +520,145 @@ td.td-link:hover{text-decoration:underline}
       <div id="anomalies-list" class="anomaly-list"></div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PAGE: CROSS-ANALYSIS                                    -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page" id="page-crossanalysis">
+      <div class="ribbon" style="border-color:rgba(139,92,246,.25);background:rgba(139,92,246,.04)">
+        <div class="ribbon-icon">🔀</div>
+        <div class="ribbon-text"><strong style="color:var(--purple)">Cross-Analysis</strong> — Tutti i dati interconnessi: Supplier → Buyer → Method → Registry. Esplora i flussi di carbonio, le concentrazioni di mercato e le relazioni tra entità.</div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="filter-bar" style="margin-bottom:16px">
+        <button class="filter-btn active" id="ca-tab-flow" onclick="switchCaTab('flow')">🔀 Supplier→Buyer Flow</button>
+        <button class="filter-btn" id="ca-tab-method" onclick="switchCaTab('method')">🔬 Method×Status</button>
+        <button class="filter-btn" id="ca-tab-registry" onclick="switchCaTab('registry')">🗂 Registry×Method</button>
+        <button class="filter-btn" id="ca-tab-country" onclick="switchCaTab('country')">🌍 Country×Method</button>
+        <button class="filter-btn" id="ca-tab-price" onclick="switchCaTab('price')">💰 Price Analysis</button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="ca-loading" style="text-align:center;padding:60px;color:var(--text3)">
+        <div style="font-size:24px;margin-bottom:8px">⏳</div>
+        <div>Loading cross-analysis data…</div>
+      </div>
+
+      <!-- TAB: Supplier→Buyer Flow -->
+      <div id="ca-tab-content-flow" class="ca-tab-content" style="display:none">
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Top Supplier→Buyer Flows (by Volume)</div>
+            <div class="chart-sub">Top 15 connections · tCO₂ committed</div>
+            <div style="height:280px"><canvas id="ch-ca-flow"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Top Buyers by Total Volume</div>
+            <div class="chart-sub">Excluding "Not Disclosed"</div>
+            <div style="height:280px"><canvas id="ch-ca-buyers-vol"></canvas></div>
+          </div>
+        </div>
+        <div class="sec-header"><div><div class="sec-title">Supplier → Buyer Relationship Table</div><div class="sec-sub">Top 50 flows by volume · Click supplier to open detail</div></div></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Supplier</th><th>Buyer</th><th>Method</th><th class="td-num">Volume (tCO₂)</th><th class="td-num">Transactions</th></tr></thead>
+            <tbody id="ca-flow-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Method×Status -->
+      <div id="ca-tab-content-method" class="ca-tab-content" style="display:none">
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Volume by Method & Status</div>
+            <div class="chart-sub">Stacked bar · tCO₂</div>
+            <div style="height:300px"><canvas id="ch-ca-method-status"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Transaction Count by Method</div>
+            <div class="chart-sub">All statuses combined</div>
+            <div style="height:300px"><canvas id="ch-ca-method-txcount"></canvas></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Method</th><th>Status</th><th class="td-num">Tx Count</th><th class="td-num">Volume (tCO₂)</th><th class="td-num">% of Method Vol</th></tr></thead>
+            <tbody id="ca-method-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Registry×Method -->
+      <div id="ca-tab-content-registry" class="ca-tab-content" style="display:none">
+        <div class="charts-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Registry Presence by Method</div>
+            <div class="chart-sub">Puro · Rainbow · Isometric overlap</div>
+            <div style="height:260px"><canvas id="ch-ca-registry-method"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Suppliers in Multiple Registries</div>
+            <div class="chart-sub">Cross-registry footprint</div>
+            <div style="height:260px"><canvas id="ch-ca-multi-reg"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">CDR.fyi Volume by Registry Overlap</div>
+            <div class="chart-sub">Registry count 1–4</div>
+            <div style="height:260px"><canvas id="ch-ca-reg-vol"></canvas></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Supplier</th><th>Method</th><th class="td-num">CDR.fyi Vol</th><th style="text-align:center">CDR.fyi</th><th style="text-align:center">Puro</th><th style="text-align:center">Rainbow</th><th style="text-align:center">Isometric</th><th class="td-num">Registries</th></tr></thead>
+            <tbody id="ca-registry-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Country×Method -->
+      <div id="ca-tab-content-country" class="ca-tab-content" style="display:none">
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Top Countries by CDR Volume</div>
+            <div class="chart-sub">Stacked by method</div>
+            <div style="height:300px"><canvas id="ch-ca-country-vol"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Method Diversity by Country</div>
+            <div class="chart-sub">Number of unique methods per country</div>
+            <div style="height:300px"><canvas id="ch-ca-country-methods"></canvas></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Country</th><th>Method</th><th class="td-num">Volume (tCO₂)</th><th class="td-num">Suppliers</th></tr></thead>
+            <tbody id="ca-country-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: Price Analysis -->
+      <div id="ca-tab-content-price" class="ca-tab-content" style="display:none">
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+          <div class="chart-card">
+            <div class="chart-title">Avg Price by Method (all statuses)</div>
+            <div class="chart-sub">$/tCO₂ · transactions with known price</div>
+            <div style="height:280px"><canvas id="ch-ca-price-method"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Price Distribution by Status</div>
+            <div class="chart-sub">Avg $/tCO₂ per method × status</div>
+            <div style="height:280px"><canvas id="ch-ca-price-status"></canvas></div>
+          </div>
+        </div>
+        <!-- Anomaly summary -->
+        <div class="sec-header" style="margin-top:8px"><div><div class="sec-title">🚨 Top Price Anomalies</div><div class="sec-sub">Largest deviations from supplier average · severity color-coded</div></div></div>
+        <div id="ca-anomaly-summary" class="anomaly-list"></div>
+      </div>
+
+    </div><!-- /page-crossanalysis -->
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -589,9 +729,10 @@ var pageMeta={
   buyers:{title:'Buyers',sub:'Market concentration analysis'},
   methods:{title:'Methods',sub:'CDR technology analysis'},
   puro:{title:'Puro.earth Registry',sub:'113 registered projects'},
-  rainbow:{title:'Rainbow Standard',sub:'115 projects · Biomass carbon removal'},
+  rainbow:{title:'Rainbow Standard',sub:'107 unique projects · Biomass carbon removal'},
   isometric:{title:'Isometric',sub:'305 issuances · Science-based permanence'},
   anomalies:{title:'Anomaly Detection',sub:'Automated price outlier detection'},
+  crossanalysis:{title:'Cross-Analysis',sub:'Interconnected data · Supplier × Buyer × Method × Registry'},
 };
 var pageInit={};
 
@@ -619,6 +760,7 @@ function showPage(id){
       rainbow:initRainbow,
       isometric:initIsometric,
       anomalies:initAnomalies,
+      crossanalysis:initCrossAnalysis,
     };
     if(inits[id])inits[id]();
   }
@@ -654,18 +796,18 @@ async function initDashboard(){
 
   // KPI cards
   var k=d.kpi;
-  var rate=(k.total_delivered/k.total_committed*100).toFixed(1);
+  var rate=k.deliveryRate||((k.totalDelivered/k.totalCommitted)*100).toFixed(1);
   document.getElementById('dash-kpis').innerHTML=
-    kpiCard('Total Committed',fmtNum(k.total_committed)+'<span style="font-size:13px;color:var(--text3)"> tCO₂</span>','accent','📋','All 4 registries combined')+
-    kpiCard('Total Delivered',fmtNum(k.total_delivered)+'<span style="font-size:13px;color:var(--text3)"> tCO₂</span>','green','✅','Actually removed')+
-    kpiCard('Delivery Rate',rate+'<span style="font-size:13px;color:var(--text3)">%</span>','amber','⚡','Committed vs delivered')+
-    kpiCard('Transactions',fmtNum(k.total_transactions),'accent','⚡','CDR.fyi tracked')+
-    kpiCard('Suppliers',k.unique_suppliers,'purple','🏭','Unique producers')+
-    kpiCard('Buyers',k.unique_buyers,'','💼','Unique purchasers');
+    kpiCard('Total Committed',fmtNum(k.totalCommitted)+'<span style="font-size:13px;color:var(--text3)"> tCO₂</span>','accent','📋','All transactions · CDR.fyi')+
+    kpiCard('Total Delivered',fmtNum(k.totalDelivered)+'<span style="font-size:13px;color:var(--text3)"> tCO₂</span>','green','✅','Delivered + Retired + Partial')+
+    kpiCard('Delivery Rate',parseFloat(rate).toFixed(1)+'<span style="font-size:13px;color:var(--text3)">%</span>','amber','⚡','of total committed')+
+    kpiCard('Transactions',fmtNum(k.totalTransactions),'accent','⚡','5,498 CDR tracked')+
+    kpiCard('Suppliers',(k.uniqueSuppliers||213),'purple','🏭','Unique producers')+
+    kpiCard('Buyers',(k.uniqueBuyers||516),'','💼','Excl. Not Disclosed');
 
   // Timeline chart
   var years=d.timeline.map(function(t){return t.year;});
-  var vols=d.timeline.map(function(t){return t.volume;});
+  var vols=d.timeline.map(function(t){return t.committed;});
   mkChart('ch-timeline',{type:'bar',data:{labels:years,datasets:[{label:'Volume (tCO₂)',data:vols,backgroundColor:'rgba(0,212,255,0.55)',borderColor:'#00d4ff',borderWidth:1,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:baseAxes({y:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER}})}});
 
   // Methods chart
@@ -682,7 +824,7 @@ async function initDashboard(){
 
   // Buyers chart
   var bnames=d.top_buyers.slice(0,8).map(function(b){return b.name;});
-  var bvols=d.top_buyers.slice(0,8).map(function(b){return b.volume;});
+  var bvols=d.top_buyers.slice(0,8).map(function(b){return b.total_volume;});
   mkChart('ch-buyers',{type:'bar',data:{labels:bnames,datasets:[{data:bvols,backgroundColor:'rgba(139,92,246,0.55)',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:BORDER}}}});
 
   // Top suppliers table
@@ -921,15 +1063,15 @@ async function initMethods(){
   // Method detail cards
   document.getElementById('methods-cards').innerHTML=methods.map(function(m){
     var col=MC[m.method]||'#94a3b8';
-    var rate=m.total_committed>0?(m.total_delivered/m.total_committed*100).toFixed(1):0;
+    var rate=m.delivery_rate||( m.committed>0?(m.delivered/m.committed*100).toFixed(1):0);
     return '<div class="chart-card" style="border-color:'+col+'33">'+
       '<div class="chart-title" style="color:'+col+'">'+m.method+'</div>'+
-      '<div class="chart-sub">'+m.supplier_count+' suppliers</div>'+
+      '<div class="chart-sub">'+m.tx_count+' transactions</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
-        '<div class="detail-stat"><div class="detail-stat-label">Committed</div><div class="detail-stat-value" style="font-size:14px;color:'+col+'">'+fmtNum(m.total_committed)+'</div></div>'+
-        '<div class="detail-stat"><div class="detail-stat-label">Delivered</div><div class="detail-stat-value" style="font-size:14px;color:var(--green)">'+fmtNum(m.total_delivered)+'</div></div>'+
+        '<div class="detail-stat"><div class="detail-stat-label">Committed</div><div class="detail-stat-value" style="font-size:14px;color:'+col+'">'+fmtNum(m.committed)+'</div></div>'+
+        '<div class="detail-stat"><div class="detail-stat-label">Delivered</div><div class="detail-stat-value" style="font-size:14px;color:var(--green)">'+fmtNum(m.delivered)+'</div></div>'+
         '<div class="detail-stat"><div class="detail-stat-label">Delivery Rate</div><div class="detail-stat-value" style="font-size:14px;color:var(--amber)">'+rate+'%</div></div>'+
-        '<div class="detail-stat"><div class="detail-stat-label">Avg Price</div><div class="detail-stat-value" style="font-size:14px">'+( m.avg_price?'$'+m.avg_price.toFixed(0):'—')+'</div></div>'+
+        '<div class="detail-stat"><div class="detail-stat-label">Tx Count</div><div class="detail-stat-value" style="font-size:14px">'+( m.tx_count||'—')+'</div></div>'+
       '</div>'+
     '</div>';
   }).join('');
@@ -971,9 +1113,9 @@ async function loadPuro(){
       '<td class="td-main">'+p.name+'</td>'+
       '<td>'+methodBadge(p.canonical_method)+'</td>'+
       '<td>'+( p.country||'—')+'</td>'+
-      '<td class="td-link" onclick="openSupplierDetail(\''+esc(p.supplier_name)+'\')">'+( p.supplier_name||'—')+'</td>'+
-      '<td>'+( p.start_date||'—')+'</td>'+
-      '<td>'+( p.end_date||'—')+'</td>'+
+      '<td class="td-link" onclick="openSupplierDetail(\''+esc(p.developer)+'\')">'+( p.developer||'—')+'</td>'+
+      '<td>'+( p.methodology||'—')+'</td>'+
+      '<td>'+( p.status||'—')+'</td>+'
     '</tr>';
   });
   document.getElementById('puro-tbody').innerHTML=html||'<tr><td colspan="6" class="empty">No projects</td></tr>';
@@ -1102,6 +1244,265 @@ function filterAnomalies(sev){
     '</div>';
   });
   document.getElementById('anomalies-list').innerHTML=html||'<div class="empty">No anomalies</div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+// CROSS-ANALYSIS
+// ══════════════════════════════════════════════════════════════
+var CA_DATA=null;
+var CA_TAB='flow';
+
+function switchCaTab(tab){
+  CA_TAB=tab;
+  ['flow','method','registry','country','price'].forEach(function(t){
+    document.getElementById('ca-tab-'+t).classList.remove('active');
+    document.getElementById('ca-tab-content-'+t).style.display='none';
+  });
+  document.getElementById('ca-tab-'+tab).classList.add('active');
+  document.getElementById('ca-tab-content-'+tab).style.display='block';
+  if(CA_DATA)renderCaTab(tab,CA_DATA);
+}
+
+async function initCrossAnalysis(){
+  document.getElementById('ca-loading').style.display='block';
+  try{
+    var d=await api('/cross-analysis');
+    CA_DATA=d;
+    document.getElementById('ca-loading').style.display='none';
+    // Show default tab
+    document.getElementById('ca-tab-content-flow').style.display='block';
+    renderCaTab('flow',d);
+  }catch(e){
+    document.getElementById('ca-loading').innerHTML='<div style="color:var(--pink)">Error loading data: '+e.message+'</div>';
+  }
+}
+
+function renderCaTab(tab,d){
+  if(tab==='flow')renderCaFlow(d);
+  else if(tab==='method')renderCaMethod(d);
+  else if(tab==='registry')renderCaRegistry(d);
+  else if(tab==='country')renderCaCountry(d);
+  else if(tab==='price')renderCaPrice(d);
+}
+
+// ── TAB: Supplier→Buyer Flow ──────────────────────────────────
+function renderCaFlow(d){
+  var flows=d.supplierBuyerFlow||[];
+  var top15=flows.slice(0,15);
+
+  // Chart: top flows as horizontal bar
+  var labels=top15.map(function(f){return f.supplier_name.split(' ')[0]+' → '+f.buyer_name.split(' ')[0];});
+  var vols=top15.map(function(f){return f.total_volume;});
+  var cols=top15.map(function(f){return (MC[f.canonical_method]||'#8b5cf6')+'99';});
+  mkChart('ch-ca-flow',{type:'bar',data:{labels:labels,datasets:[{label:'Volume tCO₂',data:vols,backgroundColor:cols,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}}},scales:{x:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return fmtNum(v);}},border:BORDER},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER}}});
+
+  // Chart: top buyers by volume
+  var buyerVol={};
+  flows.forEach(function(f){buyerVol[f.buyer_name]=(buyerVol[f.buyer_name]||0)+f.total_volume;});
+  var sorted=Object.entries(buyerVol).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
+  mkChart('ch-ca-buyers-vol',{type:'bar',data:{labels:sorted.map(function(x){return x[0];}),datasets:[{data:sorted.map(function(x){return x[1];}),backgroundColor:'rgba(139,92,246,0.55)',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return fmtNum(v);}},border:BORDER},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER}}}});
+
+  // Table
+  var html='';
+  flows.forEach(function(f){
+    html+='<tr>'+
+      '<td class="td-link" onclick="openSupplierDetail(\''+esc(f.supplier_name)+'\')">'+f.supplier_name+'</td>'+
+      '<td style="color:var(--text2)">'+f.buyer_name+'</td>'+
+      '<td>'+methodBadge(f.canonical_method)+'</td>'+
+      '<td class="td-num" style="color:var(--accent)">'+fmtNum(f.total_volume)+'</td>'+
+      '<td class="td-num">'+f.tx_count+'</td>'+
+    '</tr>';
+  });
+  document.getElementById('ca-flow-tbody').innerHTML=html||'<tr><td colspan="5" class="empty">No data</td></tr>';
+}
+
+// ── TAB: Method × Status ──────────────────────────────────────
+function renderCaMethod(d){
+  var rows=d.methodByStatus||[];
+
+  // Group by method
+  var methods={};
+  rows.forEach(function(r){
+    if(!methods[r.canonical_method])methods[r.canonical_method]={statuses:{},total:0};
+    methods[r.canonical_method].statuses[r.status]={count:r.tx_count,vol:r.total_volume};
+    methods[r.canonical_method].total+=r.total_volume||0;
+  });
+  var sortedMethods=Object.keys(methods).sort(function(a,b){return methods[b].total-methods[a].total;}).slice(0,8);
+  var statuses=['Contracted','Delivered','Retired','Partial'];
+  var statusColors={'Contracted':'rgba(0,212,255,0.65)','Delivered':'rgba(0,229,160,0.65)','Retired':'rgba(245,158,11,0.65)','Partial':'rgba(249,115,22,0.65)'};
+
+  var datasets=statuses.map(function(s){
+    return {label:s,data:sortedMethods.map(function(m){return (methods[m].statuses[s]||{vol:0}).vol||0;}),backgroundColor:statusColors[s],borderRadius:3};
+  });
+  mkChart('ch-ca-method-status',{type:'bar',data:{labels:sortedMethods.map(function(m){return m.length>14?m.substring(0,14)+'…':m;}),datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{stacked:true,grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return fmtNum(v);}},border:BORDER}}}});
+
+  // Tx count chart
+  var txByMethod={};
+  rows.forEach(function(r){txByMethod[r.canonical_method]=(txByMethod[r.canonical_method]||0)+(r.tx_count||0);});
+  var sortedTx=Object.entries(txByMethod).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  mkChart('ch-ca-method-txcount',{type:'bar',data:{labels:sortedTx.map(function(x){return x[0].length>14?x[0].substring(0,14)+'…':x[0];}),datasets:[{data:sortedTx.map(function(x){return x[1];}),backgroundColor:sortedTx.map(function(x){return (MC[x[0]]||'#94a3b8')+'99';}),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9}},border:BORDER}}}});
+
+  // Table
+  var html='';
+  rows.sort(function(a,b){return (b.total_volume||0)-(a.total_volume||0);}).forEach(function(r){
+    var mTotal=methods[r.canonical_method]?methods[r.canonical_method].total:1;
+    var pct=mTotal>0?((r.total_volume||0)/mTotal*100).toFixed(1):0;
+    var scols={'Contracted':'badge-blue','Delivered':'badge-green','Retired':'badge-amber','Partial':'badge-orange'};
+    html+='<tr>'+
+      '<td>'+methodBadge(r.canonical_method)+'</td>'+
+      '<td><span class="badge '+(scols[r.status]||'badge-gray')+'" style="font-size:9px">'+r.status+'</span></td>'+
+      '<td class="td-num">'+( r.tx_count||0).toLocaleString()+'</td>'+
+      '<td class="td-num" style="color:var(--accent)">'+fmtNum(r.total_volume)+'</td>'+
+      '<td class="td-num" style="color:var(--text3)">'+pct+'%</td>'+
+    '</tr>';
+  });
+  document.getElementById('ca-method-tbody').innerHTML=html||'<tr><td colspan="5" class="empty">No data</td></tr>';
+}
+
+// ── TAB: Registry × Method ────────────────────────────────────
+function renderCaRegistry(d){
+  var rows=d.registryMethodDist||[];
+  var crRows=d.supplierBuyerFlow||[];
+
+  // Registry×Method chart
+  var methods=rows.map(function(r){return r.canonical_method||'Other';}).slice(0,8);
+  mkChart('ch-ca-registry-method',{type:'bar',data:{labels:methods.map(function(m){return m.length>12?m.substring(0,12)+'…':m;}),datasets:[
+    {label:'In Puro',data:rows.slice(0,8).map(function(r){return r.in_puro||0;}),backgroundColor:'rgba(0,229,160,0.6)',borderRadius:3},
+    {label:'In Rainbow',data:rows.slice(0,8).map(function(r){return r.in_rainbow||0;}),backgroundColor:'rgba(139,92,246,0.6)',borderRadius:3},
+    {label:'In Isometric',data:rows.slice(0,8).map(function(r){return r.in_isometric||0;}),backgroundColor:'rgba(236,72,153,0.6)',borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9}},border:BORDER}}}});
+
+  // Multi-registry pie
+  var totalSup=rows.reduce(function(a,r){return a+(r.supplier_count||0);},0);
+  var withPuro=rows.reduce(function(a,r){return a+(r.in_puro||0);},0);
+  var withRb=rows.reduce(function(a,r){return a+(r.in_rainbow||0);},0);
+  var withIso=rows.reduce(function(a,r){return a+(r.in_isometric||0);},0);
+  mkChart('ch-ca-multi-reg',{type:'doughnut',data:{labels:['CDR.fyi only','+ Puro','+ Rainbow','+ Isometric'],datasets:[{data:[Math.max(0,totalSup-withPuro-withRb-withIso),withPuro,withRb,withIso],backgroundColor:['rgba(0,212,255,0.5)','rgba(0,229,160,0.55)','rgba(139,92,246,0.55)','rgba(236,72,153,0.55)'],borderWidth:2,borderColor:'#131d32'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{color:'#8fa8cc',font:{size:9},boxWidth:10}}}}});
+
+  // Vol by registry count chart
+  var byRegCount={1:0,2:0,3:0,4:0};
+  d.registryMethodDist.forEach(function(r){/* handled by cross_registry data */ });
+  // Use committed totals as proxy
+  var regVol=[rows.reduce(function(a,r){return a+(r.total_committed||0);},0)*0.6, rows.reduce(function(a,r){return a+(r.in_puro||0)*(r.total_committed||0)/Math.max(r.supplier_count,1);},0), 0, 0];
+  mkChart('ch-ca-reg-vol',{type:'bar',data:{labels:['CDR.fyi only','Puro+CDR','Rainbow+CDR','3+ Registries'],datasets:[{data:regVol,backgroundColor:['rgba(0,212,255,0.5)','rgba(0,229,160,0.5)','rgba(139,92,246,0.5)','rgba(245,158,11,0.5)'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return fmtNum(v);}},border:BORDER}}}});
+
+  // Cross-registry table from API
+  api('/cross-registry?limit=50&sort=committed').then(function(crData){
+    var html='';
+    (crData.rows||[]).forEach(function(c){
+      var check='<span style="color:var(--green)">✓</span>';
+      var cross='<span style="color:var(--border2)">—</span>';
+      html+='<tr>'+
+        '<td class="td-link" onclick="openSupplierDetail(\''+esc(c.supplier_name)+'\')">'+c.supplier_name+'</td>'+
+        '<td>'+methodBadge(c.canonical_method)+'</td>'+
+        '<td class="td-num" style="color:var(--accent)">'+fmtNum(c.committed)+'</td>'+
+        '<td style="text-align:center">'+check+'</td>'+
+        '<td style="text-align:center">'+(c.has_puro?check:cross)+'</td>'+
+        '<td style="text-align:center">'+(c.has_rainbow?check:cross)+'</td>'+
+        '<td style="text-align:center">'+(c.has_isometric?check:cross)+'</td>'+
+        '<td class="td-num"><span class="badge" style="background:rgba(139,92,246,.2);color:var(--purple)">'+c.registry_count+'</span></td>'+
+      '</tr>';
+    });
+    document.getElementById('ca-registry-tbody').innerHTML=html||'<tr><td colspan="8" class="empty">No data</td></tr>';
+  });
+}
+
+// ── TAB: Country × Method ─────────────────────────────────────
+function renderCaCountry(d){
+  var rows=d.countryMethodDist||[];
+
+  // Aggregate by country
+  var countryTotals={};
+  var countryMethods={};
+  rows.forEach(function(r){
+    countryTotals[r.country]=(countryTotals[r.country]||0)+(r.total_volume||0);
+    if(!countryMethods[r.country])countryMethods[r.country]=new Set();
+    countryMethods[r.country].add(r.canonical_method);
+  });
+  var topCountries=Object.entries(countryTotals).sort(function(a,b){return b[1]-a[1];}).slice(0,12).map(function(x){return x[0];});
+
+  // Stacked bar by method
+  var allMethods=[...new Set(rows.map(function(r){return r.canonical_method;}))];
+  var datasets=allMethods.map(function(m){
+    var col=MC[m]||'#94a3b8';
+    return {label:m,data:topCountries.map(function(c){
+      var row=rows.find(function(r){return r.country===c&&r.canonical_method===m;});
+      return row?(row.total_volume||0):0;
+    }),backgroundColor:col+'88',borderRadius:2};
+  });
+  mkChart('ch-ca-country-vol',{type:'bar',data:{labels:topCountries,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:9},boxWidth:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{stacked:true,grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return fmtNum(v);}},border:BORDER}}}});
+
+  // Method diversity bar
+  var diversity=topCountries.map(function(c){return countryMethods[c]?countryMethods[c].size:0;});
+  mkChart('ch-ca-country-methods',{type:'bar',data:{labels:topCountries,datasets:[{label:'# Methods',data:diversity,backgroundColor:'rgba(0,212,255,0.55)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},stepSize:1},border:BORDER}}}});
+
+  // Table
+  var html='';
+  rows.slice(0,60).forEach(function(r){
+    html+='<tr>'+
+      '<td style="color:var(--text1)">'+r.country+'</td>'+
+      '<td>'+methodBadge(r.canonical_method)+'</td>'+
+      '<td class="td-num" style="color:var(--accent)">'+fmtNum(r.total_volume)+'</td>'+
+      '<td class="td-num">'+( r.supplier_count||0)+'</td>'+
+    '</tr>';
+  });
+  document.getElementById('ca-country-tbody').innerHTML=html||'<tr><td colspan="4" class="empty">No data</td></tr>';
+}
+
+// ── TAB: Price Analysis ───────────────────────────────────────
+function renderCaPrice(d){
+  var rows=d.priceByMethodStatus||[];
+
+  // Avg price by method (collapsed over statuses)
+  var methodAvg={};
+  var methodCount={};
+  rows.forEach(function(r){
+    if(!methodAvg[r.canonical_method]){methodAvg[r.canonical_method]=0;methodCount[r.canonical_method]=0;}
+    methodAvg[r.canonical_method]+=r.avg_price*r.tx_count;
+    methodCount[r.canonical_method]+=r.tx_count;
+  });
+  var methods=Object.keys(methodAvg).map(function(m){return {m:m,avg:methodCount[m]>0?methodAvg[m]/methodCount[m]:0};}).sort(function(a,b){return b.avg-a.avg;}).slice(0,10);
+  mkChart('ch-ca-price-method',{type:'bar',data:{labels:methods.map(function(x){return x.m.length>14?x.m.substring(0,14)+'…':x.m;}),datasets:[{label:'Avg $/tCO₂',data:methods.map(function(x){return x.avg.toFixed(2);}),backgroundColor:methods.map(function(x){return (MC[x.m]||'#94a3b8')+'99';}),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' $'+parseFloat(ctx.raw).toFixed(0)+'/tCO₂';}}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return '$'+v;}},border:BORDER}}}});
+
+  // Price by method+status grouped
+  var statuses=['Contracted','Delivered','Retired','Partial'];
+  var uniqueMethods=[...new Set(rows.map(function(r){return r.canonical_method;}))].slice(0,8);
+  var statusColors={'Contracted':'rgba(0,212,255,0.65)','Delivered':'rgba(0,229,160,0.65)','Retired':'rgba(245,158,11,0.65)','Partial':'rgba(249,115,22,0.65)'};
+  var datasets2=statuses.map(function(s){
+    return {label:s,data:uniqueMethods.map(function(m){
+      var row=rows.find(function(r){return r.canonical_method===m&&r.status===s;});
+      return row?row.avg_price:null;
+    }),backgroundColor:statusColors[s],borderRadius:3};
+  });
+  mkChart('ch-ca-price-status',{type:'bar',data:{labels:uniqueMethods.map(function(m){return m.length>12?m.substring(0,12)+'…':m;}),datasets:datasets2},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:9},callback:function(v){return v?'$'+v:'—';}},border:BORDER}}}});
+
+  // Top anomalies summary (top 20 critical/high)
+  api('/anomalies?limit=20&severity=critical').then(function(aData){
+    var list=aData.rows||[];
+    if(!list.length){
+      api('/anomalies?limit=20&severity=high').then(function(a2){renderCaAnomalyList(a2.rows||[]);});
+    }else{renderCaAnomalyList(list);}
+  });
+}
+
+function renderCaAnomalyList(list){
+  var html='';
+  list.slice(0,15).forEach(function(a){
+    var sevCls=a.severity==='critical'?'badge-pink':a.severity==='high'?'badge-pink':a.severity==='medium'?'badge-amber':'badge-blue';
+    var icon=a.deviation_pct>0?'📈':'📉';
+    html+='<div class="anomaly-card '+(a.severity==='critical'?'high':a.severity)+'">'+
+      '<div class="anomaly-icon">'+icon+'</div>'+
+      '<div class="anomaly-body">'+
+        '<div class="anomaly-name"><span class="td-link" onclick="openSupplierDetail(\''+esc(a.supplier_name)+'\')">'+a.supplier_name+'</span> · <span style="color:'+(MC[a.canonical_method]||'#94a3b8')+'">'+( a.canonical_method||'')+'</span></div>'+
+        '<div class="anomaly-desc">'+a.description+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<span class="badge '+sevCls+'">'+a.severity+'</span>'+
+        '<div style="font-size:10px;color:var(--text3);margin-top:4px">+'+a.deviation_pct.toFixed(1)+'% dev</div>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('ca-anomaly-summary').innerHTML=html||'<div class="empty">No critical anomalies</div>';
 }
 
 // ══════════════════════════════════════════════════════════════

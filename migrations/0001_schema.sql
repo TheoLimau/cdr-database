@@ -1,104 +1,49 @@
 -- ============================================================
--- CDR Intelligence Platform — Database Schema
+-- CDR Intelligence Platform — Database Schema v2
+-- Allineato con struttura cdr_data.json
 -- ============================================================
 
 -- Registries
 CREATE TABLE IF NOT EXISTS registries (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  short_name TEXT NOT NULL,
-  url TEXT,
-  color TEXT,
-  description TEXT
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
 );
 
 -- Canonical methods
 CREATE TABLE IF NOT EXISTS methods (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT,
-  durability TEXT,
-  color TEXT
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  committed REAL DEFAULT 0,
+  delivered REAL DEFAULT 0,
+  delivery_rate REAL DEFAULT 0,
+  tx_count INTEGER DEFAULT 0
 );
 
 -- Buyers
 CREATE TABLE IF NOT EXISTS buyers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,
-  volume REAL DEFAULT 0,
-  pct REAL DEFAULT 0,
+  total_volume REAL DEFAULT 0,
   tx_count INTEGER DEFAULT 0
 );
 
--- Suppliers
+-- Suppliers (CDR.fyi top 50)
 CREATE TABLE IF NOT EXISTS suppliers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,
-  country TEXT,
-  city TEXT,
-  technology TEXT,
-  canonical_method TEXT,
-  price_per_ton REAL,
   committed REAL DEFAULT 0,
   delivered REAL DEFAULT 0,
+  delivery_rate REAL DEFAULT 0,
   tx_count INTEGER DEFAULT 0,
-  first_tx TEXT,
-  last_tx TEXT,
-  delivery_rate REAL GENERATED ALWAYS AS (
-    CASE WHEN committed > 0 THEN ROUND(delivered / committed * 100, 2) ELSE 0 END
-  ) STORED
-);
-
--- Projects (Puro)
-CREATE TABLE IF NOT EXISTS projects_puro (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  method TEXT,
-  method_code TEXT,
-  canonical_method TEXT,
   country TEXT,
-  country_code TEXT,
-  supplier_name TEXT,
-  url TEXT,
-  start_date TEXT,
-  end_date TEXT,
-  rules TEXT
-);
-
--- Projects (Rainbow)
-CREATE TABLE IF NOT EXISTS projects_rainbow (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  developer TEXT,
-  methodology TEXT,
-  mechanism TEXT,
-  durability TEXT,
-  country TEXT,
-  country_code TEXT,
-  city TEXT,
-  status TEXT,
-  issued_credits REAL DEFAULT 0,
-  available_credits REAL DEFAULT 0,
-  first_issuance TEXT,
-  last_issuance TEXT
-);
-
--- Projects (Isometric)
-CREATE TABLE IF NOT EXISTS projects_isometric (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  pathway TEXT,
-  supplier_name TEXT,
-  issued REAL DEFAULT 0,
-  retired REAL DEFAULT 0,
-  issued_date TEXT
+  canonical_method TEXT
 );
 
 -- Transactions
 CREATE TABLE IF NOT EXISTS transactions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tx_date TEXT,
-  volume REAL,
+  volume REAL DEFAULT 0,
   technology TEXT,
   canonical_method TEXT,
   supplier_name TEXT,
@@ -108,26 +53,61 @@ CREATE TABLE IF NOT EXISTS transactions (
   notes TEXT
 );
 
--- Cross-registry mapping (supplier appears in multiple registries)
+-- Projects (Puro.earth)
+CREATE TABLE IF NOT EXISTS projects_puro (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT UNIQUE,
+  name TEXT NOT NULL,
+  developer TEXT,
+  methodology TEXT,
+  country TEXT,
+  status TEXT,
+  issued_credits REAL DEFAULT 0,
+  retired_credits REAL DEFAULT 0,
+  canonical_method TEXT
+);
+
+-- Projects (Rainbow)
+CREATE TABLE IF NOT EXISTS projects_rainbow (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT UNIQUE,
+  name TEXT NOT NULL,
+  developer TEXT,
+  methodology TEXT,
+  country TEXT,
+  status TEXT,
+  available_credits REAL DEFAULT 0,
+  issued_credits REAL DEFAULT 0,
+  durability TEXT,
+  canonical_method TEXT
+);
+
+-- Projects (Isometric)
+CREATE TABLE IF NOT EXISTS projects_isometric (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT UNIQUE,
+  name TEXT NOT NULL,
+  developer TEXT,
+  pathway TEXT,
+  country TEXT,
+  status TEXT,
+  issued_credits REAL DEFAULT 0,
+  canonical_method TEXT
+);
+
+-- Cross-registry mapping
 CREATE TABLE IF NOT EXISTS cross_registry (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  supplier_name TEXT NOT NULL,
-  canonical_method TEXT,
-  country TEXT,
-  -- CDR.fyi data
-  cdr_committed REAL DEFAULT 0,
-  cdr_delivered REAL DEFAULT 0,
-  cdr_count INTEGER DEFAULT 0,
-  cdr_price REAL DEFAULT 0,
-  cdr_first_tx TEXT,
-  cdr_last_tx TEXT,
-  -- Registry presence flags
+  supplier_name TEXT NOT NULL UNIQUE,
+  committed REAL DEFAULT 0,
+  delivered REAL DEFAULT 0,
   has_puro INTEGER DEFAULT 0,
   has_rainbow INTEGER DEFAULT 0,
   has_isometric INTEGER DEFAULT 0,
-  puro_project_count INTEGER DEFAULT 0,
-  rainbow_project_count INTEGER DEFAULT 0,
-  -- Computed
+  puro_volume REAL DEFAULT 0,
+  rainbow_volume REAL DEFAULT 0,
+  isometric_volume REAL DEFAULT 0,
+  canonical_method TEXT,
   registry_count INTEGER GENERATED ALWAYS AS (
     1 + has_puro + has_rainbow + has_isometric
   ) STORED
@@ -138,32 +118,26 @@ CREATE TABLE IF NOT EXISTS price_anomalies (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   supplier_name TEXT,
   canonical_method TEXT,
-  price REAL,
-  method_avg REAL,
+  price_per_ton REAL,
+  avg_price REAL,
   deviation_pct REAL,
-  severity TEXT, -- 'low','medium','high'
-  description TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+  severity TEXT,
+  description TEXT
 );
 
--- KPI snapshots
+-- KPI snapshot (JSON blob per flessibilità)
 CREATE TABLE IF NOT EXISTS kpi_snapshot (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  total_committed REAL,
-  total_delivered REAL,
-  delivery_rate REAL,
-  total_transactions INTEGER,
-  unique_suppliers INTEGER,
-  unique_buyers INTEGER,
-  updated_at TEXT
+  id INTEGER PRIMARY KEY,
+  data TEXT NOT NULL,
+  updated_at TEXT DEFAULT (datetime('now'))
 );
 
 -- Timeline
 CREATE TABLE IF NOT EXISTS timeline (
   year TEXT PRIMARY KEY,
-  volume REAL DEFAULT 0,
-  tx_count INTEGER DEFAULT 0,
-  yoy_pct REAL
+  committed REAL DEFAULT 0,
+  delivered REAL DEFAULT 0,
+  tx_count INTEGER DEFAULT 0
 );
 
 -- Indexes
@@ -177,3 +151,7 @@ CREATE INDEX IF NOT EXISTS idx_sup_country ON suppliers(country);
 CREATE INDEX IF NOT EXISTS idx_cr_supplier ON cross_registry(supplier_name);
 CREATE INDEX IF NOT EXISTS idx_proj_puro_method ON projects_puro(canonical_method);
 CREATE INDEX IF NOT EXISTS idx_proj_rainbow_method ON projects_rainbow(methodology);
+CREATE INDEX IF NOT EXISTS idx_proj_rainbow_status ON projects_rainbow(status);
+CREATE INDEX IF NOT EXISTS idx_tx_price ON transactions(price_per_ton);
+CREATE INDEX IF NOT EXISTS idx_anomaly_supplier ON price_anomalies(supplier_name);
+CREATE INDEX IF NOT EXISTS idx_anomaly_severity ON price_anomalies(severity);
