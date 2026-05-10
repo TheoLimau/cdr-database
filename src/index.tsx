@@ -1969,10 +1969,8 @@ function dcExportXLSX(){
 
 
 // ============================================================
-// HELPER: format numbers
+// HELPER: format numbers (fmtShort/fmtNum defined earlier)
 // ============================================================
-function fmtShort(n){if(!n&&n!==0)return'—';if(Math.abs(n)>=1e6)return(n/1e6).toFixed(1)+'M';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'k';return Math.round(n).toLocaleString();}
-function fmtNum(n){if(!n&&n!==0)return'—';return Math.round(n).toLocaleString();}
 function fmtPct(n){if(!n&&n!==0)return'—';return n.toFixed(1)+'%';}
 
 // ============================================================
@@ -2475,9 +2473,9 @@ function injectMicrosoftWarning(){
       '<strong style="color:var(--text1);">Microsoft</strong> alone accounts for <strong style="color:var(--amber);">'+bc.top1pct+'%</strong> of all CDR.fyi volume. '+
       'Top 3 buyers: <strong style="color:var(--amber);">'+bc.top3pct+'%</strong>. Top 10: <strong style="color:var(--amber);">'+bc.top10pct+'%</strong>. '+
       'HHI Index: <strong style="color:var(--amber);">'+bc.hhi+'</strong> (highly concentrated). '+
-      '<a href="javascript:showPage('deliverygap')" style="color:var(--accent);">→ View full analysis</a>'+
+      '<a href="#" onclick="event.preventDefault();showPage(&quot;deliverygap&quot;)" style="color:var(--accent);">→ View full analysis</a>'+
     '</div>'+
-    '<button onclick="this.parentElement.style.display='none'" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
+    '<button onclick="this.parentElement.style.display=&quot;none&quot;" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;padding:0 4px;">×</button>';
   // Insert after KPI grid
   var kpiGrid=dashPage.querySelector('.kpi-grid');
   if(kpiGrid&&kpiGrid.nextSibling){dashPage.insertBefore(div,kpiGrid.nextSibling);}
