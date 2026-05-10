@@ -2065,6 +2065,12 @@ function renderCrossRegistry(){
   if(!DATA||!DATA.crossRegistry)return;
   var cr=DATA.crossRegistry;
 
+  // Distruggi eventuali istanze Chart.js precedenti per evitare errori su re-render
+  ['crRegistryChart','crMethodChart','crCountryChart','crTop10Chart'].forEach(function(id){
+    var existing=Chart.getChart(id);
+    if(existing)existing.destroy();
+  });
+
   // ── Chart 1: Registry breakdown doughnut ──
   var cdrOnly=cr.filter(function(s){return !s.puro.length&&!s.rainbow.length;}).length;
   var puroOnly=cr.filter(function(s){return s.puro.length&&!s.rainbow.length;}).length;
