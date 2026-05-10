@@ -839,7 +839,7 @@ async function initDashboard(){
       '<td class="td-num">'+fmtNum(s.committed)+'</td>'+
       '<td class="td-num">'+fmtNum(s.delivered)+'</td>'+
       '<td class="td-num">'+rateBar(rate)+' <span style="font-size:10px;color:var(--text3)">'+rate+'%</span></td>'+
-      '<td class="td-num">'+fmtPrice(s.price_per_ton)+'</td>'+
+      '<td class="td-num">'+s.tx_count+'</td>'+
     '</tr>';
   });
   document.getElementById('dash-sup-tbody').innerHTML=html||'<tr><td colspan="7" class="empty">No data</td></tr>';
@@ -876,8 +876,8 @@ async function initIntelligence(){
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': $'+ctx.raw.toFixed(0)+'/t';}}}},scales:baseAxes({x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10},maxRotation:30},border:BORDER}})}});
 
   // Delivery rate
-  var mdr=methods.methods.filter(function(m){return m.total_committed>0;});
-  var drVals=mdr.map(function(m){return m.total_committed>0?Math.min(m.total_delivered/m.total_committed*100,100):0;});
+  var mdr=methods.methods.filter(function(m){return m.committed>0;});
+  var drVals=mdr.map(function(m){return m.committed>0?Math.min(m.delivered/m.committed*100,100):0;});
   mkChart('ch-delivery-rate',{type:'bar',data:{
     labels:mdr.map(function(m){return m.method;}),
     datasets:[{data:drVals,backgroundColor:drVals.map(function(v){return v>=50?'rgba(0,229,160,0.6)':v>=10?'rgba(245,158,11,0.6)':'rgba(236,72,153,0.6)';}),borderRadius:4}]
@@ -887,8 +887,8 @@ async function initIntelligence(){
   mkChart('ch-gap',{type:'bar',data:{
     labels:methods.methods.map(function(m){return m.method;}),
     datasets:[
-      {label:'Committed',data:methods.methods.map(function(m){return m.total_committed;}),backgroundColor:'rgba(0,212,255,0.4)',borderRadius:3},
-      {label:'Delivered',data:methods.methods.map(function(m){return m.total_delivered;}),backgroundColor:'rgba(0,229,160,0.7)',borderRadius:3},
+      {label:'Committed',data:methods.methods.map(function(m){return m.committed;}),backgroundColor:'rgba(0,212,255,0.4)',borderRadius:3},
+      {label:'Delivered',data:methods.methods.map(function(m){return m.delivered;}),backgroundColor:'rgba(0,229,160,0.7)',borderRadius:3},
     ]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:baseAxes({x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10},maxRotation:30},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER}})}});
 
@@ -1000,11 +1000,10 @@ async function loadSup(){
       '<td class="td-num">'+fmtNum(s.committed)+'</td>'+
       '<td class="td-num">'+fmtNum(s.delivered)+'</td>'+
       '<td class="td-num">'+rateBar(rate)+' <span style="font-size:10px;color:var(--text3)">'+rate+'%</span></td>'+
-      '<td class="td-num">'+fmtPrice(s.price_per_ton)+'</td>'+
       '<td class="td-num">'+s.tx_count+'</td>'+
     '</tr>';
   });
-  document.getElementById('sup-tbody').innerHTML=html||'<tr><td colspan="8" class="empty">No suppliers</td></tr>';
+  document.getElementById('sup-tbody').innerHTML=html||'<tr><td colspan="7" class="empty">No suppliers</td></tr>';
   renderPagination('sup-pagination',d.page,d.pages,function(p){SUP_STATE.page=p;loadSup();});
 }
 
@@ -1014,7 +1013,7 @@ async function loadSup(){
 async function initBuyers(){
   var d=await api('/buyers');
   var buyers=d.rows;
-  var total=buyers.reduce(function(s,b){return s+b.volume;},0);
+  var total=buyers.reduce(function(s,b){return s+b.total_volume;},0);
 
   document.getElementById('buyers-ribbon').innerHTML=
     '<strong style="color:var(--accent)">Market Concentration Alert</strong> — '+
@@ -1023,14 +1022,14 @@ async function initBuyers(){
     'HHI Index indicates <strong style="color:var(--pink)">highly concentrated</strong> market.';
 
   var bnames=buyers.slice(0,10).map(function(b){return b.name;});
-  var bvols=buyers.slice(0,10).map(function(b){return b.volume;});
+  var bvols=buyers.slice(0,10).map(function(b){return b.total_volume;});
   var bpcts=buyers.slice(0,10).map(function(b){return b.pct;});
   mkChart('ch-buyers-detail',{type:'bar',data:{labels:bnames,datasets:[{data:bvols,backgroundColor:'rgba(139,92,246,0.55)',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:BORDER}}}});
   mkChart('ch-buyers-pct',{type:'doughnut',data:{labels:bnames,datasets:[{data:bpcts,backgroundColor:['rgba(139,92,246,0.7)','rgba(0,212,255,0.6)','rgba(0,229,160,0.6)','rgba(245,158,11,0.6)','rgba(236,72,153,0.6)','rgba(249,115,22,0.5)','rgba(6,182,212,0.5)','rgba(16,185,129,0.5)','rgba(139,92,246,0.4)','rgba(90,115,153,0.5)'],borderWidth:2,borderColor:'#131d32'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{position:'right',labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.label+': '+ctx.raw.toFixed(1)+'%';}}}}}});
 
   var html='';
   buyers.forEach(function(b,i){
-    html+='<tr><td class="td-num" style="color:var(--text3)">'+(i+1)+'</td><td class="td-main">'+b.name+'</td><td class="td-num">'+fmtNum(b.volume)+'</td><td class="td-num"><span class="badge '+(i===0?'badge-pink':i<3?'badge-amber':'badge-gray')+'">'+b.pct.toFixed(1)+'%</span></td><td class="td-num">'+b.tx_count+'</td></tr>';
+    html+='<tr><td class="td-num" style="color:var(--text3)">'+(i+1)+'</td><td class="td-main">'+b.name+'</td><td class="td-num">'+fmtNum(b.total_volume)+'</td><td class="td-num"><span class="badge '+(i===0?'badge-pink':i<3?'badge-amber':'badge-gray')+'">'+b.pct.toFixed(1)+'%</span></td><td class="td-num">'+b.tx_count+'</td></tr>';
   });
   document.getElementById('buyers-tbody').innerHTML=html;
 }
@@ -1045,8 +1044,8 @@ async function initMethods(){
   // KPI
   document.getElementById('methods-kpis').innerHTML=methods.map(function(m){
     var col=MC[m.method]||'#94a3b8';
-    var rate=m.total_committed>0?(m.total_delivered/m.total_committed*100).toFixed(1):0;
-    return '<div class="kpi-card" style="border-color:'+col+'33"><div class="kpi-label">'+m.method+'</div><div class="kpi-value" style="color:'+col+'">'+fmtNum(m.total_committed)+'</div><div class="kpi-sub">tCO₂ · '+m.supplier_count+' suppliers · '+rate+'% delivered</div></div>';
+    var rate=m.committed>0?(m.delivered/m.committed*100).toFixed(1):0;
+    return '<div class="kpi-card" style="border-color:'+col+'33"><div class="kpi-label">'+m.method+'</div><div class="kpi-value" style="color:'+col+'">'+fmtNum(m.committed)+'</div><div class="kpi-sub">tCO₂ · '+m.tx_count+' tx · '+rate+'% delivered</div></div>';
   }).join('');
 
   // Price range chart
@@ -1115,7 +1114,7 @@ async function loadPuro(){
       '<td>'+( p.country||'—')+'</td>'+
       '<td class="td-link" onclick="openSupplierDetail(\''+esc(p.developer)+'\')">'+( p.developer||'—')+'</td>'+
       '<td>'+( p.methodology||'—')+'</td>'+
-      '<td>'+( p.status||'—')+'</td>+'
+      '<td>'+( p.status||'—')+'</td>'+
     '</tr>';
   });
   document.getElementById('puro-tbody').innerHTML=html||'<tr><td colspan="6" class="empty">No projects</td></tr>';
@@ -1530,7 +1529,6 @@ async function openSupplierDetail(name){
         '<div class="detail-stat"><div class="detail-stat-label">Committed</div><div class="detail-stat-value" style="color:var(--accent)">'+fmtNum(s.committed)+'</div></div>'+
         '<div class="detail-stat"><div class="detail-stat-label">Delivered</div><div class="detail-stat-value" style="color:var(--green)">'+fmtNum(s.delivered)+'</div></div>'+
         '<div class="detail-stat"><div class="detail-stat-label">Delivery Rate</div><div class="detail-stat-value" style="color:'+rateCol+'">'+rate+'%</div></div>'+
-        '<div class="detail-stat"><div class="detail-stat-label">Price/t</div><div class="detail-stat-value" style="color:var(--amber)">'+fmtPrice(s.price_per_ton)+'</div></div>'+
         '<div class="detail-stat"><div class="detail-stat-label">Transactions</div><div class="detail-stat-value">'+s.tx_count+'</div></div>'+
         '<div class="detail-stat"><div class="detail-stat-label">Method</div><div class="detail-stat-value" style="font-size:12px;color:'+(MC[s.canonical_method]||'#94a3b8')+'">'+( s.canonical_method||'—')+'</div></div>'+
       '</div>'+
