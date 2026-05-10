@@ -362,18 +362,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .price-card:hover{border-color:var(--border2);transform:translateY(-2px)}
 .price-bar-wrap{height:8px;background:var(--bg3);border-radius:4px;margin:8px 0;overflow:hidden}
 .price-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .6s ease}
-/* ===== CROSS REGISTRY ===== */
-.cr-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .2s}
-.cr-card:hover{border-color:var(--border2);box-shadow:var(--glow)}
-.cr-card.multi{border-color:rgba(139,92,246,.35);background:linear-gradient(135deg,rgba(139,92,246,.04),var(--card))}
-.cr-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}
-.cr-name{font-size:14px;font-weight:700;color:var(--text1)}
-.cr-country{font-size:11px;color:var(--text3)}
-.cr-registries{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.cr-reg-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px}
-.cr-stat-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-.cr-stat{font-size:11px;color:var(--text3)}
-.cr-stat strong{color:var(--text1);font-weight:600}
+
 /* ===== SPARKLINES ===== */
 .kpi-sparkline{margin-top:8px;height:32px;position:relative}
 .sparkline-svg{width:100%;height:32px;overflow:visible}
@@ -390,7 +379,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
 .price-discovery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px}
 @media(max-width:900px){
   .price-discovery-grid{grid-template-columns:1fr 1fr}
-  #cr-grid{grid-template-columns:1fr}
 }
 @media(max-width:600px){
   .price-discovery-grid{grid-template-columns:1fr}
@@ -435,7 +423,7 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     <div class="nav-section">
       <div class="nav-label">Analysis</div>
       <button class="nav-btn" onclick="showPage('insights')"><span class="icon">🧠</span><span>Insights</span></button>
-      <button class="nav-btn" onclick="showPage('crossregistry')"><span class="icon">🔗</span><span>Cross-Registry</span></button>
+
     </div>
     <div class="nav-section">
       <div class="nav-label">Other Registries</div>
@@ -1086,87 +1074,6 @@ tr:hover td{background:rgba(19,29,50,.6);color:var(--text1)}
     </div>
   
 
-  <!-- CROSS-REGISTRY SUPPLIER PAGE -->
-  <div class="page" id="page-crossregistry">
-    <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
-      <div class="ribbon-icon">🔗</div>
-      <div class="ribbon-text"><strong style="color:var(--purple);">Cross-Registry Supplier Intelligence</strong> · 50 suppliers profiled across CDR.fyi, Puro.earth and Rainbow Standard · 24 appear in multiple registries · Biochar dominates with 41 suppliers</div>
-    </div>
-
-    <!-- KPI Strip -->
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;" class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-label">Total Suppliers</div><div class="kpi-value accent" id="cr-kpi-total">50</div><div class="kpi-sub">profiled across registries</div><div class="kpi-icon">🏭</div></div>
-      <div class="kpi-card"><div class="kpi-label">Multi-Registry</div><div class="kpi-value" style="color:var(--purple);" id="cr-kpi-multi">24</div><div class="kpi-sub">in 2+ registries</div><div class="kpi-icon">🔗</div></div>
-      <div class="kpi-card"><div class="kpi-label">Total Committed</div><div class="kpi-value green" id="cr-kpi-vol">8.4M</div><div class="kpi-sub">tCO₂ contracted</div><div class="kpi-icon">📋</div></div>
-      <div class="kpi-card"><div class="kpi-label">Avg Price</div><div class="kpi-value amber" id="cr-kpi-price">$136/t</div><div class="kpi-sub">per tCO₂ · range $100–$200</div><div class="kpi-icon">💰</div></div>
-      <div class="kpi-card"><div class="kpi-label">Countries</div><div class="kpi-value accent" id="cr-kpi-countries">12</div><div class="kpi-sub">supplier nations</div><div class="kpi-icon">🌍</div></div>
-      <div class="kpi-card"><div class="kpi-label">CDR Methods</div><div class="kpi-value green" id="cr-kpi-methods">6</div><div class="kpi-sub">removal technologies</div><div class="kpi-icon">🔬</div></div>
-    </div>
-
-    <!-- Charts row 1 -->
-    <div class="charts-grid" style="margin-bottom:0;">
-      <div class="chart-card">
-        <div class="chart-title">Registry Breakdown</div>
-        <div class="chart-sub">How many suppliers appear in each registry combination</div>
-        <div class="chart-wrap" style="height:200px;"><canvas id="crRegistryChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Suppliers by Method</div>
-        <div class="chart-sub">Number of suppliers and total volume per CDR technology</div>
-        <div class="chart-wrap" style="height:200px;"><canvas id="crMethodChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Suppliers by Country</div>
-        <div class="chart-sub">Top supplier nations by count</div>
-        <div class="chart-wrap" style="height:200px;"><canvas id="crCountryChart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Charts row 2 -->
-    <div class="charts-grid">
-      <div class="chart-card" style="grid-column:1/-1;">
-        <div class="chart-title">Top 10 Suppliers by Committed Volume (tCO₂)</div>
-        <div class="chart-sub">★ = appears in multiple registries · colour = delivery rate (green ≥50% · amber 10–50% · red &lt;10%)</div>
-        <div class="chart-wrap" style="height:280px;"><canvas id="crTop10Chart"></canvas></div>
-      </div>
-    </div>
-
-    <!-- Search + filter bar -->
-    <div class="section-header" style="margin-top:4px;">
-      <div><div class="section-title">🏭 Supplier Cards</div><div class="section-sub">Full profiles — click any card to expand details</div></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-      <input type="text" id="cr-search" placeholder="🔍 Search supplier, country, method…" oninput="filterCR()" style="flex:1;min-width:220px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text1);font-size:13px;outline:none;">
-      <select id="cr-filter" onchange="filterCR()" class="filter-select">
-        <option value="">All Suppliers</option>
-        <option value="multi">Multi-Registry Only</option>
-        <option value="puro">Has Puro Projects</option>
-        <option value="rainbow">Has Rainbow Projects</option>
-        <option value="cdrfyi">CDR.fyi Only</option>
-      </select>
-      <select id="cr-method" onchange="filterCR()" class="filter-select">
-        <option value="">All Methods</option>
-        <option value="Biochar">Biochar</option>
-        <option value="Biomass Storage">Biomass Storage</option>
-        <option value="Enhanced Weathering">Enhanced Weathering</option>
-        <option value="Mineralization">Mineralization</option>
-        <option value="Ocean Removal">Ocean Removal</option>
-        <option value="BECCS">BECCS</option>
-      </select>
-      <select id="cr-sort" onchange="filterCR()" class="filter-select">
-        <option value="vol">Sort: Volume</option>
-        <option value="rate">Sort: Delivery Rate</option>
-        <option value="tx">Sort: Transactions</option>
-        <option value="price">Sort: Price</option>
-        <option value="name">Sort: Name A–Z</option>
-      </select>
-      <span id="cr-count" style="font-size:12px;color:var(--text3);white-space:nowrap;"></span>
-    </div>
-
-    <!-- Supplier grid -->
-    <div id="cr-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px;"></div>
-  </div>
-
   <!-- CSV UPLOAD PAGE -->
   <div class="page" id="page-csvupload">
     <div class="ribbon" style="background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,212,255,.05));border-color:rgba(139,92,246,.25);">
@@ -1295,7 +1202,6 @@ var pageMeta={
   projects:{title:'Puro.earth Registry',sub:'113 registered projects · May 2026 export'},
   methods:{title:'Removal Methods',sub:'CDR pathways analysis & comparison'},
   insights:{title:'Market Insights',sub:'Strategic analysis of the CDR landscape'},
-  crossregistry:{title:'Cross-Registry Supplier Profiles',sub:'50 suppliers profiled · 24 cross-registry matches · Puro + Rainbow'},
   rainbow:{title:'Rainbow Standard Registry',sub:'115 projects · Biomass Carbon Removal, Biobased Construction, Biogas · 25 countries'},
   isometric:{title:'Isometric Registry',sub:'305 issuances · 99,731 credits · 17 certified protocols'},
   datacontrol:{title:'Data Control Center',sub:'Unified CDR data · All registries · Filter · Export · Track updates'},
@@ -1330,7 +1236,6 @@ function showPage(id){
       else if(id==='rainbow')renderRainbow();
       else if(id==='isometric')renderIsometric();
       else if(id==='datacontrol')renderDataControl();
-      else if(id==='crossregistry')renderCrossRegistry();
     }catch(err){console.error('[CDR] render error on page '+id+':', err.message, err.stack);}
   }
   // re-check scroll hints after page switch
@@ -2055,251 +1960,7 @@ function renderPriceDiscovery(){
 
 
 
-// ============================================================
-// CROSS-REGISTRY SUPPLIER PAGE
-// ============================================================
-var crFiltered=[];
-var MC={'Biochar':'#00e5a0','BECCS':'#00d4ff','DACCS':'#8b5cf6','Enhanced Weathering':'#f59e0b','Mineralization':'#ec4899','Ocean Alkalinity':'#06b6d4','Ocean Removal':'#10b981','Biomass Storage':'#f97316','Other':'#94a3b8'};
 
-function renderCrossRegistry(){
-  if(!DATA||!DATA.crossRegistry)return;
-  var cr=DATA.crossRegistry;
-
-  // Distruggi eventuali istanze Chart.js precedenti per evitare errori su re-render
-  ['crRegistryChart','crMethodChart','crCountryChart','crTop10Chart'].forEach(function(id){
-    var existing=Chart.getChart(id);
-    if(existing)existing.destroy();
-  });
-
-  // ── Chart 1: Registry breakdown doughnut ──
-  var cdrOnly=cr.filter(function(s){return !s.puro.length&&!s.rainbow.length;}).length;
-  var puroOnly=cr.filter(function(s){return s.puro.length&&!s.rainbow.length;}).length;
-  var rbOnly=cr.filter(function(s){return s.rainbow.length&&!s.puro.length;}).length;
-  var both=cr.filter(function(s){return s.puro.length&&s.rainbow.length;}).length;
-  new Chart(document.getElementById('crRegistryChart'),{
-    type:'doughnut',
-    data:{
-      labels:['CDR.fyi only','+ Puro','+ Rainbow','+ Puro & Rainbow'],
-      datasets:[{data:[cdrOnly,puroOnly,rbOnly,both],
-        backgroundColor:['#00d4ff44','#00e5a044','#8b5cf644','#f59e0b44'],
-        borderColor:['#00d4ff','#00e5a0','#8b5cf6','#f59e0b'],
-        borderWidth:2}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-      plugins:{legend:{position:'right',labels:{color:'#8fa8cc',font:{size:10},boxWidth:12,padding:8}},
-        tooltip:{callbacks:{label:function(ctx){return ' '+ctx.label+': '+ctx.raw+' suppliers';}}}}}
-  });
-
-  // ── Chart 2: Methods bar ──
-  var methodCounts={};var methodVols={};
-  cr.forEach(function(s){
-    var m=s.cdrfyi.canonicalMethod;
-    methodCounts[m]=(methodCounts[m]||0)+1;
-    methodVols[m]=(methodVols[m]||0)+s.cdrfyi.committed;
-  });
-  var mKeys=Object.keys(methodCounts).sort(function(a,b){return methodCounts[b]-methodCounts[a];});
-  new Chart(document.getElementById('crMethodChart'),{
-    type:'bar',
-    data:{labels:mKeys,datasets:[{label:'Suppliers',data:mKeys.map(function(m){return methodCounts[m];}),
-      backgroundColor:mKeys.map(function(m){return (MC[m]||'#94a3b8')+'66';}),
-      borderColor:mKeys.map(function(m){return MC[m]||'#94a3b8';}),
-      borderWidth:1,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){
-        return ' '+ctx.raw+' suppliers · '+fmtShort(methodVols[mKeys[ctx.dataIndex]])+' tCO₂';
-      }}}},
-      scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:{display:false}},
-        y:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:9},stepSize:5},border:{display:false}}}}
-  });
-
-  // ── Chart 3: Countries bar ──
-  var countryCounts={};
-  cr.forEach(function(s){countryCounts[s.cdrfyi.country]=(countryCounts[s.cdrfyi.country]||0)+1;});
-  var cKeys=Object.keys(countryCounts).sort(function(a,b){return countryCounts[b]-countryCounts[a];}).slice(0,10);
-  new Chart(document.getElementById('crCountryChart'),{
-    type:'bar',
-    data:{labels:cKeys,datasets:[{label:'Suppliers',data:cKeys.map(function(c){return countryCounts[c];}),
-      backgroundColor:'#00d4ff33',borderColor:'#00d4ff',borderWidth:1,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw+' suppliers';}}}},
-      scales:{x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:9}},border:{display:false}},
-        y:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:9},stepSize:2},border:{display:false}}}}
-  });
-
-  // ── Chart 4: Top 10 by committed volume ──
-  var top10=cr.slice().sort(function(a,b){return b.cdrfyi.committed-a.cdrfyi.committed;}).slice(0,10);
-  var t10Labels=top10.map(function(s){return (s.puro.length||s.rainbow.length?'★ ':'')+s.name;});
-  var t10Vols=top10.map(function(s){return s.cdrfyi.committed;});
-  var t10Colors=top10.map(function(s){
-    var r=s.cdrfyi.committed>0?(s.cdrfyi.delivered/s.cdrfyi.committed)*100:0;
-    return r>=50?'#00e5a066':r>=10?'#f59e0b66':'#ef444466';
-  });
-  var t10Borders=top10.map(function(s){
-    var r=s.cdrfyi.committed>0?(s.cdrfyi.delivered/s.cdrfyi.committed)*100:0;
-    return r>=50?'#00e5a0':r>=10?'#f59e0b':'#ef4444';
-  });
-  new Chart(document.getElementById('crTop10Chart'),{
-    type:'bar',
-    data:{labels:t10Labels,datasets:[{label:'Committed tCO₂',data:t10Vols,
-      backgroundColor:t10Colors,borderColor:t10Borders,borderWidth:1,borderRadius:4}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){
-        var s=top10[ctx.dataIndex];
-        var r=s.cdrfyi.committed>0?((s.cdrfyi.delivered/s.cdrfyi.committed)*100).toFixed(1):'0';
-        return ' '+fmtNum(ctx.raw)+' tCO₂ committed · '+r+'% delivered · $'+(s.cdrfyi.price||'—')+'/t';
-      }}}},
-      scales:{
-        x:{grid:{color:'rgba(30,45,74,.5)'},ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtShort(v);}},border:{display:false}},
-        y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:{display:false}}
-      }}
-  });
-
-  // Render cards
-  crFiltered=cr.slice();
-  filterCR();
-}
-
-function filterCR(){
-  if(!DATA||!DATA.crossRegistry)return;
-  var search=(document.getElementById('cr-search')||{}).value||'';
-  var filter=(document.getElementById('cr-filter')||{}).value||'';
-  var method=(document.getElementById('cr-method')||{}).value||'';
-  var sort=(document.getElementById('cr-sort')||{}).value||'vol';
-  var sl=search.toLowerCase();
-
-  crFiltered=DATA.crossRegistry.filter(function(s){
-    if(sl&&s.name.toLowerCase().indexOf(sl)===-1&&s.cdrfyi.country.toLowerCase().indexOf(sl)===-1&&s.cdrfyi.canonicalMethod.toLowerCase().indexOf(sl)===-1)return false;
-    if(filter==='multi'&&!s.puro.length&&!s.rainbow.length)return false;
-    if(filter==='puro'&&!s.puro.length)return false;
-    if(filter==='rainbow'&&!s.rainbow.length)return false;
-    if(filter==='cdrfyi'&&(s.puro.length>0||s.rainbow.length>0))return false;
-    if(method&&s.cdrfyi.canonicalMethod!==method)return false;
-    return true;
-  });
-
-  // Sort
-  crFiltered.sort(function(a,b){
-    if(sort==='vol')return b.cdrfyi.committed-a.cdrfyi.committed;
-    if(sort==='rate'){var ra=a.cdrfyi.committed>0?a.cdrfyi.delivered/a.cdrfyi.committed:0;var rb=b.cdrfyi.committed>0?b.cdrfyi.delivered/b.cdrfyi.committed:0;return rb-ra;}
-    if(sort==='tx')return b.cdrfyi.count-a.cdrfyi.count;
-    if(sort==='price')return (parseFloat(b.cdrfyi.price)||0)-(parseFloat(a.cdrfyi.price)||0);
-    if(sort==='name')return a.name.localeCompare(b.name);
-    return 0;
-  });
-
-  var countEl=document.getElementById('cr-count');
-  if(countEl)countEl.textContent=crFiltered.length+' of '+DATA.crossRegistry.length+' suppliers';
-
-  var grid=document.getElementById('cr-grid');
-  if(!grid)return;
-  var html='';
-
-  crFiltered.forEach(function(s){
-    var isMulti=s.puro.length>0||s.rainbow.length>0;
-    var col=MC[s.cdrfyi.canonicalMethod]||'#94a3b8';
-    var dr=s.cdrfyi.committed>0?(s.cdrfyi.delivered/s.cdrfyi.committed)*100:0;
-    var drStr=dr.toFixed(1)+'%';
-    var drCol=dr>=50?'#00e5a0':dr>=10?'#f59e0b':'#ef4444';
-    var price=s.cdrfyi.price&&s.cdrfyi.price!='N/A'?'$'+s.cdrfyi.price+'/t':'—';
-
-    // Registry badges
-    var regBadges='<span class="cr-reg-badge" style="background:rgba(0,212,255,.15);color:#00d4ff;border:1px solid rgba(0,212,255,.3);">CDR.fyi</span>';
-    if(s.puro.length)regBadges+=' <span class="cr-reg-badge" style="background:rgba(0,229,160,.15);color:#00e5a0;border:1px solid rgba(0,229,160,.3);">Puro.earth</span>';
-    if(s.rainbow.length)regBadges+=' <span class="cr-reg-badge" style="background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.3);">Rainbow</span>';
-
-    // Delivery rate mini bar
-    var barPct=Math.min(dr,100);
-    var drBar='<div style="margin:8px 0 4px;">'+
-      '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px;">'+
-        '<span>Delivery rate</span><span style="color:'+drCol+';font-weight:700;">'+drStr+'</span>'+
-      '</div>'+
-      '<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">'+
-        '<div style="height:100%;width:'+barPct+'%;background:'+drCol+';border-radius:2px;transition:width .4s;"></div>'+
-      '</div>'+
-    '</div>';
-
-    // Activity dates
-    var dates=s.cdrfyi.firstTx&&s.cdrfyi.lastTx?
-      '<div style="font-size:10px;color:var(--text3);margin-top:6px;">📅 Active: '+s.cdrfyi.firstTx+' → '+s.cdrfyi.lastTx+'</div>':'';
-
-    // Puro projects detail
-    var puroHtml='';
-    if(s.puro.length){
-      puroHtml='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">'+
-        '<div style="font-size:10px;font-weight:700;color:#00e5a0;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">🌱 Puro.earth Projects ('+s.puro.length+')</div>';
-      s.puro.forEach(function(p){
-        puroHtml+='<div style="font-size:11px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;">'+
-          '<span style="color:var(--text1);font-weight:500;">'+p.name+'</span>'+
-          '<span style="color:var(--text3);white-space:nowrap;">'+p.start+' – '+(p.end||'—')+'</span>'+
-        '</div>';
-      });
-      puroHtml+='</div>';
-    }
-
-    // Rainbow projects detail
-    var rbHtml='';
-    if(s.rainbow.length){
-      var totalCredits=s.rainbow.reduce(function(acc,p){return acc+(p.issuedCredits||0);},0);
-      rbHtml='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">'+
-        '<div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">🌈 Rainbow Projects ('+s.rainbow.length+(totalCredits?' · '+fmtShort(totalCredits)+' credits':'')+')</div>';
-      s.rainbow.forEach(function(p){
-        rbHtml+='<div style="font-size:11px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;">'+
-          '<span style="color:var(--text1);font-weight:500;">'+p.name+'</span>'+
-          (p.issuedCredits?'<span style="color:var(--purple);font-weight:600;white-space:nowrap;">'+fmtShort(p.issuedCredits)+' cr</span>':'<span style="color:var(--text3);">—</span>')+
-        '</div>';
-      });
-      rbHtml+='</div>';
-    }
-
-    html+=
-      '<div class="cr-card'+(isMulti?' multi':'')+'" style="display:flex;flex-direction:column;gap:0;">'+
-        // Header
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">'+
-          '<div>'+
-            '<div style="font-size:14px;font-weight:700;color:var(--text1);">'+s.name+'</div>'+
-            '<div style="font-size:11px;color:var(--text3);margin-top:2px;">📍 '+s.cdrfyi.country+' · '+s.cdrfyi.technology+'</div>'+
-          '</div>'+
-          '<div style="text-align:right;flex-shrink:0;margin-left:8px;">'+
-            '<div style="font-size:15px;font-weight:800;color:var(--accent);">'+fmtShort(s.cdrfyi.committed)+'</div>'+
-            '<div style="font-size:9px;color:var(--text3);">tCO₂ committed</div>'+
-          '</div>'+
-        '</div>'+
-        // Registry badges + method
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;">'+
-          regBadges+
-          '<span class="badge" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44;margin-left:4px;">'+s.cdrfyi.canonicalMethod+'</span>'+
-        '</div>'+
-        // Delivery rate bar
-        drBar+
-        // Stats row
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;">'+
-          '<div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center;">'+
-            '<div style="font-size:13px;font-weight:700;color:var(--text1);">'+fmtShort(s.cdrfyi.delivered)+'</div>'+
-            '<div style="font-size:9px;color:var(--text3);margin-top:2px;">delivered</div>'+
-          '</div>'+
-          '<div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center;">'+
-            '<div style="font-size:13px;font-weight:700;color:'+drCol+';">'+drStr+'</div>'+
-            '<div style="font-size:9px;color:var(--text3);margin-top:2px;">del. rate</div>'+
-          '</div>'+
-          '<div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center;">'+
-            '<div style="font-size:13px;font-weight:700;color:var(--amber);">'+price+'</div>'+
-            '<div style="font-size:9px;color:var(--text3);margin-top:2px;">price</div>'+
-          '</div>'+
-          '<div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center;">'+
-            '<div style="font-size:13px;font-weight:700;color:var(--text1);">'+s.cdrfyi.count+'</div>'+
-            '<div style="font-size:9px;color:var(--text3);margin-top:2px;">transactions</div>'+
-          '</div>'+
-        '</div>'+
-        // Dates
-        dates+
-        // Puro & Rainbow detail
-        puroHtml+
-        rbHtml+
-      '</div>';
-  });
-
-  grid.innerHTML=html||'<div style="color:var(--text3);padding:40px;text-align:center;font-size:13px;grid-column:1/-1;">No suppliers match current filters.</div>';
-}
 
 // ============================================================
 // SPARKLINES on KPI cards
