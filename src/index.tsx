@@ -220,7 +220,6 @@ td.td-link:hover{text-decoration:underline}
   <div class="nav-section">
     <div class="nav-label">Overview</div>
     <button class="nav-btn active" onclick="showPage('dashboard')"><span class="icon">📊</span><span class="nav-text">Dashboard</span></button>
-    <button class="nav-btn" onclick="showPage('intelligence')"><span class="icon">🧠</span><span class="nav-text">Market Intelligence</span></button>
   </div>
 
   <div class="nav-section">
@@ -242,6 +241,7 @@ td.td-link:hover{text-decoration:underline}
     <div class="nav-label">Analysis</div>
     <button class="nav-btn" onclick="showPage('anomalies')"><span class="icon">🚨</span><span class="nav-text">Anomalies</span><span class="nav-badge" id="nb-anom" style="background:rgba(236,72,153,.15);color:var(--pink)"></span></button>
     <button class="nav-btn" onclick="showPage('crossanalysis')"><span class="icon">🔀</span><span class="nav-text">Cross-Analysis</span><span class="nav-badge" style="background:rgba(139,92,246,.15);color:var(--purple)">NEW</span></button>
+    <button class="nav-btn" onclick="showPage('sources')"><span class="icon">📚</span><span class="nav-text">Sources</span></button>
   </div>
 
   <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i> <span>Collapse</span></button>
@@ -303,38 +303,7 @@ td.td-link:hover{text-decoration:underline}
       </table></div></div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════ -->
-    <!-- PAGE: MARKET INTELLIGENCE                              -->
-    <!-- ══════════════════════════════════════════════════════ -->
-    <div class="page" id="page-intelligence">
-      <div class="ribbon">
-        <div class="ribbon-icon">🧠</div>
-        <div class="ribbon-text"><strong style="color:var(--accent)">Market Intelligence</strong> — Automated insights from 5,498 transactions across 4 registries. Price analysis, concentration metrics, and delivery performance.</div>
-      </div>
-      <div class="kpi-grid" id="intel-kpis"></div>
-      <div class="charts-grid">
-        <div class="chart-card" style="grid-column:1/-1">
-          <div class="chart-title">Price per tCO₂ by Method</div>
-          <div class="chart-sub">Avg · Min · Max price range for each CDR technology</div>
-          <div class="chart-wrap" style="height:240px"><canvas id="ch-price-method"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Delivery Rate by Method</div>
-          <div class="chart-sub">% of committed volume actually delivered</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="ch-delivery-rate"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Supply vs Demand Gap</div>
-          <div class="chart-sub">Committed vs delivered across methods</div>
-          <div class="chart-wrap" style="height:220px"><canvas id="ch-gap"></canvas></div>
-        </div>
-      </div>
-      <div class="sec-header" style="margin-top:8px">
-        <div><div class="sec-title">🚨 Price Anomalies</div><div class="sec-sub">Suppliers with prices significantly above or below method average</div></div>
-        <button class="filter-btn" onclick="showPage('anomalies')">All anomalies →</button>
-      </div>
-      <div id="intel-anomalies" class="anomaly-list"></div>
-    </div>
+
 
     <!-- ══════════════════════════════════════════════════════ -->
     <!-- PAGE: TRANSACTIONS                                     -->
@@ -405,18 +374,6 @@ td.td-link:hover{text-decoration:underline}
         <div class="ribbon-icon">💼</div>
         <div class="ribbon-text" id="buyers-ribbon">Loading buyer concentration data…</div>
       </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">Top 10 Buyers by Volume</div>
-          <div class="chart-sub">tCO₂ committed</div>
-          <div class="chart-wrap" style="height:260px"><canvas id="ch-buyers-detail"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Market Share %</div>
-          <div class="chart-sub">Concentration by buyer</div>
-          <div class="chart-wrap" style="height:260px"><canvas id="ch-buyers-pct"></canvas></div>
-        </div>
-      </div>
       <div class="table-wrap"><div class="table-scroll"><table>
         <thead><tr><th>#</th><th>Buyer</th><th class="td-num">Volume (tCO₂)</th><th class="td-num">Market Share</th><th class="td-num">Transactions</th></tr></thead>
         <tbody id="buyers-tbody"></tbody>
@@ -428,13 +385,6 @@ td.td-link:hover{text-decoration:underline}
     <!-- ══════════════════════════════════════════════════════ -->
     <div class="page" id="page-methods">
       <div class="kpi-grid" id="methods-kpis"></div>
-      <div class="charts-grid">
-        <div class="chart-card" style="grid-column:1/-1">
-          <div class="chart-title">Price Range per Method ($/tCO₂)</div>
-          <div class="chart-sub">Min, average and max observed price</div>
-          <div class="chart-wrap" style="height:260px"><canvas id="ch-method-price"></canvas></div>
-        </div>
-      </div>
       <div id="methods-cards" class="charts-grid"></div>
     </div>
 
@@ -450,7 +400,7 @@ td.td-link:hover{text-decoration:underline}
       </div>
       <div class="table-wrap">
         <div class="table-scroll"><table>
-          <thead><tr><th>Project</th><th>Method</th><th>Country</th><th>Supplier</th><th>Start</th><th>End</th></tr></thead>
+          <thead><tr><th>Project</th><th>Method</th><th>Country</th><th>Developer</th><th>Methodology</th><th>Status</th></tr></thead>
           <tbody id="puro-tbody"></tbody>
         </table></div>
         <div class="pagination" id="puro-pagination"></div>
@@ -659,6 +609,149 @@ td.td-link:hover{text-decoration:underline}
 
     </div><!-- /page-crossanalysis -->
 
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PAGE: SOURCES                                          -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page" id="page-sources">
+      <div class="ribbon" style="border-color:rgba(0,212,255,.2);background:rgba(0,212,255,.03)">
+        <div class="ribbon-icon">📚</div>
+        <div class="ribbon-text"><strong style="color:var(--accent)">Data Sources</strong> — This platform aggregates data from 4 independent registries and data providers. Each source uses its own methodology, verification standard and issuance process.</div>
+      </div>
+
+      <!-- CDR.fyi -->
+      <div class="chart-card" style="margin-bottom:16px;border-color:rgba(0,212,255,.25)">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,229,160,.15));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⚡</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--accent)">CDR.fyi — Order Explorer</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">portal.cdr.fyi/order-explorer</div>
+          </div>
+          <a href="https://portal.cdr.fyi/order-explorer" target="_blank" style="margin-left:auto;padding:6px 14px;border-radius:7px;border:1px solid rgba(0,212,255,.3);color:var(--accent);font-size:11px;text-decoration:none;white-space:nowrap">Visit ↗</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:12px">CDR.fyi is the primary transaction-level database for the carbon dioxide removal market. It tracks individual purchase orders between buyers and CDR suppliers, covering price, volume, technology, delivery status and registry source. Data is sourced from public disclosures, supplier announcements and registry issuances.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px">
+          <div class="detail-stat"><div class="detail-stat-label">Transactions tracked</div><div class="detail-stat-value" style="color:var(--accent)">5,498</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Date range</div><div class="detail-stat-value">2019 – 2025</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Unique suppliers</div><div class="detail-stat-value">213</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Unique buyers</div><div class="detail-stat-value">516</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Total committed</div><div class="detail-stat-value" style="color:var(--accent)">38.83M tCO₂</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Coverage</div><div class="detail-stat-value">Global</div></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">CDR Technologies Covered</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="badge" style="background:rgba(0,229,160,.15);color:#00e5a0">Biochar</span>
+            <span class="badge" style="background:rgba(0,212,255,.15);color:#00d4ff">BECCS</span>
+            <span class="badge" style="background:rgba(139,92,246,.15);color:#8b5cf6">DACCS</span>
+            <span class="badge" style="background:rgba(245,158,11,.15);color:#f59e0b">Enhanced Weathering</span>
+            <span class="badge" style="background:rgba(236,72,153,.15);color:#ec4899">Mineralization</span>
+            <span class="badge" style="background:rgba(6,182,212,.15);color:#06b6d4">Ocean Alkalinity</span>
+            <span class="badge" style="background:rgba(16,185,129,.15);color:#10b981">Ocean Removal</span>
+            <span class="badge" style="background:rgba(249,115,22,.15);color:#f97316">Biomass Storage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Puro.earth -->
+      <div class="chart-card" style="margin-bottom:16px;border-color:rgba(0,229,160,.25)">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,rgba(0,229,160,.25),rgba(0,212,255,.1));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🌱</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--green)">Puro.earth Registry</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">puro.earth · Puro Standard</div>
+          </div>
+          <a href="https://puro.earth" target="_blank" style="margin-left:auto;padding:6px 14px;border-radius:7px;border:1px solid rgba(0,229,160,.3);color:var(--green);font-size:11px;text-decoration:none;white-space:nowrap">Visit ↗</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:12px">Puro.earth is the world's leading marketplace and standard for engineered carbon removal. Founded in 2019, it developed the <strong style="color:var(--text1)">Puro Standard</strong> — a rigorous third-party verified certification framework for durable CDR. Suppliers must meet strict additionality, permanence and monitoring criteria before issuance. The registry publicly lists all issued and retired CORC (Carbon Removal Certificates) with full project transparency.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px">
+          <div class="detail-stat"><div class="detail-stat-label">Projects in DB</div><div class="detail-stat-value" style="color:var(--green)">113</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Standard</div><div class="detail-stat-value">Puro Standard</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Certificate type</div><div class="detail-stat-value">CORC</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Min. durability</div><div class="detail-stat-value">100 years</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Founded</div><div class="detail-stat-value">2019</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">HQ</div><div class="detail-stat-value">Helsinki, Finland</div></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Certified Methodologies</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="badge badge-green">Biochar Carbon Removal</span>
+            <span class="badge badge-green">Wood in Construction</span>
+            <span class="badge badge-green">Geologically Stored Carbon</span>
+            <span class="badge badge-green">Enhanced Rock Weathering</span>
+            <span class="badge badge-green">Biogas Carbon Removal</span>
+            <span class="badge badge-green">Carbonated Materials</span>
+            <span class="badge badge-green">Direct Air Capture & Storage</span>
+            <span class="badge badge-green">Marine Anoxic Carbon Storage</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rainbow Standard -->
+      <div class="chart-card" style="margin-bottom:16px;border-color:rgba(139,92,246,.25)">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(236,72,153,.1));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🌈</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--purple)">Rainbow Standard</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">rainbowstandard.com · Biomass Carbon Removal</div>
+          </div>
+          <a href="https://www.rainbowstandard.com" target="_blank" style="margin-left:auto;padding:6px 14px;border-radius:7px;border:1px solid rgba(139,92,246,.3);color:var(--purple);font-size:11px;text-decoration:none;white-space:nowrap">Visit ↗</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:12px">The Rainbow Standard is a certification framework specifically designed for <strong style="color:var(--text1)">Biomass Carbon Removal and Storage (BiCRS)</strong> projects. It provides a rigorous, science-based methodology for quantifying and verifying carbon removal from biological feedstocks — including agricultural residues, forestry waste and dedicated energy crops. The Rainbow Standard emphasises full lifecycle accounting, co-benefit assessment and long-term storage durability.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px">
+          <div class="detail-stat"><div class="detail-stat-label">Projects in DB</div><div class="detail-stat-value" style="color:var(--purple)">107</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Focus</div><div class="detail-stat-value">BiCRS / Biomass</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Approach</div><div class="detail-stat-value">Lifecycle accounting</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Co-benefits</div><div class="detail-stat-value">Yes — assessed</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Feedstocks</div><div class="detail-stat-value">Ag. residues, forestry</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Storage types</div><div class="detail-stat-value">Geological + Biomass</div></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Key Principle</div>
+          <p style="font-size:12px;color:var(--text3);line-height:1.6;font-style:italic">"Carbon removed through biological processes must be stored in durable, verifiable sinks with full chain-of-custody documentation and permanent monitoring."</p>
+        </div>
+      </div>
+
+      <!-- Isometric -->
+      <div class="chart-card" style="margin-bottom:16px;border-color:rgba(236,72,153,.25)">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,rgba(236,72,153,.25),rgba(245,158,11,.1));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">⚖️</div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--pink)">Isometric Registry</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">registry.isometric.com · Science-based permanence</div>
+          </div>
+          <a href="https://registry.isometric.com" target="_blank" style="margin-left:auto;padding:6px 14px;border-radius:7px;border:1px solid rgba(236,72,153,.3);color:var(--pink);font-size:11px;text-decoration:none;white-space:nowrap">Visit ↗</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:12px">Isometric is a science-first carbon registry that exclusively lists credits verified to the <strong style="color:var(--text1)">Isometric Standard</strong>. Each credit represents exactly 1 tonne of CO₂ removed from the atmosphere, backed by rigorous measurement, reporting and verification (MRV). Isometric assigns quantitative <strong style="color:var(--text1)">permanence ratings</strong> to every credit — a unique feature that makes the actual durability of storage explicit and comparable across CDR pathways.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px">
+          <div class="detail-stat"><div class="detail-stat-label">Issuances in DB</div><div class="detail-stat-value" style="color:var(--pink)">305</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Credits issued</div><div class="detail-stat-value">99,731 tCO₂</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Credits retired</div><div class="detail-stat-value">32,626 tCO₂</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Retirement rate</div><div class="detail-stat-value" style="color:var(--amber)">32.7%</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Active protocols</div><div class="detail-stat-value">17 pathways</div></div>
+          <div class="detail-stat"><div class="detail-stat-label">Unique feature</div><div class="detail-stat-value">Permanence ratings</div></div>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Verified CDR Pathways</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="badge badge-pink">Direct Air Capture</span>
+            <span class="badge badge-pink">Biochar</span>
+            <span class="badge badge-pink">Enhanced Weathering</span>
+            <span class="badge badge-pink">Ocean Alkalinity Enhancement</span>
+            <span class="badge badge-pink">Biomass + CCS</span>
+            <span class="badge badge-pink">Geological Storage</span>
+            <span class="badge badge-pink">Mineralization</span>
+            <span class="badge badge-pink">Soil Carbon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data methodology note -->
+      <div style="padding:16px 20px;border-radius:10px;border:1px solid var(--border);background:var(--card2);margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">📌 Data Methodology Note</div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.7">All transaction data is sourced from CDR.fyi public disclosures and cross-referenced with registry issuance records. Supplier/buyer names are normalised to canonical forms. Prices reflect reported deal values and may not include brokerage fees. Volume figures represent committed tonnes at time of deal; delivered volumes depend on project execution. Anomaly detection uses per-supplier price deviation from their historical average. 8 duplicate Rainbow Standard project IDs were deduplicated — DB contains 107 unique projects vs 115 raw JSON entries.</p>
+      </div>
+    </div><!-- /page-sources -->
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -723,7 +816,6 @@ async function api(path){
 // ══════════════════════════════════════════════════════════════
 var pageMeta={
   dashboard:{title:'Dashboard',sub:'CDR market overview · 4 registries'},
-  intelligence:{title:'Market Intelligence',sub:'Automated insights & price analysis'},
   transactions:{title:'Transactions',sub:'5,498 CDR transactions · 2019–2025'},
   suppliers:{title:'Suppliers',sub:'212 CDR producers'},
   buyers:{title:'Buyers',sub:'Market concentration analysis'},
@@ -733,6 +825,7 @@ var pageMeta={
   isometric:{title:'Isometric',sub:'305 issuances · Science-based permanence'},
   anomalies:{title:'Anomaly Detection',sub:'Automated price outlier detection'},
   crossanalysis:{title:'Cross-Analysis',sub:'Interconnected data · Supplier × Buyer × Method × Registry'},
+  sources:{title:'Data Sources',sub:'About the registries and data providers'},
 };
 var pageInit={};
 
@@ -751,7 +844,6 @@ function showPage(id){
     pageInit[id]=true;
     var inits={
       dashboard:initDashboard,
-      intelligence:initIntelligence,
       transactions:initTransactions,
       suppliers:initSuppliers,
       buyers:initBuyers,
@@ -761,6 +853,7 @@ function showPage(id){
       isometric:initIsometric,
       anomalies:initAnomalies,
       crossanalysis:initCrossAnalysis,
+      sources:initSources,
     };
     if(inits[id])inits[id]();
   }
@@ -852,62 +945,9 @@ function kpiCard(label,value,color,icon,sub){
 function esc(s){return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
 
 // ══════════════════════════════════════════════════════════════
-// MARKET INTELLIGENCE
+// SOURCES
 // ══════════════════════════════════════════════════════════════
-async function initIntelligence(){
-  var [methods,anomalies]=await Promise.all([api('/methods'),api('/anomalies')]);
-
-  // KPI cards
-  document.getElementById('intel-kpis').innerHTML=
-    kpiCard('Methods Tracked',methods.methods.length,'accent','🔬','CDR technologies')+
-    kpiCard('Anomalies Found',anomalies.rows.length,'pink','🚨','Price outliers')+
-    kpiCard('High Severity',anomalies.rows.filter(function(a){return a.severity==='high';}).length,'','🔴','Deviation >40%')+
-    kpiCard('Price Range','$'+Math.min.apply(null,methods.methods.filter(function(m){return m.min_price>0;}).map(function(m){return m.min_price;})).toFixed(0)+'–$'+Math.max.apply(null,methods.methods.map(function(m){return m.max_price;})).toFixed(0),'amber','💰','Min–max per tCO₂');
-
-  // Price by method
-  var mlist=methods.methods.filter(function(m){return m.avg_price>0;});
-  mkChart('ch-price-method',{type:'bar',data:{
-    labels:mlist.map(function(m){return m.method;}),
-    datasets:[
-      {label:'Min',data:mlist.map(function(m){return m.min_price||0;}),backgroundColor:'rgba(0,229,160,0.3)',borderColor:'#00e5a0',borderWidth:1,borderRadius:3},
-      {label:'Avg',data:mlist.map(function(m){return m.avg_price||0;}),backgroundColor:'rgba(0,212,255,0.55)',borderColor:'#00d4ff',borderWidth:1,borderRadius:3},
-      {label:'Max',data:mlist.map(function(m){return m.max_price||0;}),backgroundColor:'rgba(245,158,11,0.3)',borderColor:'#f59e0b',borderWidth:1,borderRadius:3},
-    ]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': $'+ctx.raw.toFixed(0)+'/t';}}}},scales:baseAxes({x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10},maxRotation:30},border:BORDER}})}});
-
-  // Delivery rate
-  var mdr=methods.methods.filter(function(m){return m.committed>0;});
-  var drVals=mdr.map(function(m){return m.committed>0?Math.min(m.delivered/m.committed*100,100):0;});
-  mkChart('ch-delivery-rate',{type:'bar',data:{
-    labels:mdr.map(function(m){return m.method;}),
-    datasets:[{data:drVals,backgroundColor:drVals.map(function(v){return v>=50?'rgba(0,229,160,0.6)':v>=10?'rgba(245,158,11,0.6)':'rgba(236,72,153,0.6)';}),borderRadius:4}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw.toFixed(1)+'%';}}}},scales:baseAxes({y:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return v+'%';}},border:BORDER}})}});
-
-  // Gap chart
-  mkChart('ch-gap',{type:'bar',data:{
-    labels:methods.methods.map(function(m){return m.method;}),
-    datasets:[
-      {label:'Committed',data:methods.methods.map(function(m){return m.committed;}),backgroundColor:'rgba(0,212,255,0.4)',borderRadius:3},
-      {label:'Delivered',data:methods.methods.map(function(m){return m.delivered;}),backgroundColor:'rgba(0,229,160,0.7)',borderRadius:3},
-    ]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:baseAxes({x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10},maxRotation:30},border:BORDER},y:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER}})}});
-
-  // Top anomalies
-  var html='';
-  anomalies.rows.slice(0,8).forEach(function(a){
-    var sevCls=a.severity==='high'?'badge-pink':a.severity==='medium'?'badge-amber':'badge-blue';
-    var icon=a.deviation_pct>0?'📈':'📉';
-    html+='<div class="anomaly-card '+a.severity+'">'+
-      '<div class="anomaly-icon">'+icon+'</div>'+
-      '<div class="anomaly-body">'+
-        '<div class="anomaly-name">'+a.supplier_name+'</div>'+
-        '<div class="anomaly-desc">'+a.description+'</div>'+
-      '</div>'+
-      '<div><span class="badge '+sevCls+'">'+a.severity+'</span></div>'+
-    '</div>';
-  });
-  document.getElementById('intel-anomalies').innerHTML=html||'<div class="empty">No anomalies detected</div>';
-}
+function initSources(){/* static page, nothing to load */}
 
 // ══════════════════════════════════════════════════════════════
 // TRANSACTIONS
@@ -1021,11 +1061,6 @@ async function initBuyers(){
     'Top 3 buyers control <strong style="color:var(--amber)">'+(buyers.slice(0,3).reduce(function(s,b){return s+b.pct;},0).toFixed(1))+'%</strong> of the market. '+
     'HHI Index indicates <strong style="color:var(--pink)">highly concentrated</strong> market.';
 
-  var bnames=buyers.slice(0,10).map(function(b){return b.name;});
-  var bvols=buyers.slice(0,10).map(function(b){return b.total_volume;});
-  var bpcts=buyers.slice(0,10).map(function(b){return b.pct;});
-  mkChart('ch-buyers-detail',{type:'bar',data:{labels:bnames,datasets:[{data:bvols,backgroundColor:'rgba(139,92,246,0.55)',borderColor:'#8b5cf6',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+fmtNum(ctx.raw)+' tCO₂';}}}},scales:{x:{grid:GRID,ticks:{color:'#5a7399',font:{size:10},callback:function(v){return fmtNum(v);}},border:BORDER},y:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:BORDER}}}});
-  mkChart('ch-buyers-pct',{type:'doughnut',data:{labels:bnames,datasets:[{data:bpcts,backgroundColor:['rgba(139,92,246,0.7)','rgba(0,212,255,0.6)','rgba(0,229,160,0.6)','rgba(245,158,11,0.6)','rgba(236,72,153,0.6)','rgba(249,115,22,0.5)','rgba(6,182,212,0.5)','rgba(16,185,129,0.5)','rgba(139,92,246,0.4)','rgba(90,115,153,0.5)'],borderWidth:2,borderColor:'#131d32'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'50%',plugins:{legend:{position:'right',labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.label+': '+ctx.raw.toFixed(1)+'%';}}}}}});
 
   var html='';
   buyers.forEach(function(b,i){
@@ -1047,17 +1082,6 @@ async function initMethods(){
     var rate=m.committed>0?(m.delivered/m.committed*100).toFixed(1):0;
     return '<div class="kpi-card" style="border-color:'+col+'33"><div class="kpi-label">'+m.method+'</div><div class="kpi-value" style="color:'+col+'">'+fmtNum(m.committed)+'</div><div class="kpi-sub">tCO₂ · '+m.tx_count+' tx · '+rate+'% delivered</div></div>';
   }).join('');
-
-  // Price range chart
-  var mf=methods.filter(function(m){return m.avg_price>0;});
-  mkChart('ch-method-price',{type:'bar',data:{
-    labels:mf.map(function(m){return m.method;}),
-    datasets:[
-      {label:'Min $',data:mf.map(function(m){return m.min_price||0;}),backgroundColor:'rgba(0,229,160,0.4)',borderRadius:3},
-      {label:'Avg $',data:mf.map(function(m){return m.avg_price||0;}),backgroundColor:'rgba(0,212,255,0.6)',borderRadius:3},
-      {label:'Max $',data:mf.map(function(m){return m.max_price||0;}),backgroundColor:'rgba(245,158,11,0.4)',borderRadius:3},
-    ]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa8cc',font:{size:10},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': $'+ctx.raw.toFixed(0)+'/t';}}}},scales:baseAxes({x:{grid:{display:false},ticks:{color:'#8fa8cc',font:{size:10}},border:BORDER}})}});
 
   // Method detail cards
   document.getElementById('methods-cards').innerHTML=methods.map(function(m){
