@@ -152,17 +152,36 @@ td.td-link:hover{text-decoration:underline}
 .ribbon-text{font-size:11.5px;color:var(--text2);line-height:1.5;flex:1}
 
 /* ── ANOMALY CARDS ── */
-.anomaly-list{display:flex;flex-direction:column;gap:8px}
-.anomaly-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;transition:border-color .2s}
-.anomaly-card:hover{border-color:var(--border2)}
-.anomaly-card.high{border-left:3px solid var(--pink)}
-.anomaly-card.medium{border-left:3px solid var(--amber)}
-.anomaly-card.low{border-left:3px solid var(--accent)}
-.anomaly-icon{font-size:18px;flex-shrink:0}
-.anomaly-body{flex:1}
-.anomaly-name{font-size:12px;font-weight:700;color:var(--text1)}
-.anomaly-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.anomaly-list{display:flex;flex-direction:column;gap:10px}
+.anomaly-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;transition:border-color .2s,box-shadow .2s}
+.anomaly-card:hover{border-color:var(--border2);box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.anomaly-card.critical{border-left:4px solid #ef4444}
+.anomaly-card.high{border-left:4px solid var(--pink)}
+.anomaly-card.medium{border-left:4px solid var(--amber)}
+.anomaly-card.low{border-left:4px solid var(--accent)}
+.anomaly-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center}
+.anomaly-body{flex:1;min-width:0}
+.anomaly-name{font-size:13px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.anomaly-method-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;color:#fff;opacity:.9}
+.anomaly-prices{font-size:11px;color:var(--text2);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.anomaly-price-box{background:var(--bg3);border-radius:6px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.anomaly-price-box.actual{color:var(--text1);font-weight:700}
+.anomaly-price-box.avg{color:var(--text3)}
+.anomaly-desc{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.4}
+.anomaly-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;min-width:80px}
+.anomaly-dev{font-size:18px;font-weight:800;line-height:1}
+.anomaly-dev.pos{color:#ef4444}
+.anomaly-dev.neg{color:var(--green)}
 .anomaly-sev{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase}
+/* ── ANOMALY EXPLAINER ── */
+.anom-explainer{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:18px}
+.anom-explainer-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.anom-explainer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.anom-exp-step{display:flex;gap:10px;align-items:flex-start}
+.anom-exp-num{width:22px;height:22px;border-radius:50%;background:rgba(236,72,153,.15);color:var(--pink);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.anom-exp-text{font-size:11px;color:var(--text3);line-height:1.5}
+.anom-exp-text strong{color:var(--text2)}
+.anom-exp-text code{background:var(--bg3);border-radius:3px;padding:1px 4px;font-size:10px;color:var(--accent)}
 
 /* ── DETAIL PANEL ── */
 #detail-panel{position:fixed;right:0;top:0;bottom:0;width:480px;background:var(--bg2);border-left:1px solid var(--border);z-index:50;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
@@ -457,17 +476,125 @@ td.td-link:hover{text-decoration:underline}
     <!-- PAGE: ANOMALIES                                        -->
     <!-- ══════════════════════════════════════════════════════ -->
     <div class="page" id="page-anomalies">
+
+      <!-- EXPLANATION RIBBON -->
       <div class="ribbon" style="border-color:rgba(236,72,153,.25);background:rgba(236,72,153,.04)">
         <div class="ribbon-icon">🚨</div>
-        <div class="ribbon-text"><strong style="color:var(--pink)">Anomaly Detection</strong> — Automatically detected price outliers. Suppliers whose price deviates more than 20% from their method's average are flagged.</div>
+        <div class="ribbon-text">
+          <strong style="color:var(--pink)">Anomaly Detection Engine</strong> — 
+          This system automatically identifies CDR suppliers whose prices deviate significantly from the method-level average.
+          For each supplier, the engine computes the average price across all their transactions and compares it to the median price
+          of all suppliers using the same carbon removal method. A deviation is flagged as
+          <strong style="color:#ef4444">Critical</strong> if &gt;200%,
+          <strong style="color:var(--pink)">High</strong> if &gt;100%,
+          <strong style="color:var(--amber)">Medium</strong> if &gt;50%,
+          <strong style="color:var(--accent)">Low</strong> if &gt;10%.
+          Positive deviations mean the supplier charges <em>above</em> the method average; negative means <em>below</em>.
+        </div>
       </div>
-      <div class="filter-bar">
-        <button class="filter-btn active" id="anom-all" onclick="filterAnomalies('')">All</button>
-        <button class="filter-btn" id="anom-high" onclick="filterAnomalies('high')">🔴 High</button>
-        <button class="filter-btn" id="anom-med" onclick="filterAnomalies('medium')">🟡 Medium</button>
+
+      <!-- KPI ROW -->
+      <div class="kpi-grid" id="anom-kpi-grid" style="margin-bottom:18px">
+        <div class="kpi-card" style="border-color:rgba(236,72,153,.2)">
+          <div class="kpi-icon">🚨</div>
+          <div class="kpi-label">Total Anomalies</div>
+          <div class="kpi-value" id="anom-kpi-total">—</div>
+          <div class="kpi-sub">across all methods</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(239,68,68,.35)">
+          <div class="kpi-icon" style="font-size:16px">🔴</div>
+          <div class="kpi-label">Critical</div>
+          <div class="kpi-value" style="color:#ef4444" id="anom-kpi-critical">—</div>
+          <div class="kpi-sub">deviation &gt;200%</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(236,72,153,.25)">
+          <div class="kpi-icon" style="font-size:16px">🟠</div>
+          <div class="kpi-label">High</div>
+          <div class="kpi-value" style="color:var(--pink)" id="anom-kpi-high">—</div>
+          <div class="kpi-sub">deviation &gt;100%</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(245,158,11,.25)">
+          <div class="kpi-icon" style="font-size:16px">🟡</div>
+          <div class="kpi-label">Medium</div>
+          <div class="kpi-value" style="color:var(--amber)" id="anom-kpi-medium">—</div>
+          <div class="kpi-sub">deviation &gt;50%</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(0,212,255,.2)">
+          <div class="kpi-icon" style="font-size:16px">🔵</div>
+          <div class="kpi-label">Low</div>
+          <div class="kpi-value accent" id="anom-kpi-low">—</div>
+          <div class="kpi-sub">deviation &gt;10%</div>
+        </div>
+        <div class="kpi-card" style="border-color:rgba(139,92,246,.2)">
+          <div class="kpi-icon">⚗️</div>
+          <div class="kpi-label">Most Flagged Method</div>
+          <div class="kpi-value purple" id="anom-kpi-method" style="font-size:14px;line-height:1.2">—</div>
+          <div class="kpi-sub" id="anom-kpi-method-cnt"></div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:18px">
+        <div class="chart-card">
+          <div class="chart-title">Severity Distribution by Method</div>
+          <div class="chart-sub">Count of anomalies per removal method, broken down by severity level</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="ch-anom-method"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Deviation Distribution</div>
+          <div class="chart-sub">How far suppliers deviate from their method's average price (% buckets)</div>
+          <div class="chart-wrap" style="height:220px"><canvas id="ch-anom-hist"></canvas></div>
+        </div>
+      </div>
+
+      <!-- METHODOLOGY EXPLAINER -->
+      <div class="anom-explainer">
+        <div class="anom-explainer-title">📐 Detection Methodology</div>
+        <div class="anom-explainer-grid">
+          <div class="anom-exp-step">
+            <div class="anom-exp-num">1</div>
+            <div class="anom-exp-text">
+              <strong>Group by method</strong> — All suppliers are grouped by canonical removal method (Biochar, BECCS, DACCS, etc.).
+            </div>
+          </div>
+          <div class="anom-exp-step">
+            <div class="anom-exp-num">2</div>
+            <div class="anom-exp-text">
+              <strong>Compute averages</strong> — For each supplier the weighted average <code>price_per_ton</code> is calculated across all their transactions.
+            </div>
+          </div>
+          <div class="anom-exp-step">
+            <div class="anom-exp-num">3</div>
+            <div class="anom-exp-text">
+              <strong>Compare to method median</strong> — The supplier's average is compared to the method-level median. Deviation % = (supplier_avg − method_avg) / method_avg × 100.
+            </div>
+          </div>
+          <div class="anom-exp-step">
+            <div class="anom-exp-num">4</div>
+            <div class="anom-exp-text">
+              <strong>Classify severity</strong> — Critical (&gt;200%), High (&gt;100%), Medium (&gt;50%), Low (&gt;10%). Only suppliers with |deviation| &gt; 10% are flagged.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar" style="margin-bottom:12px">
+        <button class="filter-btn active" id="anom-f-all"      onclick="setAnomSev('')">All</button>
+        <button class="filter-btn" id="anom-f-critical" onclick="setAnomSev('critical')">🔴 Critical</button>
+        <button class="filter-btn" id="anom-f-high"    onclick="setAnomSev('high')">🟠 High</button>
+        <button class="filter-btn" id="anom-f-medium"  onclick="setAnomSev('medium')">🟡 Medium</button>
+        <button class="filter-btn" id="anom-f-low"     onclick="setAnomSev('low')">🔵 Low</button>
+        <select class="filter-select" id="anom-f-method" onchange="applyAnomFilters()" style="min-width:160px">
+          <option value="">All Methods</option>
+        </select>
+        <input class="filter-input" id="anom-f-search" placeholder="🔍 Search supplier…" oninput="applyAnomFilters()" style="min-width:200px;flex:1">
         <span class="filter-count" id="anom-count"></span>
       </div>
+
+      <!-- ANOMALY CARDS + PAGINATION -->
       <div id="anomalies-list" class="anomaly-list"></div>
+      <div id="anom-pagination" class="pagination" style="margin-top:8px"></div>
     </div>
 
     <!-- ══════════════════════════════════════════════════════ -->
@@ -1233,41 +1360,233 @@ async function initIsometric(){
 // ANOMALIES
 // ══════════════════════════════════════════════════════════════
 var ALL_ANOMALIES=[];
+var ANOM_SEV='';
+var ANOM_METHOD='';
+var ANOM_Q='';
+var ANOM_PAGE=1;
+var ANOM_PER_PAGE=50;
+var ANOM_CHARTS_BUILT=false;
+
+var SEV_COLOR={critical:'#ef4444',high:'#ec4899',medium:'#f59e0b',low:'#00d4ff'};
+var SEV_BADGE={critical:'badge-pink',high:'badge-pink',medium:'badge-amber',low:'badge-blue'};
+var SEV_ORDER={critical:0,high:1,medium:2,low:3};
 
 async function initAnomalies(){
-  var d=await api('/anomalies');
-  ALL_ANOMALIES=d.rows;
-  document.getElementById('nb-anom').textContent=ALL_ANOMALIES.length;
-  filterAnomalies('');
+  // Carica tutti i 3,544 rows una volta sola — gestibile client-side
+  var d=await api('/anomalies?limit=9999');
+  ALL_ANOMALIES=d.rows||[];
+
+  // Aggiorna badge nav
+  document.getElementById('nb-anom').textContent=ALL_ANOMALIES.length.toLocaleString();
+
+  // Calcola distribuzione severità dai dati
+  var sevDist={critical:0,high:0,medium:0,low:0};
+  ALL_ANOMALIES.forEach(function(a){if(sevDist[a.severity]!==undefined)sevDist[a.severity]++;});
+
+  // KPI cards
+  document.getElementById('anom-kpi-total').textContent=ALL_ANOMALIES.length.toLocaleString();
+  document.getElementById('anom-kpi-critical').textContent=(sevDist.critical||0).toLocaleString();
+  document.getElementById('anom-kpi-high').textContent=(sevDist.high||0).toLocaleString();
+  document.getElementById('anom-kpi-medium').textContent=(sevDist.medium||0).toLocaleString();
+  document.getElementById('anom-kpi-low').textContent=(sevDist.low||0).toLocaleString();
+
+  // Method più flaggato
+  var methodMap={};
+  ALL_ANOMALIES.forEach(function(a){
+    var m=a.canonical_method||'Unknown';
+    methodMap[m]=(methodMap[m]||0)+1;
+  });
+  var topMethod=Object.entries(methodMap).sort(function(a,b){return b[1]-a[1];})[0];
+  if(topMethod){
+    document.getElementById('anom-kpi-method').textContent=topMethod[0];
+    document.getElementById('anom-kpi-method-cnt').textContent=topMethod[1]+' anomalies';
+  }
+
+  // Popola dropdown metodo
+  var methods=Object.keys(methodMap).sort();
+  var sel=document.getElementById('anom-f-method');
+  methods.forEach(function(m){
+    var opt=document.createElement('option');
+    opt.value=m;opt.textContent=m+' ('+methodMap[m]+')';
+    sel.appendChild(opt);
+  });
+
+  // Costruisci grafici
+  buildAnomCharts(methodMap);
+
+  // Render lista
+  applyAnomFilters();
 }
 
-function filterAnomalies(sev){
-  ['anom-all','anom-high','anom-med'].forEach(function(id){
-    document.getElementById(id).classList.remove('active');
+function buildAnomCharts(methodMap){
+  if(ANOM_CHARTS_BUILT)return;
+  ANOM_CHARTS_BUILT=true;
+
+  // Grafico 1 — Severità per metodo (stacked bar orizzontale)
+  var sevs=['critical','high','medium','low'];
+  var methodNames=Object.keys(methodMap).sort();
+  var methodSevData={};
+  methodNames.forEach(function(m){methodSevData[m]={critical:0,high:0,medium:0,low:0};});
+  ALL_ANOMALIES.forEach(function(a){
+    var m=a.canonical_method||'Unknown';
+    if(methodSevData[m]&&a.severity)methodSevData[m][a.severity]++;
   });
-  if(sev==='')document.getElementById('anom-all').classList.add('active');
-  else if(sev==='high')document.getElementById('anom-high').classList.add('active');
-  else document.getElementById('anom-med').classList.add('active');
-  var list=sev?ALL_ANOMALIES.filter(function(a){return a.severity===sev;}):ALL_ANOMALIES;
-  document.getElementById('anom-count').textContent=list.length+' anomalies';
-  var html='';
-  list.forEach(function(a){
-    var sevCls=a.severity==='high'?'badge-pink':a.severity==='medium'?'badge-amber':'badge-blue';
-    var icon=a.deviation_pct>0?'📈':'📉';
-    html+='<div class="anomaly-card '+a.severity+'">'+
-      '<div class="anomaly-icon">'+icon+'</div>'+
-      '<div class="anomaly-body">'+
-        '<div class="anomaly-name"><span class="td-link" onclick="openSupplierDetail(\''+esc(a.supplier_name)+'\')">'+a.supplier_name+'</span> · <span style="color:'+( MC[a.canonical_method]||'#94a3b8')+'">'+( a.canonical_method||'')+'</span></div>'+
-        '<div class="anomaly-desc">'+a.description+'</div>'+
-      '</div>'+
-      '<div style="text-align:right">'+
-        '<span class="badge '+sevCls+'">'+a.severity+'</span>'+
-        '<div style="font-size:10px;color:var(--text3);margin-top:4px">'+(a.deviation_pct>0?'+':'')+a.deviation_pct.toFixed(1)+'% vs avg</div>'+
-      '</div>'+
-    '</div>';
+  var datasets=sevs.map(function(sev){
+    return{
+      label:sev.charAt(0).toUpperCase()+sev.slice(1),
+      data:methodNames.map(function(m){return methodSevData[m][sev]||0;}),
+      backgroundColor:SEV_COLOR[sev]+'bb',
+      borderColor:SEV_COLOR[sev],
+      borderWidth:1,
+      borderRadius:3
+    };
   });
-  document.getElementById('anomalies-list').innerHTML=html||'<div class="empty">No anomalies</div>';
+  var ctx1=document.getElementById('ch-anom-method');
+  if(ctx1&&typeof Chart!=='undefined'){
+    new Chart(ctx1,{
+      type:'bar',
+      data:{labels:methodNames,datasets:datasets},
+      options:{
+        indexAxis:'y',
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{labels:{color:'#94a3b8',font:{size:10},boxWidth:10}},
+          tooltip:{callbacks:{label:function(c){return ' '+c.dataset.label+': '+c.parsed.x;}}}
+        },
+        scales:{
+          x:{stacked:true,ticks:{color:'#64748b',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}},
+          y:{stacked:true,ticks:{color:'#94a3b8',font:{size:10}},grid:{display:false}}
+        }
+      }
+    });
+  }
+
+  // Grafico 2 — Istogramma deviazioni
+  var buckets=['< -100%','-100 to -50','-50 to -20','-20 to 0','0 to 20','20 to 50','50 to 100','100 to 200','> 200%'];
+  var counts=new Array(9).fill(0);
+  ALL_ANOMALIES.forEach(function(a){
+    var dv=a.deviation_pct||0;
+    if(dv<-100)counts[0]++;
+    else if(dv<-50)counts[1]++;
+    else if(dv<-20)counts[2]++;
+    else if(dv<0)counts[3]++;
+    else if(dv<20)counts[4]++;
+    else if(dv<50)counts[5]++;
+    else if(dv<100)counts[6]++;
+    else if(dv<200)counts[7]++;
+    else counts[8]++;
+  });
+  var histColors=['#ef4444bb','#ec4899bb','#f59e0bbb','#00d4ffbb','#00d4ffbb','#f59e0bbb','#ec4899bb','#ef4444bb','#ef4444bb'];
+  var ctx2=document.getElementById('ch-anom-hist');
+  if(ctx2&&typeof Chart!=='undefined'){
+    new Chart(ctx2,{
+      type:'bar',
+      data:{
+        labels:buckets,
+        datasets:[{label:'Suppliers',data:counts,backgroundColor:histColors,borderRadius:4,borderSkipped:false}]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:function(c){return ' '+c.parsed.y+' suppliers';}}}
+        },
+        scales:{
+          x:{ticks:{color:'#64748b',font:{size:9},maxRotation:35},grid:{color:'rgba(255,255,255,.05)'}},
+          y:{ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'rgba(255,255,255,.05)'}}
+        }
+      }
+    });
+  }
 }
+
+function setAnomSev(sev){
+  ANOM_SEV=sev;
+  ANOM_PAGE=1;
+  ['all','critical','high','medium','low'].forEach(function(s){
+    var btn=document.getElementById('anom-f-'+s);
+    if(btn)btn.classList.remove('active');
+  });
+  document.getElementById('anom-f-'+(sev||'all')).classList.add('active');
+  applyAnomFilters();
+}
+
+function applyAnomFilters(){
+  ANOM_METHOD=document.getElementById('anom-f-method').value;
+  ANOM_Q=(document.getElementById('anom-f-search').value||'').toLowerCase().trim();
+  ANOM_PAGE=1;
+  renderAnomPage();
+}
+
+function renderAnomPage(){
+  // Filtra
+  var filtered=ALL_ANOMALIES.filter(function(a){
+    if(ANOM_SEV&&a.severity!==ANOM_SEV)return false;
+    if(ANOM_METHOD&&a.canonical_method!==ANOM_METHOD)return false;
+    if(ANOM_Q&&!(a.supplier_name||'').toLowerCase().includes(ANOM_Q))return false;
+    return true;
+  });
+
+  // Ordina: per severità, poi per |deviazione| decrescente
+  filtered.sort(function(a,b){
+    var sd=(SEV_ORDER[a.severity]||99)-(SEV_ORDER[b.severity]||99);
+    if(sd!==0)return sd;
+    return Math.abs(b.deviation_pct||0)-Math.abs(a.deviation_pct||0);
+  });
+
+  var total=filtered.length;
+  var pages=Math.max(1,Math.ceil(total/ANOM_PER_PAGE));
+  if(ANOM_PAGE>pages)ANOM_PAGE=pages;
+  var slice=filtered.slice((ANOM_PAGE-1)*ANOM_PER_PAGE,ANOM_PAGE*ANOM_PER_PAGE);
+
+  document.getElementById('anom-count').textContent=total.toLocaleString()+' anomalies';
+
+  // Render cards
+  var html='';
+  slice.forEach(function(a){
+    var dev=a.deviation_pct||0;
+    var devStr=(dev>0?'+':'')+dev.toFixed(1)+'%';
+    var devCls=dev>0?'pos':'neg';
+    var icon=dev>0?'📈':'📉';
+    var sevCls=SEV_BADGE[a.severity]||'badge-gray';
+    var methColor=MC[a.canonical_method]||'#94a3b8';
+    var ppt=a.price_per_ton!=null?'$'+parseFloat(a.price_per_ton).toFixed(0):'—';
+    var avg=a.avg_price!=null?'$'+parseFloat(a.avg_price).toFixed(0):'—';
+    html+=
+      '<div class="anomaly-card '+a.severity+'">'+
+        '<div class="anomaly-icon">'+icon+'</div>'+
+        '<div class="anomaly-body">'+
+          '<div class="anomaly-name">'+
+            '<span class="td-link" onclick="openSupplierDetail(\''+esc(a.supplier_name)+'\')">'+esc(a.supplier_name)+'</span>'+
+            '<span class="anomaly-method-badge" style="background:'+methColor+'22;color:'+methColor+';border:1px solid '+methColor+'44">'+
+              esc(a.canonical_method||'Unknown')+
+            '</span>'+
+            '<span class="badge '+sevCls+'" style="font-size:9px">'+a.severity+'</span>'+
+          '</div>'+
+          '<div class="anomaly-prices">'+
+            '<span style="color:var(--text3);font-size:10px">Supplier avg:</span>'+
+            '<span class="anomaly-price-box actual">'+ppt+'/t</span>'+
+            '<span style="color:var(--text3);font-size:10px">Method avg:</span>'+
+            '<span class="anomaly-price-box avg">'+avg+'/t</span>'+
+          '</div>'+
+          '<div class="anomaly-desc">'+esc(a.description||'')+'</div>'+
+        '</div>'+
+        '<div class="anomaly-right">'+
+          '<span class="anomaly-dev '+devCls+'">'+devStr+'</span>'+
+          '<span style="font-size:9px;color:var(--text3)">vs method avg</span>'+
+        '</div>'+
+      '</div>';
+  });
+  document.getElementById('anomalies-list').innerHTML=
+    html||'<div class="empty">No anomalies match the current filters.</div>';
+
+  // Paginazione
+  renderPagination('anom-pagination',ANOM_PAGE,pages,
+    'function(p){ANOM_PAGE=p;renderAnomPage()}');
+}
+
+// Alias per compatibilità con page-switcher
+function filterAnomalies(sev){ setAnomSev(sev); }
 
 // ══════════════════════════════════════════════════════════════
 // CROSS-ANALYSIS
