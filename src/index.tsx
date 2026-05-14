@@ -32,7 +32,7 @@ body{background:var(--bg);color:var(--text1);font-family:'Inter',system-ui,sans-
 /* ── SIDEBAR ── */
 #sidebar{width:240px;min-width:240px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:width .25s}
 #sidebar.collapsed{width:60px;min-width:60px}
-#sidebar.collapsed .nav-label,.sidebar-logo span,.sidebar-logo .logo-sub,#sidebar.collapsed .nav-text,#sidebar.collapsed .nav-badge{display:none}
+#sidebar.collapsed .nav-label,#sidebar.collapsed .sidebar-logo span,#sidebar.collapsed .sidebar-logo .logo-sub,#sidebar.collapsed .nav-text,#sidebar.collapsed .nav-badge{display:none}
 .sidebar-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--green));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .sidebar-logo span{font-size:13px;font-weight:700;color:var(--text1);line-height:1.2}
@@ -194,7 +194,7 @@ td.td-link:hover{text-decoration:underline}
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   #sidebar{width:60px;min-width:60px}
-  #sidebar .nav-label,.sidebar-logo span,.sidebar-logo .logo-sub,.nav-text,.nav-badge{display:none}
+  #sidebar .nav-label,#sidebar .sidebar-logo span,#sidebar .sidebar-logo .logo-sub,.nav-text,.nav-badge{display:none}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   #detail-panel{width:100%}
 }
@@ -298,7 +298,7 @@ td.td-link:hover{text-decoration:underline}
         <button class="filter-btn" onclick="showPage('suppliers')">View all →</button>
       </div>
       <div class="table-wrap"><div class="table-scroll"><table>
-        <thead><tr><th>Supplier</th><th>Country</th><th>Method</th><th class="td-num">Committed</th><th class="td-num">Delivered</th><th class="td-num">Rate</th><th class="td-num">Price/t</th></tr></thead>
+        <thead><tr><th>Supplier</th><th>Country</th><th>Method</th><th class="td-num">Committed</th><th class="td-num">Delivered</th><th class="td-num">Rate</th><th class="td-num">Tx</th></tr></thead>
         <tbody id="dash-sup-tbody"><tr><td colspan="7" class="loading"><div class="spinner"></div> Loading…</td></tr></tbody>
       </table></div></div>
     </div>
@@ -389,9 +389,9 @@ td.td-link:hover{text-decoration:underline}
           <thead><tr>
             <th>Supplier</th><th>Country</th><th>Method</th>
             <th class="td-num">Committed</th><th class="td-num">Delivered</th>
-            <th class="td-num">Rate</th><th class="td-num">Price/t</th><th class="td-num">Tx</th>
+            <th class="td-num">Rate</th><th class="td-num">Tx</th>
           </tr></thead>
-          <tbody id="sup-tbody"><tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr></tbody>
+          <tbody id="sup-tbody"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
         </table></div>
         <div class="pagination" id="sup-pagination"></div>
       </div>
@@ -526,7 +526,7 @@ td.td-link:hover{text-decoration:underline}
     <div class="page" id="page-crossanalysis">
       <div class="ribbon" style="border-color:rgba(139,92,246,.25);background:rgba(139,92,246,.04)">
         <div class="ribbon-icon">🔀</div>
-        <div class="ribbon-text"><strong style="color:var(--purple)">Cross-Analysis</strong> — Tutti i dati interconnessi: Supplier → Buyer → Method → Registry. Esplora i flussi di carbonio, le concentrazioni di mercato e le relazioni tra entità.</div>
+        <div class="ribbon-text"><strong style="color:var(--purple)">Cross-Analysis</strong> — All data interconnected: Supplier → Buyer → Method → Registry. Explore carbon flows, market concentrations and entity relationships.</div>
       </div>
 
       <!-- Tab bar -->
@@ -986,7 +986,7 @@ async function loadSup(){
   var sort=document.getElementById('sup-sort').value||'committed';
   SUP_STATE.sort=sort;
   var url='/suppliers?q='+q+'&method='+method+'&country='+country+'&sort='+sort+'&page='+SUP_STATE.page+'&limit=50';
-  document.getElementById('sup-tbody').innerHTML='<tr><td colspan="8" class="loading"><div class="spinner"></div></td></tr>';
+  document.getElementById('sup-tbody').innerHTML='<tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>';
   var d=await api(url);
   document.getElementById('sup-count').textContent=d.total.toLocaleString()+' suppliers';
   document.getElementById('nb-sup').textContent=d.total;
@@ -1642,6 +1642,10 @@ function renderPagination(containerId,page,pages,cb){
 // INIT
 // ══════════════════════════════════════════════════════════════
 showPage('dashboard');
+// Pre-load anomaly badge count without waiting for user to click
+api('/anomalies?limit=1').then(function(d){
+  if(d&&d.total){document.getElementById('nb-anom').textContent=d.total.toLocaleString();}
+}).catch(function(){});
 </script>
 </body>
 </html>`;
